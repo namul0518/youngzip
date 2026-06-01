@@ -236,7 +236,12 @@ handle_callback()
 # ════════════════════════════════════════════════════════════
 profile      = st.session_state.get("user_profile")
 is_logged_in = bool(profile)
-auth_url     = build_auth_url()   # 매 렌더링마다 새 state 생성 (ttl 안에서 유효)
+
+# auth_url을 세션에 캐싱 — 리렌더링마다 URL이 바뀌면 카카오가 거부함
+# 로그아웃 시 세션 clear()되므로 다음 접속 때 자동으로 새로 생성됨
+if "auth_url" not in st.session_state:
+    st.session_state["auth_url"] = build_auth_url()
+auth_url = st.session_state["auth_url"]
 
 
 # ════════════════════════════════════════════════════════════
