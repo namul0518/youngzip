@@ -1,23 +1,30 @@
 """
 web_app.py
 ==========
-역할:
-  - 카카오 소셜 로그인 처리 (인증, 토큰, 프로필, 로그아웃)
-  - 로그인 상태를 index.html 에 JS 변수로 주입하여 탭 권한 제어
-  - 계산기 렌더링 (index.html)
+구조:
+  ┌─ Streamlit 메인 프레임 (Python) ────────────────────────┐
+  │  · 카카오 OAuth 콜백 처리                               │
+  │  · 로그인 버튼 ← 여기서 렌더링 (sandbox 없음, 리다이렉트 가능) │
+  │  · 환영 배너 / 로그아웃 버튼                            │
+  └──────────────────────────────────────────────────────────┘
+  ┌─ components.html iframe ────────────────────────────────┐
+  │  · 계산기 UI (index.html)                               │
+  │  · 탭 클릭 시 로그인 필요 → sendLoginRequest() 호출    │
+  │    → postMessage로 메인 프레임에 신호만 보냄            │
+  │    → 실제 리다이렉트는 메인 프레임 JS가 처리            │
+  └──────────────────────────────────────────────────────────┘
 
-탭 권한:
-  1탭(주담대 한도)   → 비로그인도 사용 가능
-  2탭(정책대출 진단) → 로그인 필수
-  3탭(맞춤유형 추천) → 로그인 필수
+핵심 원칙:
+  iframe(sandbox) 안에서는 절대 외부 URL로 이동하지 않음.
+  로그인 리다이렉트는 반드시 메인 프레임에서만 처리.
 
-Streamlit Cloud Secrets 설정:
+Streamlit Cloud Secrets:
   KAKAO_REST_API_KEY = "YOUR_REST_API_KEY"
 
-카카오 개발자 콘솔 설정 필수:
-  - 카카오 로그인 → 활성화 ON
-  - Redirect URI 등록: https://youngzip.streamlit.app/
-  - 동의항목: 닉네임(필수), 프로필 이미지(선택), 이메일(선택) 활성화
+카카오 개발자 콘솔:
+  - 카카오 로그인 활성화 ON
+  - Redirect URI: https://youngzip.streamlit.app/
+  - 동의항목: 닉네임(필수), 프로필 이미지·이메일(선택)
 """
 
 import json
@@ -30,12 +37,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # ════════════════════════════════════════════════════════════
-# 설정값 — st.secrets 에서만 읽음, 코드에 키값 없음
+# 설정값
 # ════════════════════════════════════════════════════════════
 REST_API_KEY = st.secrets["KAKAO_REST_API_KEY"]
-
-# 카카오 개발자 콘솔 Redirect URI 등록값과 1글자도 다르면 안 됨
-REDIRECT_URI = "https://youngzip.streamlit.app/"
+REDIRECT_URI = "https://youngzip.streamlit.app/"  # 콘솔 등록값과 1:1 일치
 
 AUTH_URL    = "https://kauth.kakao.com/oauth/authorize"
 TOKEN_URL   = "https://kauth.kakao.com/oauth/token"
@@ -52,17 +57,31 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ── 전역 CSS ─────────────────────────────────────────────────
 st.markdown("""
 <style>
   .block-container{padding-top:0.8rem !important; padding-bottom:0 !important}
   header[data-testid="stHeader"]{display:none}
   iframe{border:none !important; display:block;}
+
+  /* 로그인 버튼 */
+  .kakao-login-wrap{text-align:center; padding:8px 0 4px;}
+  a.kakao-btn{
+    display:inline-flex; align-items:center; gap:10px;
+    background:#FEE500; color:#191919 !important;
+    font-weight:800; font-size:15px; text-decoration:none !important;
+    padding:13px 28px; border-radius:8px;
+    box-shadow:0 2px 10px rgba(254,229,0,.5);
+  }
+  a.kakao-btn:hover{background:#F5DC00;}
+  .kakao-logo{
+    width:24px; height:24px; flex-shrink:0;
+  }
+
   /* 환영 배너 */
   .welcome-bar{
     display:flex; align-items:center; gap:14px;
     background:#FFFDE7; border:1.5px solid #FEE500;
-    border-radius:12px; padding:12px 16px; margin-bottom:10px;
+    border-radius:12px; padding:12px 16px; margin-bottom:4px;
   }
   .welcome-name{font-size:15px; font-weight:800; color:#3A1D00;}
   .welcome-email{font-size:11px; color:#6B7280; margin-top:2px;}
@@ -71,13 +90,13 @@ st.markdown("""
 
 
 # ════════════════════════════════════════════════════════════
-# OAuth 헬퍼 함수
+# OAuth 헬퍼
 # ════════════════════════════════════════════════════════════
 
 def build_auth_url(state: str) -> str:
     """
-    카카오 인증 요청 URL 생성.
-    safe=':/' 로 redirect_uri의 슬래시가 %2F로 인코딩되는 것을 방지.
+    카카오 인증 URL 생성.
+    safe=':/' → redirect_uri 슬래시가 %2F로 인코딩되지 않도록 보장.
     """
     query = (
         f"response_type=code"
@@ -89,15 +108,14 @@ def build_auth_url(state: str) -> str:
 
 
 def get_access_token(code: str) -> str | None:
-    """인가 코드 → 액세스 토큰 교환. 카카오는 POST + form-data 방식."""
-    data = {
-        "grant_type":   "authorization_code",
-        "client_id":    REST_API_KEY,
-        "redirect_uri": REDIRECT_URI,
-        "code":         code,
-    }
+    """인가 코드 → 액세스 토큰. 카카오는 POST + form-data."""
     try:
-        r = requests.post(TOKEN_URL, data=data, timeout=10)
+        r = requests.post(TOKEN_URL, data={
+            "grant_type":   "authorization_code",
+            "client_id":    REST_API_KEY,
+            "redirect_uri": REDIRECT_URI,
+            "code":         code,
+        }, timeout=10)
         r.raise_for_status()
         return r.json().get("access_token")
     except Exception as e:
@@ -106,19 +124,20 @@ def get_access_token(code: str) -> str | None:
 
 
 def get_profile(access_token: str) -> dict | None:
-    """액세스 토큰 → 사용자 프로필 조회."""
-    headers = {"Authorization": f"Bearer {access_token}"}
+    """액세스 토큰 → 사용자 프로필."""
     try:
-        r = requests.get(PROFILE_URL, headers=headers, timeout=10)
+        r = requests.get(PROFILE_URL,
+                         headers={"Authorization": f"Bearer {access_token}"},
+                         timeout=10)
         r.raise_for_status()
-        data          = r.json()
-        kakao_account = data.get("kakao_account", {})
-        profile       = kakao_account.get("profile", {})
+        data    = r.json()
+        acct    = data.get("kakao_account", {})
+        profile = acct.get("profile", {})
         return {
             "id":            str(data.get("id", "")),
             "nickname":      profile.get("nickname", ""),
             "profile_image": profile.get("profile_image_url", ""),
-            "email":         kakao_account.get("email", ""),
+            "email":         acct.get("email", ""),
         }
     except Exception as e:
         st.error(f"프로필 조회 실패: {e}")
@@ -126,7 +145,14 @@ def get_profile(access_token: str) -> dict | None:
 
 
 # ════════════════════════════════════════════════════════════
-# OAuth 콜백 처리
+# CSRF state 초기화 (항상 맨 먼저)
+# ════════════════════════════════════════════════════════════
+if "oauth_state" not in st.session_state:
+    st.session_state["oauth_state"] = secrets.token_urlsafe(16)
+
+
+# ════════════════════════════════════════════════════════════
+# 콜백 처리 — 카카오가 ?code=...&state=... 로 돌아왔을 때
 # ════════════════════════════════════════════════════════════
 
 def handle_callback() -> None:
@@ -140,9 +166,8 @@ def handle_callback() -> None:
     if st.session_state.get("logged_in"):
         st.query_params.clear()
         return
-    # state 불일치 → CSRF 의심, 차단
     if state and saved and state != saved:
-        st.error("보안 검증 실패 (state 불일치). 다시 시도해 주세요.")
+        st.error("보안 검증 실패. 다시 시도해 주세요.")
         st.query_params.clear()
         return
 
@@ -156,9 +181,11 @@ def handle_callback() -> None:
             st.query_params.clear()
             return
 
-    st.session_state["logged_in"]    = True
-    st.session_state["user_profile"] = prof
-    st.session_state["access_token"] = token
+    st.session_state.update({
+        "logged_in":    True,
+        "user_profile": prof,
+        "access_token": token,
+    })
     st.query_params.clear()
     st.rerun()
 
@@ -167,30 +194,25 @@ handle_callback()
 
 
 # ════════════════════════════════════════════════════════════
-# 로그인 상태 확인
+# 로그인 상태
 # ════════════════════════════════════════════════════════════
-
 profile      = st.session_state.get("user_profile")
 is_logged_in = bool(profile)
-
-# CSRF state — 로그인 전 항상 준비
-if "oauth_state" not in st.session_state:
-    st.session_state["oauth_state"] = secrets.token_urlsafe(16)
-auth_url = build_auth_url(st.session_state["oauth_state"])
+auth_url     = build_auth_url(st.session_state["oauth_state"])
 
 
 # ════════════════════════════════════════════════════════════
-# 상단 UI: 환영 배너(로그인 후) / 없음(로그인 전)
+# 상단 UI (메인 프레임 — sandbox 없음)
 # ════════════════════════════════════════════════════════════
 
 if is_logged_in:
+    # ── 환영 배너 ──
     nickname = profile.get("nickname") or "사용자"
     email    = profile.get("email", "")
     img_url  = profile.get("profile_image", "")
-
-    img_tag = (
+    img_tag  = (
         f'<img src="{img_url}" '
-        f'style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+        'style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0">'
         if img_url else '<span style="font-size:28px">👤</span>'
     )
     st.markdown(f"""
@@ -200,40 +222,59 @@ if is_logged_in:
         <div class="welcome-name">환영합니다, {nickname}님 👋</div>
         <div class="welcome-email">{email}</div>
       </div>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
 
+    # ── 로그아웃 ──
     if st.button("로그아웃", key="logout_btn"):
         st.session_state.clear()
-        # 카카오 로그아웃: 세션 만료 후 앱으로 복귀
         logout_target = (
             f"{LOGOUT_URL}"
             f"?client_id={urllib.parse.quote(REST_API_KEY, safe='')}"
             f"&logout_redirect_uri={urllib.parse.quote(REDIRECT_URI, safe=':/')}"
         )
+        # 메인 프레임에서 실행 → sandbox 없음 → 정상 동작
         st.markdown(
             f'<meta http-equiv="refresh" content="0;url={logout_target}">',
             unsafe_allow_html=True,
         )
         st.stop()
 
+else:
+    # ── 로그인 버튼 — 메인 프레임 <a href> → sandbox 없이 직접 이동 ──
+    # href 를 Python에서 직접 주입하므로 JS 불필요, iframe 우회 불필요
+    st.markdown(f"""
+    <div class="kakao-login-wrap">
+      <a href="{auth_url}" class="kakao-btn">
+        <svg class="kakao-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.632 5.076 4.1 6.48L5.1 21l4.72-2.52A11.6 11.6 0 0012 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z" fill="#191919"/>
+        </svg>
+        카카오 계정으로 로그인
+      </a>
+      <div style="font-size:11px;color:#9CA3AF;margin-top:10px">
+        2·3탭 기능은 로그인 후 이용할 수 있습니다
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # ════════════════════════════════════════════════════════════
 # index.html 렌더링
-# is_logged_in / auth_url 을 JS 변수로 주입 → 탭 권한 제어
+# is_logged_in 만 주입 — auth_url은 더 이상 iframe 안에서 쓰지 않음
 # ════════════════════════════════════════════════════════════
 
 if not INDEX_PATH.exists():
-    st.error(f"index.html 파일을 찾을 수 없습니다: {INDEX_PATH}")
+    st.error(f"index.html을 찾을 수 없습니다: {INDEX_PATH}")
     st.stop()
 
 html_raw = INDEX_PATH.read_text(encoding="utf-8")
 
 inject = f"""
 <script>
-  /* web_app.py 주입: 탭 권한 제어용 변수 */
+  /* web_app.py 주입 */
   var APP_LOGGED_IN = {json.dumps(is_logged_in)};
-  var APP_AUTH_URL  = {json.dumps(auth_url)};
+  /* APP_AUTH_URL 은 더 이상 iframe 안에서 사용하지 않음.
+     로그인 버튼은 메인 프레임(Python)에서 렌더링됨. */
+  var APP_AUTH_URL  = '';
 </script>
 """
 html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
