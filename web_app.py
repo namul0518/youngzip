@@ -16,7 +16,7 @@ Streamlit Cloud Secrets 설정:
   NAVER_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
 
 네이버 개발자 센터 Callback URL 등록 필수:
-  https://youngzip.streamlit.app
+  https://youngzip.streamlit.app/
 """
 
 import json
@@ -33,7 +33,7 @@ import streamlit.components.v1 as components
 # ════════════════════════════════════════════════════════════
 CLIENT_ID     = st.secrets["NAVER_CLIENT_ID"]
 CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
-REDIRECT_URI  = "https://youngzip.streamlit.app"  # 고정값
+REDIRECT_URI  = "https://youngzip.streamlit.app/"  # 고정값
 
 AUTH_URL    = "https://nid.naver.com/oauth2.0/authorize"
 TOKEN_URL   = "https://nid.naver.com/oauth2.0/token"
