@@ -35,7 +35,12 @@ CLIENT_ID     = st.secrets["NAVER_CLIENT_ID"]
 CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
 REDIRECT_URI  = "https://youngzip.streamlit.app/"  # 고정값
 
-AUTH_URL    = "https://nid.naver.com/oauth2.0/authorize"
+auth_url = (
+    "https://nid.naver.com/oauth2.0/authorize?"
+    "response_type=code"
+    "&client_id=r5bY8mbtvz12MEgtwN6j"
+    "&redirect_uri=https://youngzip.streamlit.app"
+    "&state=" + st.session_state.get('oauth_state', 'default')
 TOKEN_URL   = "https://nid.naver.com/oauth2.0/token"
 PROFILE_URL = "https://openapi.naver.com/v1/nid/me"
 LOGOUT_URL  = "https://nid.naver.com/nidlogin.logout"
