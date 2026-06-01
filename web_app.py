@@ -240,14 +240,16 @@ html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 # height=900, scrolling=True: iframe 내부 스크롤로 처리
 if not st.session_state.get("logged_in"):
     # 버튼을 누르는 즉시 브라우저가 네이버로 이동하도록 강제 자바스크립트 실행
+  if not st.session_state.get("logged_in"):
     st.markdown(f'''
         <div style="text-align:center; padding:20px;">
-            <a href="{auth_url}" target="_top" 
-               style="background:#03C75A; color:white; padding:15px 30px; border-radius:10px; 
-               text-decoration:none; font-weight:bold; font-size:16px; 
+            <a href="{auth_url}" 
+               onclick="window.top.location.href='{auth_url}'; return false;"
+               target="_top" 
+               style="display:inline-block; background:#03C75A; color:white; padding:15px 30px; 
+               border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px; 
                box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                네이버 계정으로 로그인 (필수)
             </a>
         </div>
     ''', unsafe_allow_html=True)
-components.html(html_injected, height=900, scrolling=True)
