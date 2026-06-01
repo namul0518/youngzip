@@ -16,7 +16,7 @@ Streamlit Cloud Secrets 설정:
 
 카카오 개발자 콘솔 설정 필수:
   - 카카오 로그인 → 활성화 ON
-  - Redirect URI 등록: https://youngzip.streamlit.app/
+  - Redirect URI 등록: https://youngzip.streamlit.app
   - 동의항목: 닉네임(필수), 프로필 이미지(선택), 이메일(선택) 활성화
 """
 
@@ -35,7 +35,7 @@ import streamlit.components.v1 as components
 REST_API_KEY = st.secrets["KAKAO_REST_API_KEY"]
 
 # 카카오 개발자 콘솔 Redirect URI 등록값과 1글자도 다르면 안 됨
-REDIRECT_URI = "https://youngzip.streamlit.app/"
+REDIRECT_URI = "https://youngzip.streamlit.app"
 
 AUTH_URL    = "https://kauth.kakao.com/oauth/authorize"
 TOKEN_URL   = "https://kauth.kakao.com/oauth/token"
