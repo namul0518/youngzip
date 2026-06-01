@@ -266,9 +266,9 @@ body{
 </div>
 
 <div class="tabs">
-  <button class="tab on" id="tb0" onclick="goTab(0)">📊 주담대 한도</button>
-  <button class="tab" id="tb1" onclick="goTab(1)">🏠 정책대출 진단</button>
-  <button class="tab" id="tb2" onclick="goTab(2)">🎯 맞춤 유형 추천</button>
+  <button class="tab on" id="tb0" data-tab="0" onclick="handleTabClick(0)">📊 주담대 한도</button>
+  <button class="tab" id="tb1" data-tab="1" onclick="handleTabClick(1)">🏠 정책대출 진단</button>
+  <button class="tab" id="tb2" data-tab="2" onclick="handleTabClick(2)">🎯 맞춤 유형 추천</button>
 </div>
 
 <div id="tp0">
@@ -410,7 +410,6 @@ body{
 </div>
 
 
-<div id="loginGate" style="display:none"></div>
 </div><script>
 /* 앱 로그인 상태 (주입없으면 기본값) */
 if(typeof APP_LOGGED_IN==='undefined') var APP_LOGGED_IN=false;
@@ -421,8 +420,6 @@ var G={income:0,asset:0,own:'',baby:false,newlywed:false,newlywed_u39:false,newl
 
 /* ══ 탭 전환 ══ */
 function goTab(n){
-  if((n===1||n===2)&&!APP_LOGGED_IN){_showLoginGate(n);return;}
-  _hideLoginGate();
   document.getElementById('tp0').style.display=n===0?'block':'none';
   document.getElementById('tp1').style.display=n===1?'block':'none';
   document.getElementById('tp2').style.display=n===2?'block':'none';
@@ -431,36 +428,20 @@ function goTab(n){
   document.getElementById('tb2').className='tab'+(n===2?' on':'');
   if(n===1) runPol();
 }
-function _showLoginGate(tabIdx){
-  var tabName=tabIdx===1?'정책대출 진단':'맞춤 유형 추천';
-  document.getElementById('tp0').style.display='none';
-  document.getElementById('tp1').style.display='none';
-  document.getElementById('tp2').style.display='none';
-  document.getElementById('tb0').className='tab';
-  document.getElementById('tb1').className='tab'+(tabIdx===1?' on':'');
-  document.getElementById('tb2').className='tab'+(tabIdx===2?' on':'');
-  var gate=document.getElementById('loginGate');
-  gate.innerHTML=''
-    +'<div style="text-align:center;padding:48px 20px 36px">'
-    +'<div style="font-size:38px;margin-bottom:14px">\uD83D\uDD12</div>'
-    +'<div style="font-size:16px;font-weight:800;color:#1E293B;margin-bottom:8px">로그인이 필요한 서비스입니다</div>'
-    +'<div style="font-size:13px;color:#64748B;margin-bottom:28px"><b>'+tabName+'</b> 탭은 로그인 후 이용할 수 있습니다.</div>'
-    +'<a href="'+APP_AUTH_URL+'" target="_top" style="'
-    +'display:inline-flex;align-items:center;gap:10px;'
-    +'background:#03C75A;color:#fff;font-weight:800;font-size:15px;text-decoration:none;'
-    +'padding:13px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(3,199,90,.35)">'
-    +'<span style="width:24px;height:24px;background:#fff;border-radius:4px;'
-    +'display:inline-flex;align-items:center;justify-content:center;'
-    +'font-weight:900;color:#03C75A;font-size:16px">N</span>'
-    +'\ub124\uc774\ubc84 \uacc4\uc815\uc73c\ub85c \ub85c\uadf8\uc778</a>'
-    +'<div style="font-size:11px;color:#CBD5E1;margin-top:16px">\ub85c\uadf8\uc778 \ud6c4 \ubaa8\ub4e0 \uae30\ub2a5\uc744 \ubb34\ub8cc\ub85c \uc774\uc6a9\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.</div>'
-    +'</div>';
-  gate.style.display='block';
+/* ── 탭 클릭 핸들러: postMessage로 Python(web_app.py)에 탭번호 전달 ── */
+function handleTabClick(n){
+  if(n===0){goTab(0);return;}
+  if(APP_LOGGED_IN){goTab(n);return;}
+  /* 비로그인 → 부모(Streamlit)에 로그인 게이트 표시 요청 */
+  try{
+    window.parent.postMessage({type:'NEED_LOGIN',tab:n},'*');
+  }catch(e){}
 }
-function _hideLoginGate(){
-  var gate=document.getElementById('loginGate');
-  if(gate)gate.style.display='none';
-}
+/* ── Python으로부터 탭 전환 허가 수신 (로그인 완료 후 재진입 시) ── */
+window.addEventListener('message',function(e){
+  if(e.data&&e.data.type==='SET_TAB'){goTab(e.data.tab);}
+});
+
 
 /* ══ 체크박스 ══ */
 function setCk(id,checked,small){
