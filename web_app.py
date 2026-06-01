@@ -239,23 +239,3 @@ html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 
 # height=900, scrolling=True: iframe 내부 스크롤로 처리
 components.html(html_injected, height=900, scrolling=True)
-# 1. 로그인 안 된 경우, 계산기 위쪽(외부 영역)에 로그인 버튼을 생성
-if not st.session_state.get("logged_in"):
-    st.markdown(f"""
-        <div style="text-align:center; padding:20px;">
-            <a href="{auth_url}" target="_top" style="
-                display:inline-block; 
-                background:#03C75A; color:white; 
-                padding:15px 30px; 
-                border-radius:10px; 
-                text-decoration:none; 
-                font-weight:bold; 
-                font-size:16px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                네이버 계정으로 로그인 (필수)
-            </a>
-        </div>
-    """, unsafe_allow_html=True)
-
-# 2. 계산기(index.html)는 그 아래에 띄움
-components.html(INDEX_PATH.read_text(encoding="utf-8"), height=900, scrolling=True)
