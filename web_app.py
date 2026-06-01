@@ -47,7 +47,7 @@ INDEX_PATH = Path(__file__).parent / "index.html"
 
 # ── 페이지 설정 ──────────────────────────────────────────────
 st.set_page_config(
-    page_title="영집 — 내 집 마련 계산기",
+    page_title="영끌내집 — 내 집 마련 계산기",
     page_icon="🏠",
     layout="centered",
     initial_sidebar_state="collapsed",
@@ -225,10 +225,14 @@ else:
 
     auth_url = build_auth_url(st.session_state["oauth_state"])
 
-    st.markdown("""
-    <div style="text-align:center; padding:70px 20px 30px">
+    st.markdown(f"""
+    <div style="
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      min-height:80vh; text-align:center; padding:20px;
+    ">
       <div style="font-size:2.4rem; font-weight:900; color:#1E293B; margin-bottom:8px">
-        🏠 영집
+        🏠 영끌내집
       </div>
       <div style="font-size:1rem; color:#64748B; margin-bottom:10px">
         내 집 마련 계산기
@@ -236,15 +240,9 @@ else:
       <div style="font-size:0.85rem; color:#94A3B8; margin-bottom:36px">
         주담대 한도 · 정책대출 진단 · 맞춤 유형 추천
       </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown(
-        f'<a href="{auth_url}" class="naver-btn" target="_self">'
-        f'<span class="naver-n">N</span>네이버 계정으로 시작하기</a>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("""
+      <a href="{auth_url}" class="naver-btn" target="_self">
+        <span class="naver-n">N</span>네이버 계정으로 시작하기
+      </a>
       <div style="font-size:11px; color:#CBD5E1; margin-top:20px">
         로그인 후 모든 계산 기능을 무료로 이용할 수 있습니다.
       </div>
