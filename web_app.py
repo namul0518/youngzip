@@ -49,7 +49,8 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed",
 )
-
+REDIRECT_URI = "https://youngzip.streamlit.app" 
+auth_url = f"https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={st.session_state.get('oauth_state', 'default_state')}"
 # ── 전역 CSS ─────────────────────────────────────────────────
 st.markdown("""
 <style>
