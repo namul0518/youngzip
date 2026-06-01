@@ -50,6 +50,25 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+
+if not st.session_state.get("logged_in"):
+    st.markdown(f"""
+        <div style="text-align:center; padding:20px;">
+            <a href="{auth_url}" target="_top" style="
+                display:inline-block; 
+                background:#03C75A; color:white; 
+                padding:15px 30px; 
+                border-radius:10px; 
+                text-decoration:none; 
+                font-weight:bold; 
+                font-size:16px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                네이버 계정으로 로그인 (필수)
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
+    
+
 # ── 전역 CSS ─────────────────────────────────────────────────
 st.markdown("""
 <style>
