@@ -36,8 +36,17 @@ if st.session_state["user_info"] is None:
     auth_url = f"https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state=1234"
     st.markdown(f'<a href="{auth_url}" style="padding:15px; background:#03C75A; color:white; border-radius:10px; text-decoration:none;">네이버로 로그인</a>', unsafe_allow_html=True)
 else:
+    # --- 수정할 부분 시작 ---
     if st.sidebar.button("로그아웃"):
         st.session_state["user_info"] = None
+        # 네이버 로그아웃 페이지로 이동시키는 스크립트 실행
+        components.html("""
+            <script>
+                window.location.href = "https://nid.naver.com/nidlogin.logout";
+            </script>
+        """, height=0)
         st.rerun()
+    # --- 수정할 부분 끝 ---
+    
     with open("index.html", "r", encoding="utf-8") as f:
         components.html(f.read(), height=2500, scrolling=False)
