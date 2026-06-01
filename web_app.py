@@ -1,26 +1,25 @@
 """
 web_app.py
 ==========
-역할: 네이버 소셜 로그인 처리 + 로그인 성공 시 index.html 계산기 표시.
-계산기 로직은 index.html 에만 있음. 이 파일은 로그인/인증만 담당.
+역할:
+  - 네이버 소셜 로그인 처리 (인증, 토큰, 프로필, 로그아웃)
+  - 로그인 상태를 index.html 에 JS 변수로 주입하여 탭 권한 제어
+  - 계산기 렌더링 (index.html)
 
-── Streamlit Cloud 배포 전 Secrets 설정 ──────────────────────
-  대시보드 → 앱 설정 → Secrets 탭에 아래 내용 입력:
+탭 권한:
+  1탭(주담대 한도)  → 비로그인도 사용 가능
+  2탭(정책대출 진단) → 로그인 필수
+  3탭(맞춤유형 추천) → 로그인 필수
 
+Streamlit Cloud Secrets 설정:
   NAVER_CLIENT_ID     = "YOUR_CLIENT_ID"
   NAVER_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
 
-  (코드에 키값을 직접 입력하지 마세요. 키가 노출되면 즉시 재발급하세요.)
-
-── 로컬 테스트 시 ─────────────────────────────────────────────
-  .streamlit/secrets.toml 파일 생성:
-  NAVER_CLIENT_ID     = "YOUR_CLIENT_ID"
-  NAVER_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
-
-── 네이버 개발자 센터 Callback URL 등록 필수 ──────────────────
+네이버 개발자 센터 Callback URL 등록 필수:
   https://youngzip.streamlit.app
 """
 
+import json
 import secrets
 import urllib.parse
 from pathlib import Path
@@ -30,19 +29,17 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # ════════════════════════════════════════════════════════════
-# ★ 설정값 구획 — st.secrets 에서만 읽음 ★
+# ★ 설정값 구획 — st.secrets 에서만 읽음, 코드에 키값 없음 ★
 # ════════════════════════════════════════════════════════════
 CLIENT_ID     = st.secrets["NAVER_CLIENT_ID"]
 CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
-REDIRECT_URI  = "https://youngzip.streamlit.app"   # 고정값
+REDIRECT_URI  = "https://youngzip.streamlit.app"  # 고정값
 
-# 네이버 OAuth 엔드포인트
 AUTH_URL    = "https://nid.naver.com/oauth2.0/authorize"
 TOKEN_URL   = "https://nid.naver.com/oauth2.0/token"
 PROFILE_URL = "https://openapi.naver.com/v1/nid/me"
 LOGOUT_URL  = "https://nid.naver.com/nidlogin.logout"
 
-# index.html 경로 (web_app.py 와 같은 폴더)
 INDEX_PATH = Path(__file__).parent / "index.html"
 
 # ── 페이지 설정 ──────────────────────────────────────────────
@@ -59,6 +56,7 @@ st.markdown("""
   .block-container{padding-top:0.8rem !important; padding-bottom:0 !important}
   header[data-testid="stHeader"]{display:none}
   iframe{border:none !important; display:block;}
+  /* 네이버 로그인 버튼 */
   .naver-btn{
     display:inline-flex; align-items:center; gap:10px;
     background:#03C75A; color:#fff !important;
@@ -73,6 +71,7 @@ st.markdown("""
     display:inline-flex; align-items:center; justify-content:center;
     font-weight:900; color:#03C75A; font-size:16px; flex-shrink:0;
   }
+  /* 환영 배너 */
   .welcome-bar{
     display:flex; align-items:center; gap:14px;
     background:#F0FDF4; border:1.5px solid #BBF7D0;
@@ -155,13 +154,13 @@ def handle_callback() -> None:
         if not token:
             st.query_params.clear()
             return
-        profile = get_profile(token)
-        if not profile:
+        prof = get_profile(token)
+        if not prof:
             st.query_params.clear()
             return
 
     st.session_state["logged_in"]    = True
-    st.session_state["user_profile"] = profile
+    st.session_state["user_profile"] = prof
     st.query_params.clear()
     st.rerun()
 
@@ -170,21 +169,30 @@ handle_callback()
 
 
 # ════════════════════════════════════════════════════════════
-# 화면 분기
+# 로그인 상태 확인
 # ════════════════════════════════════════════════════════════
 
-profile = st.session_state.get("user_profile")
+profile     = st.session_state.get("user_profile")
+is_logged_in = bool(profile)
 
-# ── A. 로그인 완료 → 계산기 표시 ────────────────────────────
-if profile:
+# CSRF state (로그인 전 항상 준비)
+if "oauth_state" not in st.session_state:
+    st.session_state["oauth_state"] = secrets.token_urlsafe(16)
+auth_url = build_auth_url(st.session_state["oauth_state"])
+
+# ════════════════════════════════════════════════════════════
+# 상단 UI: 환영 배너(로그인 후) or 로그인 유도 배너(로그인 전)
+# ════════════════════════════════════════════════════════════
+
+if is_logged_in:
     nickname = profile.get("nickname") or profile.get("name", "사용자")
     email    = profile.get("email", "")
     img_url  = profile.get("profile_image", "")
 
     img_tag = (
         f'<img src="{img_url}" '
-        f'style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0">'
-        if img_url else '<span style="font-size:32px">👤</span>'
+        f'style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+        if img_url else '<span style="font-size:28px">👤</span>'
     )
     st.markdown(f"""
     <div class="welcome-bar">
@@ -196,55 +204,38 @@ if profile:
     </div>
     """, unsafe_allow_html=True)
 
-    # 로그아웃 — 네이버 서버 세션까지 완전 종료
     if st.button("로그아웃", key="logout_btn"):
         st.session_state.clear()
         return_url    = urllib.parse.quote(REDIRECT_URI, safe="")
         logout_target = f"{LOGOUT_URL}?returl={return_url}"
-        # window.top.location.href 로 네이버 서버 로그아웃 처리
         st.markdown(
             f'<script>window.top.location.href="{logout_target}";</script>',
             unsafe_allow_html=True,
         )
         st.stop()
 
-    # ── index.html 계산기 렌더링 ────────────────────────────
-    if not INDEX_PATH.exists():
-        st.error(f"index.html 파일을 찾을 수 없습니다: {INDEX_PATH}")
-        st.stop()
+# ════════════════════════════════════════════════════════════
+# index.html 렌더링
+# 로그인 상태(is_logged_in)와 로그인 URL(auth_url)을
+# JS 변수로 주입하여 index.html 내부에서 탭 권한 제어
+# ════════════════════════════════════════════════════════════
 
-    html_code = INDEX_PATH.read_text(encoding="utf-8")
+if not INDEX_PATH.exists():
+    st.error(f"index.html 파일을 찾을 수 없습니다: {INDEX_PATH}")
+    st.stop()
 
-    # height=900 고정 + scrolling=True: iframe 내부 스크롤로 처리
-    components.html(html_code, height=900, scrolling=True)
+html_raw = INDEX_PATH.read_text(encoding="utf-8")
 
-# ── B. 로그인 전 → 로그인 화면 ──────────────────────────────
-else:
-    if "oauth_state" not in st.session_state:
-        st.session_state["oauth_state"] = secrets.token_urlsafe(16)
+# <head> 바로 뒤에 JS 변수 주입 (index.html 수정 불필요)
+inject = f"""
+<script>
+  /* web_app.py 주입: 탭 권한 제어용 변수 */
+  var APP_LOGGED_IN  = {json.dumps(is_logged_in)};
+  var APP_AUTH_URL   = {json.dumps(auth_url)};
+  var APP_LOGOUT_URL = {json.dumps(f"{LOGOUT_URL}?returl={urllib.parse.quote(REDIRECT_URI, safe='')}")};
+</script>
+"""
+html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 
-    auth_url = build_auth_url(st.session_state["oauth_state"])
-
-    st.markdown(f"""
-    <div style="
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      min-height:80vh; text-align:center; padding:20px;
-    ">
-      <div style="font-size:2.4rem; font-weight:900; color:#1E293B; margin-bottom:8px">
-        🏠 영끌내집
-      </div>
-      <div style="font-size:1rem; color:#64748B; margin-bottom:10px">
-        내 집 마련 계산기
-      </div>
-      <div style="font-size:0.85rem; color:#94A3B8; margin-bottom:36px">
-        주담대 한도 · 정책대출 진단 · 맞춤 유형 추천
-      </div>
-      <a href="{auth_url}" class="naver-btn" target="_self">
-        <span class="naver-n">N</span>네이버 계정으로 시작하기
-      </a>
-      <div style="font-size:11px; color:#CBD5E1; margin-top:20px">
-        로그인 후 모든 계산 기능을 무료로 이용할 수 있습니다.
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+# height=900, scrolling=True: iframe 내부 스크롤로 처리
+components.html(html_injected, height=900, scrolling=True)
