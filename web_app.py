@@ -88,13 +88,19 @@ st.markdown("""
 # ════════════════════════════════════════════════════════════
 
 def build_auth_url(state: str) -> str:
+    # 1. 파라미터 딕셔너리를 만듭니다.
     params = {
         "response_type": "code",
-        "client_id":     CLIENT_ID,
-        "redirect_uri":  REDIRECT_URI,
-        "state":         state,
+        "client_id": CLIENT_ID,
+        "redirect_uri": REDIRECT_URI,
+        "state": state,
     }
-    return f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
+    # 2. urlencode를 하되, 슬래시(/)와 콜론(:)은 인코딩하지 않도록 safe 설정!
+    # 이것이 핵심입니다. 네이버가 원하는 주소 형태 그대로 유지됩니다.
+    query = urllib.parse.urlencode(params, safe=':/')
+    
+    # 3. 완성된 URL을 반환합니다.
+    return f"{AUTH_URL}?{query}"
 
 
 def get_access_token(code: str, state: str) -> str | None:
