@@ -4,8 +4,9 @@ import streamlit.components.v1 as components
 # 페이지 설정
 st.set_page_config(page_title="영끌내집", layout="wide")
 
-# 여기가 계산기 화면입니다.
-html_code = <!DOCTYPE html>
+# HTML 전체를 """ 로 감싸서 '하나의 덩어리(문자열)'로 만듭니다.
+html_code = """
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -1017,6 +1018,7 @@ function calcRec(){
 </script>
 </body>
 </html>
+"""
 
-# 화면에 보여주기
-components.html(html_code, height=800)
+# HTML을 화면에 출력합니다.
+components.html(html_code, height=1200)
