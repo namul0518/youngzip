@@ -5,19 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>내가 살 수 있는 아파트 최대 가격은?</title>
 <style>
-  /* 기존 스타일은 그대로 두시고, 맨 밑에 이것만 추가하세요 */
-html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        height: auto !important; /* 고정 높이 해제 */
-        min-height: 0 !important; /* 최소 높이 제한 해제 */
-    }
-    
-    /* 덩어리를 감싸는 가장 큰 div가 있다면 그 높이도 auto로 */
-    #root, .container, body > div {
-        height: auto !important;
-        min-height: auto !important;
-    }
+/* iframe 내부 높이 자동 조절 기반 CSS */
+html{height:auto;overflow-y:auto}
+body{margin:0;padding:0}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F8FAFC;padding-bottom:60px}
 .wrap{max-width:660px;margin:0 auto;padding:18px 14px}
@@ -1050,5 +1040,24 @@ function calcRec(){
   el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 </script>
+
+<script>
+/* ── iframe → 부모 Streamlit 에 실제 높이 전달 ── */
+(function(){
+  function sendHeight(){
+    var h = document.documentElement.scrollHeight || document.body.scrollHeight;
+    window.parent.postMessage({type:'streamlit:setFrameHeight', height:h}, '*');
+  }
+  // DOM 변화(탭 전환, 결과 출력 등) 감지
+  if(window.ResizeObserver){
+    new ResizeObserver(sendHeight).observe(document.body);
+  }
+  window.addEventListener('load', sendHeight);
+  // 버튼 클릭 후 동적 콘텐츠 반영을 위한 주기적 체크 (3초간)
+  var t=0;
+  var iv=setInterval(function(){sendHeight();t++;if(t>6)clearInterval(iv);},500);
+})();
+</script>
+
 </body>
 </html>
