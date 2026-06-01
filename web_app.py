@@ -100,7 +100,7 @@ def build_auth_url(state: str) -> str:
     query = urllib.parse.urlencode(params, safe=':/')
     
     # 3. 완성된 URL을 반환합니다.
-return f"https://nid.naver.com/oauth2.0/authorize?{query}"
+    return f"https://nid.naver.com/oauth2.0/authorize?{query}"
 
 
 def get_access_token(code: str, state: str) -> str | None:
