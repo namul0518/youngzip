@@ -239,3 +239,18 @@ html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 
 # height=900, scrolling=True: iframe 내부 스크롤로 처리
 components.html(html_injected, height=900, scrolling=True)
+# 1. 로그인 안 되어 있을 때만, 버튼을 상자 밖(파이썬 화면)에 따로 띄우기
+if not st.session_state.get("logged_in"):
+    st.markdown(f"""
+        <div style="text-align:center; padding:20px;">
+            <a href="{auth_url}" target="_top" style="
+                display:inline-block; background:#03C75A; color:white; 
+                padding:15px 30px; border-radius:10px; text-decoration:none; 
+                font-weight:bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                네이버 계정으로 로그인하기
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
+
+# 2. 계산기 화면은 무조건 아래에 띄우기
+components.html(html_injected, height=900, scrolling=True)
