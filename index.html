@@ -446,6 +446,11 @@ function _showLoginGate(tabIdx){
     +'<div style="font-size:16px;font-weight:800;color:#1E293B;margin-bottom:8px">로그인이 필요한 서비스입니다</div>'
     +'<div style="font-size:13px;color:#64748B;margin-bottom:28px"><b>'+tabName+'</b> 탭은 로그인 후 이용할 수 있습니다.</div>'
     +'<a href="'+APP_AUTH_URL+'" target="_top" style="'
+    <a href="javascript:void(0)" 
+   onclick="window.top.location.href=APP_AUTH_URL;" 
+   style="...">
+   네이버 계정으로 로그인
+</a>
     +'display:inline-flex;align-items:center;gap:10px;'
     +'background:#03C75A;color:#fff;font-weight:800;font-size:15px;text-decoration:none;'
     +'padding:13px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(3,199,90,.35)">'
