@@ -251,6 +251,3 @@ if not st.session_state.get("logged_in"):
             </a>
         </div>
     """, unsafe_allow_html=True)
-
-# 2. 계산기 화면은 무조건 아래에 띄우기
-components.html(html_injected, height=900, scrolling=True)
