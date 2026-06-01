@@ -6,14 +6,17 @@
 <title>내가 살 수 있는 아파트 최대 가격은?</title>
 <style>
   /* 기존 스타일은 그대로 두시고, 맨 밑에 이것만 추가하세요 */
-    body {
+html, body {
         margin: 0 !important;
         padding: 0 !important;
-        overflow-x: hidden !important; /* 가로 스크롤 제거 */
-        min-height: 100vh !important;
+        height: auto !important; /* 고정 높이 해제 */
+        min-height: 0 !important; /* 최소 높이 제한 해제 */
     }
-    html {
-        overflow-x: hidden !important;
+    
+    /* 덩어리를 감싸는 가장 큰 div가 있다면 그 높이도 auto로 */
+    #root, .container, body > div {
+        height: auto !important;
+        min-height: auto !important;
     }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F8FAFC;padding-bottom:60px}
