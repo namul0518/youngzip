@@ -208,8 +208,9 @@ if is_logged_in:
         st.session_state.clear()
         return_url    = urllib.parse.quote(REDIRECT_URI, safe="")
         logout_target = f"{LOGOUT_URL}?returl={return_url}"
+        # st.markdown script는 Streamlit 메인 프레임에서 실행되므로 정상 작동
         st.markdown(
-            f'<script>window.top.location.href="{logout_target}";</script>',
+            f'<meta http-equiv="refresh" content="0;url={logout_target}">',
             unsafe_allow_html=True,
         )
         st.stop()
