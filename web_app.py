@@ -49,8 +49,7 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed",
 )
-REDIRECT_URI = "https://youngzip.streamlit.app" 
-auth_url = "https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=https://youngzip.streamlit.app&state=" + st.session_state.get('oauth_state', 'default')
+
 # ── 전역 CSS ─────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -239,13 +238,4 @@ inject = f"""
 html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 
 # height=900, scrolling=True: iframe 내부 스크롤로 처리
-if not st.session_state.get("logged_in"):
-    # 버튼을 누르는 즉시 브라우저가 네이버로 이동하도록 강제 자바스크립트 실행
- if not st.session_state.get("logged_in"):
-    st.markdown(f'''
-        <div style="text-align:center; padding:30px;">
-            <a href="{auth_url}" target="_top" style="font-size:20px; font-weight:bold; color:#03C75A;">
-                클릭하세요! 네이버 로그인으로 바로 이동합니다.
-            </a>
-        </div>
-    ''', unsafe_allow_html=True)
+components.html(html_injected, height=900, scrolling=True)
