@@ -238,4 +238,18 @@ inject = f"""
 html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 
 # height=900, scrolling=True: iframe 내부 스크롤로 처리
+if not is_logged_in:
+    st.markdown(f"""
+        <div style="text-align:center; padding:15px; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; margin-bottom:10px;">
+            <p style="font-size:13px; color:#065F46; font-weight:bold; margin-bottom:10px;">
+                🔒 정책대출·맞춤 유형 추천은 로그인 후 이용 가능합니다.
+            </p>
+            <a href="{auth_url}" target="_top" style="
+                background:#03C75A; color:white; padding:10px 20px; 
+                border-radius:8px; text-decoration:none; font-weight:bold; font-size:14px;
+                box-shadow: 0 2px 5px rgba(3,199,90,0.3);">
+                네이버 계정으로 로그인
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
 components.html(html_injected, height=900, scrolling=True)
