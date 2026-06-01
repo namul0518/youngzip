@@ -27,7 +27,7 @@ import streamlit.components.v1 as components
 # ════════════════════════════════════════════════════════════
 CLIENT_ID     = st.secrets["NAVER_CLIENT_ID"]
 CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
-REDIRECT_URI  = st.secrets["NAVER_REDIRECT_URI"]
+REDIRECT_URI  = st.secrets["https://youngzip.streamlit.app"]
 
 # 네이버 OAuth 엔드포인트
 AUTH_URL    = "https://nid.naver.com/oauth2.0/authorize"
