@@ -11,3 +11,4 @@ try:
     components.html(html_code, height=5000, scrolling=False)
 except FileNotFoundError:
     st.error("index.html 파일을 찾을 수 없습니다.")
+components.html(html_code, height=900, scrolling=True)
