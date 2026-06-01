@@ -8,6 +8,6 @@ st.set_page_config(layout="wide")
 try:
     with open("index.html", "r", encoding="utf-8") as f:
         html_code = f.read()
-    components.html(html_code, height=2000, scrolling=True)
+    components.html(html_code, height=2500, scrolling=False)
 except Exception as e:
     st.error(f"파일을 불러오는 중 에러가 발생했습니다: {e}")
