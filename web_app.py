@@ -2,21 +2,22 @@
 web_app.py
 ==========
 역할:
-  - 네이버 소셜 로그인 처리 (인증, 토큰, 프로필, 로그아웃)
+  - 카카오 소셜 로그인 처리 (인증, 토큰, 프로필, 로그아웃)
   - 로그인 상태를 index.html 에 JS 변수로 주입하여 탭 권한 제어
   - 계산기 렌더링 (index.html)
 
 탭 권한:
-  1탭(주담대 한도)  → 비로그인도 사용 가능
+  1탭(주담대 한도)   → 비로그인도 사용 가능
   2탭(정책대출 진단) → 로그인 필수
   3탭(맞춤유형 추천) → 로그인 필수
 
 Streamlit Cloud Secrets 설정:
-  NAVER_CLIENT_ID     = "YOUR_CLIENT_ID"
-  NAVER_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
+  KAKAO_REST_API_KEY = "YOUR_REST_API_KEY"
 
-네이버 개발자 센터 Callback URL 등록 필수:
-  https://youngzip.streamlit.app
+카카오 개발자 콘솔 설정 필수:
+  - 카카오 로그인 → 활성화 ON
+  - Redirect URI 등록: https://youngzip.streamlit.app/
+  - 동의항목: 닉네임(필수), 프로필 이미지(선택), 이메일(선택) 활성화
 """
 
 import json
@@ -29,16 +30,17 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # ════════════════════════════════════════════════════════════
-# ★ 설정값 구획 — st.secrets 에서만 읽음, 코드에 키값 없음 ★
+# 설정값 — st.secrets 에서만 읽음, 코드에 키값 없음
 # ════════════════════════════════════════════════════════════
-CLIENT_ID     = st.secrets["NAVER_CLIENT_ID"]
-CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
-REDIRECT_URI  = "https://youngzip.streamlit.app"  # 고정값
+REST_API_KEY = st.secrets["KAKAO_REST_API_KEY"]
 
-AUTH_URL    = "https://nid.naver.com/oauth2.0/authorize"
-TOKEN_URL   = "https://nid.naver.com/oauth2.0/token"
-PROFILE_URL = "https://openapi.naver.com/v1/nid/me"
-LOGOUT_URL  = "https://nid.naver.com/nidlogin.logout"
+# 카카오 개발자 콘솔 Redirect URI 등록값과 1글자도 다르면 안 됨
+REDIRECT_URI = "https://youngzip.streamlit.app/"
+
+AUTH_URL    = "https://kauth.kakao.com/oauth/authorize"
+TOKEN_URL   = "https://kauth.kakao.com/oauth/token"
+PROFILE_URL = "https://kapi.kakao.com/v2/user/me"
+LOGOUT_URL  = "https://kauth.kakao.com/oauth/logout"
 
 INDEX_PATH = Path(__file__).parent / "index.html"
 
@@ -56,28 +58,13 @@ st.markdown("""
   .block-container{padding-top:0.8rem !important; padding-bottom:0 !important}
   header[data-testid="stHeader"]{display:none}
   iframe{border:none !important; display:block;}
-  /* 네이버 로그인 버튼 */
-  .naver-btn{
-    display:inline-flex; align-items:center; gap:10px;
-    background:#03C75A; color:#fff !important;
-    font-weight:800; font-size:15px; text-decoration:none;
-    padding:13px 28px; border-radius:8px;
-    box-shadow:0 2px 10px rgba(3,199,90,.35);
-    transition:background .15s;
-  }
-  .naver-btn:hover{background:#02b050;}
-  .naver-n{
-    width:24px; height:24px; background:#fff; border-radius:4px;
-    display:inline-flex; align-items:center; justify-content:center;
-    font-weight:900; color:#03C75A; font-size:16px; flex-shrink:0;
-  }
   /* 환영 배너 */
   .welcome-bar{
     display:flex; align-items:center; gap:14px;
-    background:#F0FDF4; border:1.5px solid #BBF7D0;
+    background:#FFFDE7; border:1.5px solid #FEE500;
     border-radius:12px; padding:12px 16px; margin-bottom:10px;
   }
-  .welcome-name{font-size:15px; font-weight:800; color:#065F46;}
+  .welcome-name{font-size:15px; font-weight:800; color:#3A1D00;}
   .welcome-email{font-size:11px; color:#6B7280; margin-top:2px;}
 </style>
 """, unsafe_allow_html=True)
@@ -88,31 +75,29 @@ st.markdown("""
 # ════════════════════════════════════════════════════════════
 
 def build_auth_url(state: str) -> str:
-    # 1. 파라미터 딕셔너리를 만듭니다.
-    params = {
-        "response_type": "code",
-        "client_id": CLIENT_ID,
+    """
+    카카오 인증 요청 URL 생성.
+    safe=':/' 로 redirect_uri의 슬래시가 %2F로 인코딩되는 것을 방지.
+    """
+    query = (
+        f"response_type=code"
+        f"&client_id={urllib.parse.quote(REST_API_KEY, safe='')}"
+        f"&redirect_uri={urllib.parse.quote(REDIRECT_URI, safe=':/')}"
+        f"&state={urllib.parse.quote(state, safe='')}"
+    )
+    return f"{AUTH_URL}?{query}"
+
+
+def get_access_token(code: str) -> str | None:
+    """인가 코드 → 액세스 토큰 교환. 카카오는 POST + form-data 방식."""
+    data = {
+        "grant_type":   "authorization_code",
+        "client_id":    REST_API_KEY,
         "redirect_uri": REDIRECT_URI,
-        "state": state,
-    }
-    # 2. urlencode를 하되, 슬래시(/)와 콜론(:)은 인코딩하지 않도록 safe 설정!
-    # 이것이 핵심입니다. 네이버가 원하는 주소 형태 그대로 유지됩니다.
-    query = urllib.parse.urlencode(params, safe=':/')
-    
-    # 3. 완성된 URL을 반환합니다.
-    return f"https://nid.naver.com/oauth2.0/authorize?{query}"
-
-
-def get_access_token(code: str, state: str) -> str | None:
-    params = {
-        "grant_type":    "authorization_code",
-        "client_id":     CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "code":          code,
-        "state":         state,
+        "code":         code,
     }
     try:
-        r = requests.get(TOKEN_URL, params=params, timeout=10)
+        r = requests.post(TOKEN_URL, data=data, timeout=10)
         r.raise_for_status()
         return r.json().get("access_token")
     except Exception as e:
@@ -121,15 +106,20 @@ def get_access_token(code: str, state: str) -> str | None:
 
 
 def get_profile(access_token: str) -> dict | None:
+    """액세스 토큰 → 사용자 프로필 조회."""
     headers = {"Authorization": f"Bearer {access_token}"}
     try:
         r = requests.get(PROFILE_URL, headers=headers, timeout=10)
         r.raise_for_status()
-        data = r.json()
-        if data.get("resultcode") == "00":
-            return data.get("response", {})
-        st.error(f"프로필 오류: {data.get('message')}")
-        return None
+        data          = r.json()
+        kakao_account = data.get("kakao_account", {})
+        profile       = kakao_account.get("profile", {})
+        return {
+            "id":            str(data.get("id", "")),
+            "nickname":      profile.get("nickname", ""),
+            "profile_image": profile.get("profile_image_url", ""),
+            "email":         kakao_account.get("email", ""),
+        }
     except Exception as e:
         st.error(f"프로필 조회 실패: {e}")
         return None
@@ -145,18 +135,19 @@ def handle_callback() -> None:
     state = qp.get("state")
     saved = st.session_state.get("oauth_state")
 
-    if not code or not state:
+    if not code:
         return
     if st.session_state.get("logged_in"):
         st.query_params.clear()
         return
-    if state != saved:
+    # state 불일치 → CSRF 의심, 차단
+    if state and saved and state != saved:
         st.error("보안 검증 실패 (state 불일치). 다시 시도해 주세요.")
         st.query_params.clear()
         return
 
     with st.spinner("로그인 처리 중..."):
-        token = get_access_token(code, state)
+        token = get_access_token(code)
         if not token:
             st.query_params.clear()
             return
@@ -167,6 +158,7 @@ def handle_callback() -> None:
 
     st.session_state["logged_in"]    = True
     st.session_state["user_profile"] = prof
+    st.session_state["access_token"] = token
     st.query_params.clear()
     st.rerun()
 
@@ -178,20 +170,21 @@ handle_callback()
 # 로그인 상태 확인
 # ════════════════════════════════════════════════════════════
 
-profile     = st.session_state.get("user_profile")
+profile      = st.session_state.get("user_profile")
 is_logged_in = bool(profile)
 
-# CSRF state (로그인 전 항상 준비)
+# CSRF state — 로그인 전 항상 준비
 if "oauth_state" not in st.session_state:
     st.session_state["oauth_state"] = secrets.token_urlsafe(16)
 auth_url = build_auth_url(st.session_state["oauth_state"])
 
+
 # ════════════════════════════════════════════════════════════
-# 상단 UI: 환영 배너(로그인 후) or 로그인 유도 배너(로그인 전)
+# 상단 UI: 환영 배너(로그인 후) / 없음(로그인 전)
 # ════════════════════════════════════════════════════════════
 
 if is_logged_in:
-    nickname = profile.get("nickname") or profile.get("name", "사용자")
+    nickname = profile.get("nickname") or "사용자"
     email    = profile.get("email", "")
     img_url  = profile.get("profile_image", "")
 
@@ -212,19 +205,22 @@ if is_logged_in:
 
     if st.button("로그아웃", key="logout_btn"):
         st.session_state.clear()
-        return_url    = urllib.parse.quote(REDIRECT_URI, safe="")
-        logout_target = f"{LOGOUT_URL}?returl={return_url}"
-        # st.markdown script는 Streamlit 메인 프레임에서 실행되므로 정상 작동
+        # 카카오 로그아웃: 세션 만료 후 앱으로 복귀
+        logout_target = (
+            f"{LOGOUT_URL}"
+            f"?client_id={urllib.parse.quote(REST_API_KEY, safe='')}"
+            f"&logout_redirect_uri={urllib.parse.quote(REDIRECT_URI, safe=':/')}"
+        )
         st.markdown(
             f'<meta http-equiv="refresh" content="0;url={logout_target}">',
             unsafe_allow_html=True,
         )
         st.stop()
 
+
 # ════════════════════════════════════════════════════════════
 # index.html 렌더링
-# 로그인 상태(is_logged_in)와 로그인 URL(auth_url)을
-# JS 변수로 주입하여 index.html 내부에서 탭 권한 제어
+# is_logged_in / auth_url 을 JS 변수로 주입 → 탭 권한 제어
 # ════════════════════════════════════════════════════════════
 
 if not INDEX_PATH.exists():
@@ -233,16 +229,13 @@ if not INDEX_PATH.exists():
 
 html_raw = INDEX_PATH.read_text(encoding="utf-8")
 
-# <head> 바로 뒤에 JS 변수 주입 (index.html 수정 불필요)
 inject = f"""
 <script>
   /* web_app.py 주입: 탭 권한 제어용 변수 */
-  var APP_LOGGED_IN  = {json.dumps(is_logged_in)};
-  var APP_AUTH_URL   = {json.dumps(auth_url)};
-  var APP_LOGOUT_URL = {json.dumps(f"{LOGOUT_URL}?returl={urllib.parse.quote(REDIRECT_URI, safe='')}")};
+  var APP_LOGGED_IN = {json.dumps(is_logged_in)};
+  var APP_AUTH_URL  = {json.dumps(auth_url)};
 </script>
 """
 html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 
-# height=900, scrolling=True: iframe 내부 스크롤로 처리
 components.html(html_injected, height=900, scrolling=True)
