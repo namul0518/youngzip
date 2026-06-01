@@ -47,7 +47,8 @@ st.set_page_config(
     page_title="영끌내집 — 내 집 마련 계산기",
     page_icon="🏠",
     layout="centered",
-    initial_sidebar_state="collapsed")
+    initial_sidebar_state="collapsed",
+)
 if not st.session_state.get("logged_in"):
     st.markdown(f"""
         <div style="text-align:center; padding:20px;">
