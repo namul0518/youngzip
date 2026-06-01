@@ -462,20 +462,19 @@ function _showLoginGate(tabIdx, mode){
       +'<div style="font-size:11px;color:#CBD5E1;margin-top:16px">계산 완료 후 이 탭을 다시 눌러 주세요.</div>'
       +'</div>';
   } else {
-    /* 비로그인 → 카카오 로그인 안내
-       APP_AUTH_URL은 web_app.py가 주입. window.open으로 새 창 열기.
-       iframe sandbox 제약을 받지 않는 방식. */
+    /* 비로그인 → 위쪽 로그인 버튼 안내
+       실제 로그인 버튼은 메인 프레임(Python)에 있음.
+       iframe 안에서 외부 URL 이동 시도 자체를 하지 않음 → 브라우저 보안 정책 충돌 없음 */
     gate.innerHTML=''
       +'<div style="text-align:center;padding:48px 20px 36px">'
       +'<div style="font-size:38px;margin-bottom:14px">🔒</div>'
       +'<div style="font-size:16px;font-weight:800;color:#1E293B;margin-bottom:8px">로그인이 필요한 서비스입니다</div>'
-      +'<div style="font-size:13px;color:#64748B;margin-bottom:28px"><b>'+tabName+'</b> 탭은 로그인 후 이용할 수 있습니다.</div>'
-      +'<button onclick="kakaoLogin()" style="'
-      +'display:inline-flex;align-items:center;gap:10px;'
-      +'background:#FEE500;color:#191919;font-weight:800;font-size:15px;border:none;cursor:pointer;'
-      +'padding:13px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(254,229,0,.5)">'
-      +'<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.632 5.076 4.1 6.48L5.1 21l4.72-2.52A11.6 11.6 0 0012 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z" fill="#191919"/></svg>'
-      +'카카오 계정으로 로그인</button>'
+      +'<div style="font-size:13px;color:#64748B;margin-bottom:24px"><b>'+tabName+'</b> 탭은 로그인 후 이용할 수 있습니다.</div>'
+      +'<div style="'
+      +'display:inline-flex;align-items:center;gap:8px;'
+      +'background:#FEF9C3;border:1.5px solid #FDE047;'
+      +'border-radius:10px;padding:12px 20px;font-size:13px;font-weight:700;color:#92400E">'
+      +'☝️ 화면 위쪽 <b>카카오 계정으로 로그인</b> 버튼을 눌러 주세요</div>'
       +'<div style="font-size:11px;color:#CBD5E1;margin-top:16px">로그인 후 모든 기능을 무료로 이용할 수 있습니다.</div>'
       +'</div>';
   }
@@ -484,18 +483,6 @@ function _showLoginGate(tabIdx, mode){
 function _hideLoginGate(){
   var gate=document.getElementById('loginGate');
   if(gate)gate.style.display='none';
-}
-/* 새 창으로 카카오 인증 페이지 열기.
-   window.open은 iframe sandbox 안에서도 허용됨(allow-popups 있을 때).
-   Streamlit components.html은 기본적으로 allow-popups를 허용함. */
-function kakaoLogin(){
-  if(!APP_AUTH_URL){return;}
-  var w=window.open(APP_AUTH_URL,'kakao_login',
-    'width=500,height=700,left='+(screen.width/2-250)+',top='+(screen.height/2-350));
-  /* 팝업 차단된 경우 현재 탭에서 이동 */
-  if(!w||w.closed||typeof w.closed==='undefined'){
-    window.location.href=APP_AUTH_URL;
-  }
 }
 
 /* ══ 체크박스 ══ */
