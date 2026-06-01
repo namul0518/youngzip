@@ -549,7 +549,7 @@ function calc(){
     mkCard('met','수도권 비규제',met,aW,'metro',own)+
     mkCard('non','비수도권',non,aW,'non',own);
   document.getElementById('res').style.display='block';
-  document.getElementById('res').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('res').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 function resetCalc(){
