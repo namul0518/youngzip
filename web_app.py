@@ -20,7 +20,7 @@ web_app.py  ·  영끌내집 카카오 로그인 + 계산기
 
 Streamlit Cloud Secrets:
   KAKAO_REST_API_KEY = "REST API 키"
-  KAKAO_SECRET_SALT  = "아무 랜덤 문자열 32자 이상"  ← HMAC 서명용
+  (KAKAO_SECRET_SALT 불필요 — REST_API_KEY로 자동 서명)
 
 카카오 개발자 콘솔:
   - 카카오 로그인 활성화 ON
@@ -44,7 +44,7 @@ import streamlit.components.v1 as components
 # 설정
 # ════════════════════════════════════════════════════════════
 REST_API_KEY = st.secrets["KAKAO_REST_API_KEY"]
-SECRET_SALT  = st.secrets["KAKAO_SECRET_SALT"]   # HMAC 서명용 비밀키
+SECRET_SALT  = REST_API_KEY  # HMAC 서명용 — 별도 secrets 불필요
 REDIRECT_URI = "https://youngzip.streamlit.app/"  # 콘솔 등록값 1:1 일치
 
 AUTH_URL    = "https://kauth.kakao.com/oauth/authorize"
