@@ -8,6 +8,6 @@ st.set_page_config(layout="wide")
 try:
     with open("index.html", "r", encoding="utf-8") as f:
         html_code = f.read()
-    components.html(html_code, height=2000, scrolling=False)
+    components.html(html_code, height=5000, scrolling=False)
 except FileNotFoundError:
     st.error("index.html 파일을 찾을 수 없습니다.")
