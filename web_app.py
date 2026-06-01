@@ -39,7 +39,7 @@ NAVER_CLIENT_ID     = os.getenv("NAVER_CLIENT_ID", "")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
 
 # 네이버 로그인 후 돌아올 주소 (네이버 개발자 센터에 등록된 값과 일치해야 함)
-REDIRECT_URI = "https://youngzip.com"
+REDIRECT_URI = "https://youngzip.streamlit.app"
 
 # 로그인 데이터 저장 파일
 LOGIN_DATA_FILE = Path(__file__).parent / "user_login_data.csv"
