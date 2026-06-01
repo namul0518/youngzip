@@ -1,4 +1,11 @@
-<!DOCTYPE html>
+import streamlit as st
+import streamlit.components.v1 as components
+
+# 페이지 설정
+st.set_page_config(page_title="영끌내집", layout="wide")
+
+# 여기가 계산기 화면입니다.
+html_code = <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -1010,3 +1017,6 @@ function calcRec(){
 </script>
 </body>
 </html>
+
+# 화면에 보여주기
+components.html(html_code, height=800)
