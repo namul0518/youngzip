@@ -1021,4 +1021,4 @@ function calcRec(){
 """
 
 # HTML을 화면에 출력합니다.
-components.html(html_code, height=1200)
+st.markdown(html_code, unsafe_allow_html=True)
