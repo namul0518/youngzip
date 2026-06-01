@@ -430,19 +430,16 @@ function goTab(n){
 }
 /* ── 탭 클릭 핸들러: postMessage로 Python(web_app.py)에 탭번호 전달 ── */
 function handleTabClick(n){
-  /* 부모 Streamlit에 탭 선택 이벤트 전달 */
+  if(n===0){goTab(0);return;}
+  if(APP_LOGGED_IN){goTab(n);return;}
+  /* 비로그인 → 부모(Streamlit)에 로그인 게이트 표시 요청 */
   try{
-    window.parent.postMessage({type:'TAB_CLICK',tab:n},'*');
+    window.parent.postMessage({type:'NEED_LOGIN',tab:n},'*');
   }catch(e){}
-  /* 1탭은 로그인 불필요 → 즉시 전환 */
-  if(n===0) goTab(0);
-  /* 2·3탭은 Python이 판단 후 setTab 메시지로 실제 전환 지시 */
 }
-/* ── Python으로부터 전환 허가 수신 ── */
+/* ── Python으로부터 탭 전환 허가 수신 (로그인 완료 후 재진입 시) ── */
 window.addEventListener('message',function(e){
-  if(e.data&&e.data.type==='SET_TAB'){
-    goTab(e.data.tab);
-  }
+  if(e.data&&e.data.type==='SET_TAB'){goTab(e.data.tab);}
 });
 
 
