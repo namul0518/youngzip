@@ -1,21 +1,25 @@
 """
 web_app.py
 ==========
-역할:
-  - 네이버 소셜 로그인 처리 (인증, 토큰, 프로필, 로그아웃)
-  - 로그인 상태를 index.html 에 JS 변수로 주입하여 탭 권한 제어
-  - 계산기 렌더링 (index.html)
+역할: 네이버 로그인 처리 + 탭 권한 제어 + index.html 계산기 렌더링
 
 탭 권한:
-  1탭(주담대 한도)  → 비로그인도 사용 가능
+  1탭(주담대 한도)   → 비로그인 가능
   2탭(정책대출 진단) → 로그인 필수
   3탭(맞춤유형 추천) → 로그인 필수
 
-Streamlit Cloud Secrets 설정:
+탭 전환 흐름:
+  1. 사용자가 index.html 탭 버튼 클릭
+  2. index.html: postMessage({type:'TAB_CLICK', tab:n}) 발송
+  3. web_app.py: st.query_params 로 탭 번호 수신 (JS→Streamlit bridge)
+     → 비로그인 + 2·3탭: Python이 직접 로그인 안내 렌더링 (iframe 밖)
+     → 로그인 + 모든 탭: index.html 에 SET_TAB 메시지로 탭 전환 허가
+
+Streamlit Cloud Secrets:
   NAVER_CLIENT_ID     = "YOUR_CLIENT_ID"
   NAVER_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
 
-네이버 개발자 센터 Callback URL 등록 필수:
+네이버 개발자 센터 Callback URL:
   https://youngzip.streamlit.app
 """
 
@@ -29,11 +33,11 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # ════════════════════════════════════════════════════════════
-# ★ 설정값 구획 — st.secrets 에서만 읽음, 코드에 키값 없음 ★
+# ★ 설정값 구획 ★
 # ════════════════════════════════════════════════════════════
 CLIENT_ID     = st.secrets["NAVER_CLIENT_ID"]
 CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
-REDIRECT_URI  = "https://youngzip.streamlit.app"  # 고정값
+REDIRECT_URI  = "https://youngzip.streamlit.app"
 
 AUTH_URL    = "https://nid.naver.com/oauth2.0/authorize"
 TOKEN_URL   = "https://nid.naver.com/oauth2.0/token"
@@ -53,7 +57,7 @@ st.set_page_config(
 # ── 전역 CSS ─────────────────────────────────────────────────
 st.markdown("""
 <style>
-  .block-container{padding-top:0.8rem !important; padding-bottom:0 !important}
+  .block-container{padding-top:0.5rem !important; padding-bottom:0 !important}
   header[data-testid="stHeader"]{display:none}
   iframe{border:none !important; display:block;}
   /* 네이버 로그인 버튼 */
@@ -79,6 +83,16 @@ st.markdown("""
   }
   .welcome-name{font-size:15px; font-weight:800; color:#065F46;}
   .welcome-email{font-size:11px; color:#6B7280; margin-top:2px;}
+  /* 로그인 게이트 박스 */
+  .login-gate{
+    text-align:center; padding:48px 20px 36px;
+    border:2px dashed #E2E8F0; border-radius:14px;
+    background:#F8FAFC; margin-top:8px;
+  }
+  .login-gate-icon{font-size:38px; margin-bottom:14px;}
+  .login-gate-title{font-size:16px; font-weight:800; color:#1E293B; margin-bottom:8px;}
+  .login-gate-sub{font-size:13px; color:#64748B; margin-bottom:28px;}
+  .login-gate-hint{font-size:11px; color:#CBD5E1; margin-top:16px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -145,7 +159,7 @@ def handle_callback() -> None:
         st.query_params.clear()
         return
     if state != saved:
-        st.error("보안 검증 실패 (state 불일치). 다시 시도해 주세요.")
+        st.error("보안 검증 실패. 다시 시도해 주세요.")
         st.query_params.clear()
         return
 
@@ -161,6 +175,8 @@ def handle_callback() -> None:
 
     st.session_state["logged_in"]    = True
     st.session_state["user_profile"] = prof
+    # 탭 상태 초기화 (로그인 직후 1탭으로)
+    st.session_state["active_tab"] = 0
     st.query_params.clear()
     st.rerun()
 
@@ -169,30 +185,57 @@ handle_callback()
 
 
 # ════════════════════════════════════════════════════════════
-# 로그인 상태 확인
+# 탭 클릭 이벤트 수신 (index.html postMessage → query_params)
+#
+# index.html 의 handleTabClick(n) 이 postMessage 로 전달하지만
+# Streamlit은 postMessage를 직접 받지 못하므로,
+# 대신 index.html 안에 Streamlit.setComponentValue를 사용하는
+# bridge snippet 을 주입해 query_params 로 탭번호를 전달한다.
 # ════════════════════════════════════════════════════════════
 
-profile     = st.session_state.get("user_profile")
-is_logged_in = bool(profile)
+# query_params 에서 탭 요청 수신
+requested_tab = st.query_params.get("tab")
+if requested_tab is not None:
+    try:
+        tab_num = int(requested_tab)
+        st.session_state["active_tab"] = tab_num
+    except ValueError:
+        pass
+    # query_params 에서 tab 제거 (중복 처리 방지)
+    params = dict(st.query_params)
+    params.pop("tab", None)
+    st.query_params.update(params)
+    st.rerun()
 
-# CSRF state (로그인 전 항상 준비)
+# 현재 활성 탭 (기본 0)
+active_tab: int = st.session_state.get("active_tab", 0)
+is_logged_in: bool = bool(st.session_state.get("user_profile"))
+
+# CSRF state 준비
 if "oauth_state" not in st.session_state:
     st.session_state["oauth_state"] = secrets.token_urlsafe(16)
 auth_url = build_auth_url(st.session_state["oauth_state"])
 
+# auth_url 검증
+if not auth_url.startswith("https://nid.naver.com"):
+    st.error("⚠️ 로그인 URL 생성 실패. CLIENT_ID 설정을 확인하세요.")
+    st.stop()
+
+
 # ════════════════════════════════════════════════════════════
-# 상단 UI: 환영 배너(로그인 후) or 로그인 유도 배너(로그인 전)
+# 상단 배너: 로그인 후 환영 / 로그인 전 미니 안내
 # ════════════════════════════════════════════════════════════
 
-if is_logged_in:
+profile = st.session_state.get("user_profile")
+
+if is_logged_in and profile:
     nickname = profile.get("nickname") or profile.get("name", "사용자")
     email    = profile.get("email", "")
     img_url  = profile.get("profile_image", "")
-
-    img_tag = (
+    img_tag  = (
         f'<img src="{img_url}" '
         f'style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0">'
-        if img_url else '<span style="font-size:28px">👤</span>'
+        if img_url else '<span style="font-size:26px">👤</span>'
     )
     st.markdown(f"""
     <div class="welcome-bar">
@@ -208,16 +251,47 @@ if is_logged_in:
         st.session_state.clear()
         return_url    = urllib.parse.quote(REDIRECT_URI, safe="")
         logout_target = f"{LOGOUT_URL}?returl={return_url}"
+        # iframe 밖 최상위 창에서 네이버 서버 로그아웃
         st.markdown(
             f'<script>window.top.location.href="{logout_target}";</script>',
             unsafe_allow_html=True,
         )
         st.stop()
 
+
+# ════════════════════════════════════════════════════════════
+# 탭 권한 분기
+# ════════════════════════════════════════════════════════════
+
+# 비로그인 상태에서 2·3탭 요청 → active_tab 을 강제로 0으로
+if not is_logged_in and active_tab in (1, 2):
+    # 로그인 게이트를 iframe 밖(Python)에서 렌더링
+    tab_name = "정책대출 진단" if active_tab == 1 else "맞춤 유형 추천"
+
+    st.markdown(f"""
+    <div class="login-gate">
+      <div class="login-gate-icon">🔒</div>
+      <div class="login-gate-title">로그인이 필요한 서비스입니다</div>
+      <div class="login-gate-sub">
+        <b>{tab_name}</b> 탭은 로그인 후 이용할 수 있습니다.
+      </div>
+      <a href="{auth_url}" target="_top" class="naver-btn">
+        <span class="naver-n">N</span>네이버 계정으로 로그인
+      </a>
+      <div class="login-gate-hint">로그인 후 모든 기능을 무료로 이용할 수 있습니다.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # index.html 은 1탭 활성화 상태로만 표시 (뒤에서 SET_TAB 0 주입)
+    active_tab = 0
+
+
 # ════════════════════════════════════════════════════════════
 # index.html 렌더링
-# 로그인 상태(is_logged_in)와 로그인 URL(auth_url)을
-# JS 변수로 주입하여 index.html 내부에서 탭 권한 제어
+# ─ JS 변수 주입: APP_LOGGED_IN, APP_AUTH_URL
+# ─ bridge snippet: handleTabClick → location.href 에 ?tab=N 추가
+#   → Streamlit 이 query_params 로 읽어 active_tab 갱신 후 rerun
+# ─ SET_TAB 메시지: active_tab 값으로 탭 강제 전환
 # ════════════════════════════════════════════════════════════
 
 if not INDEX_PATH.exists():
@@ -226,28 +300,37 @@ if not INDEX_PATH.exists():
 
 html_raw = INDEX_PATH.read_text(encoding="utf-8")
 
-# ── auth_url 검증 ─────────────────────────────────────────
-if not auth_url or not auth_url.startswith("https://nid.naver.com"):
-    st.error("⚠️ 로그인 URL 생성 실패. CLIENT_ID 설정을 확인하세요.")
-    st.stop()
+logout_full = f"{LOGOUT_URL}?returl={urllib.parse.quote(REDIRECT_URI, safe='')}"
 
-# <head> 바로 뒤에 JS 변수 주입 (index.html 수정 불필요)
-# APP_LOGGED_IN, APP_AUTH_URL 을 최우선으로 선언하여
-# index.html 내 goTab() 권한 체크에서 사용
 inject = f"""
 <script>
-  /* web_app.py 주입: 탭 권한 제어용 변수 — 페이지 로드 즉시 실행 */
-  var APP_LOGGED_IN  = {json.dumps(is_logged_in)};
-  var APP_AUTH_URL   = {json.dumps(auth_url)};
-  var APP_LOGOUT_URL = {json.dumps(f"{LOGOUT_URL}?returl={urllib.parse.quote(REDIRECT_URI, safe='')}")};
+/* ── web_app.py 주입 변수 ── */
+var APP_LOGGED_IN  = {json.dumps(is_logged_in)};
+var APP_AUTH_URL   = {json.dumps(auth_url)};
+var APP_LOGOUT_URL = {json.dumps(logout_full)};
+var APP_ACTIVE_TAB = {json.dumps(active_tab)};
+
+/* ── handleTabClick: query_params 방식으로 Streamlit 에 탭번호 전달 ── */
+/* index.html 의 handleTabClick(n) 이 이 함수를 호출한다 */
+(function patchHandleTabClick(){{
+  var _orig = window.handleTabClick || function(){{}};
+  window.handleTabClick = function(n){{
+    /* 1탭은 iframe 내부에서 즉시 전환 */
+    if(n === 0){{ if(typeof goTab==='function') goTab(0); return; }}
+    /* 2·3탭: 현재 페이지 URL 에 ?tab=N 추가 → Streamlit rerun 유발 */
+    var url = window.top.location.href.split('?')[0];
+    window.top.location.href = url + '?tab=' + n;
+  }};
+}})();
+
+/* ── 페이지 로드 후 active_tab 으로 탭 강제 전환 ── */
+window.addEventListener('DOMContentLoaded', function(){{
+  if(typeof goTab === 'function'){{
+    goTab(APP_ACTIVE_TAB);
+  }}
+}});
 </script>
 """
-# <head> 직후 주입 (index.html 의 <head> 는 3번째 줄에 단독 존재)
-if "<head>" in html_raw:
-    html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
-else:
-    # 안전 장치: <head> 없으면 DOCTYPE 바로 뒤에 삽입
-    html_injected = inject + html_raw
 
-# height=900, scrolling=True: iframe 내부 스크롤로 처리
+html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
 components.html(html_injected, height=900, scrolling=True)
