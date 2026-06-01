@@ -226,16 +226,28 @@ if not INDEX_PATH.exists():
 
 html_raw = INDEX_PATH.read_text(encoding="utf-8")
 
+# ── auth_url 검증 ─────────────────────────────────────────
+if not auth_url or not auth_url.startswith("https://nid.naver.com"):
+    st.error("⚠️ 로그인 URL 생성 실패. CLIENT_ID 설정을 확인하세요.")
+    st.stop()
+
 # <head> 바로 뒤에 JS 변수 주입 (index.html 수정 불필요)
+# APP_LOGGED_IN, APP_AUTH_URL 을 최우선으로 선언하여
+# index.html 내 goTab() 권한 체크에서 사용
 inject = f"""
 <script>
-  /* web_app.py 주입: 탭 권한 제어용 변수 */
+  /* web_app.py 주입: 탭 권한 제어용 변수 — 페이지 로드 즉시 실행 */
   var APP_LOGGED_IN  = {json.dumps(is_logged_in)};
   var APP_AUTH_URL   = {json.dumps(auth_url)};
   var APP_LOGOUT_URL = {json.dumps(f"{LOGOUT_URL}?returl={urllib.parse.quote(REDIRECT_URI, safe='')}")};
 </script>
 """
-html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
+# <head> 직후 주입 (index.html 의 <head> 는 3번째 줄에 단독 존재)
+if "<head>" in html_raw:
+    html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
+else:
+    # 안전 장치: <head> 없으면 DOCTYPE 바로 뒤에 삽입
+    html_injected = inject + html_raw
 
 # height=900, scrolling=True: iframe 내부 스크롤로 처리
 components.html(html_injected, height=900, scrolling=True)
