@@ -246,4 +246,15 @@ var APP_LOGOUT_URL = {json.dumps(logout_url_full)};
 """
 
 html_injected = html_raw.replace("<head>", "<head>" + inject, 1)
+if not st.session_state.get("logged_in"):
+    st.markdown(f"""
+        <div style="text-align:center; padding:20px;">
+            <a href="{auth_url}" target="_top" style="
+                background:#03C75A; color:white; padding:15px 30px; 
+                border-radius:10px; text-decoration:none; font-weight:bold;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                네이버 계정으로 시작하기 (로그인)
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
 components.html(html_injected, height=900, scrolling=True)
