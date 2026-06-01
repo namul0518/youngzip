@@ -5,17 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>내가 살 수 있는 아파트 최대 가격은?</title>
 <style>
-/* iframe 내부 높이 자동 조절 기반 CSS */
-html{height:auto;overflow-y:auto}
-body{margin:0;padding:0}
+/* ── iframe 내부 스크롤 최적화 ── */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F8FAFC;padding-bottom:60px}
-.wrap{max-width:660px;margin:0 auto;padding:18px 14px}
+html{height:100%;overflow-x:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  background:#F8FAFC;
+  padding-bottom:0px !important;
+  overflow-x:hidden !important;
+  min-height:100%;
+}
+/* ── 레이아웃 ── */
+.wrap{max-width:660px;margin:0 auto;padding:18px 14px 40px}
 .hd{text-align:center;padding:6px 0 18px}
 .pill{display:inline-block;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:10px}
 .hd h1{font-size:20px;font-weight:800;color:#111827;margin-bottom:4px;line-height:1.35}
 .hd p{font-size:12px;color:#6B7280}
-.premium-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#FEF9C3,#FEF3C7);border:1.5px solid #FDE047;border-radius:20px;font-size:11px;font-weight:800;padding:5px 14px;margin-bottom:10px;color:#92400E;box-shadow:0 2px 6px rgba(245,158,11,.15)}
 .tabs{display:flex;background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:3px;margin-bottom:16px;gap:2px}
 .tab{flex:1;padding:8px 4px;border:none;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:#64748B;transition:all .15s;white-space:nowrap}
 .tab.on{background:#2563EB;color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.25)}
@@ -120,7 +125,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun 
 .cap-note{color:#6B7280;font-size:10px;display:block;margin-top:4px}
 .cond-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
 .cond-tag{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;background:#F1F5F9;color:#475569}
-/* 보금자리론 만기 인포박스 */
 .bgz-term-box{margin-top:9px;border-radius:8px;padding:8px 11px;background:#F0F7FF;border:1px solid #BFDBFE;font-size:10px;color:#1E40AF;line-height:1.6}
 .bgz-term-box b{font-weight:900;font-size:11px}
 .pol-vrow{margin-top:10px;padding:6px 9px;border-radius:6px;font-size:9px;font-weight:700;background:rgba(0,0,0,.04);color:#6B7280;line-height:1.6}
@@ -209,7 +213,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun 
 .verdict-card.rank2{border-color:#BFDBFE;background:#F8FBFF}
 .verdict-card.rank2b{border-color:#BFDBFE;background:#F8FBFF}
 .verdict-card.rank3{border-color:#E2E8F0;background:#F8FAFC}
-/* 5060 공동2순위 그리드 */
 .verdict-tied-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 @media(max-width:480px){.verdict-tied-grid{grid-template-columns:1fr}}
 .verdict-tied-label{font-size:10px;font-weight:800;color:#6B7280;letter-spacing:.3px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
@@ -231,7 +234,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun 
 .zv{display:inline-flex;align-items:center;gap:5px;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:800;margin-bottom:8px}
 .zv.reg{background:#FEE2E2;color:#991B1B}
 .zv.free{background:#D1FAE5;color:#065F46}
-/* 준비중 박스 공통 */
 .wip-box{border-radius:14px;padding:28px 20px;text-align:center;background:linear-gradient(135deg,#F8FAFC 0%,#F1F5F9 100%);border:2px dashed #CBD5E1;margin-bottom:12px}
 .wip-icon{font-size:32px;margin-bottom:10px}
 .wip-title{font-size:14px;font-weight:900;color:#374151;margin-bottom:8px;line-height:1.4}
@@ -240,7 +242,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun 
 .wip-multi .wip-title{color:#92400E}
 .wip-apt{background:linear-gradient(135deg,#EFF6FF 0%,#F0F7FF 100%);border-color:#BFDBFE}
 .wip-apt .wip-title{color:#1E40AF}
-/* 프리미엄 리포트 하단 뱃지 */
 .fsb-premium-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#FEF9C3,#FEF3C7);border:1.5px solid #FDE047;border-radius:20px;font-size:11px;font-weight:800;padding:6px 16px;margin-top:14px;color:#92400E;box-shadow:0 2px 6px rgba(245,158,11,.12)}
 .fsb-premium-wrap{text-align:center;padding-top:12px;border-top:1px dashed rgba(0,0,0,.08)}
 .age-20 .fsb-premium-wrap{border-top-color:#FECACA}
@@ -398,8 +399,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun 
           <option value="sw_bucheon">서남권 (부천·안산·시흥·구로·가산)</option>
           <option value="nw_ilsan">서북권 (인천·일산·파주·김포)</option>
           <option value="ne_nowon">동북권 (노원·도봉·의정부·남양주)</option>
-          </select>
-          <span class="su">▾</span>
+        </select>
+        <span class="su">▾</span>
       </div>
     </div>
     <button class="btn-main" onclick="calcRec()">🎯 맞춤 부동산 유형 진단하기</button>
@@ -563,11 +564,7 @@ function resetCalc(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ══ 정책대출: 보금자리론 만기 계산 (고도화) ══
-   50년: 만 34세 이하  OR  만 39세 이하 신혼가구
-   40년: 만 39세 이하  OR  만 40~49세 신혼가구
-   30년: 그 외
-*/
+/* ══ 정책대출: 보금자리론 만기 계산 ══ */
 function getBgzTerm(){
   if(G.under34) return 50;
   if(G.newlywed && G.newlywed_u39) return 50;
@@ -658,7 +655,6 @@ function checkFail(pid){
   return '상품 없음';
 }
 
-/* 한도 제한 사유 텍스트 반환 */
 function bindReason(loan, ltvL, dtiL, cap, capLabel){
   var vals=[{v:ltvL,l:'LTV 한도'},{v:dtiL,l:'DTI 한도'}];
   if(cap!==undefined) vals.push({v:cap,l:capLabel||'상품 한도'});
@@ -820,9 +816,7 @@ function runPol(){
       }
       var termBadge='blue';
       if(p.id==='p3'&&(G.newlywed||G.under34))termBadge='purple';
-      /* 보금자리론 만기 인포박스 */
       var termInfoSection=det.termInfoHtml||'';
-      /* 한도 비교 행 (LTV / DTI / 상품한도 중 어느 게 걸렸는지) */
       var br=det.bindReason;
       var ltvFmt=fmtW(Math.min(det.ltvLoan,999999999999));
       var dtiFmt=fmtW(Math.min(det.dtiLoan,999999999999));
@@ -835,9 +829,7 @@ function runPol(){
         +(isPriceCap?'<div class="pol-cmp-row active"><span class="pol-cmp-lbl">주택가격 상한</span><span class="pol-cmp-val">← 한도 결정</span></div>':'')
         +'<div class="pol-cmp-row" style="background:#ECFDF5;font-weight:800;"><span class="pol-cmp-lbl" style="color:#065F46;">실제 대출액</span><span class="pol-cmp-val" style="color:#059669;">'+lStr+'</span></div>'
         +'</div>';
-      /* 한도 제한 사유 박스 */
       var bindHtml=br?'<div class="pol-bind-box"><div class="pol-bind-hd">⚠️ 왜 이것밖에 못 받나요? — '+br.label+'</div>'+br.desc+'</div>':'';
-      /* 검증 행 */
       var vrowHtml='<div class="pol-vrow">검증: 순자산 '+aStr+' + 대출 '+lStr+' = 매수 가능가 '+mStr+'</div>';
       detailHtml='<div class="plc-detail">'
         +'<div class="detail-sep"></div>'
@@ -869,23 +861,18 @@ function runPol(){
   document.getElementById('plFb').style.display=allFail?'block':'none';
 }
 
-/* ══════════════════════════════════════════════════════
-   탭2: 맞춤 부동산 유형
-══════════════════════════════════════════════════════ */
+/* ══ 탭2: 맞춤 부동산 유형 ══ */
 var TYPE_SPEC={
   'new' :{loc:30,prod:100,fut:40, label:'신축 (10년 이내)',   badge:'🔵 신축',   minYr:2015,maxYr:2025},
   'semi':{loc:60,prod:70, fut:50, label:'준신축 (10~20년차)', badge:'🟢 준신축', minYr:2005,maxYr:2014},
   'old' :{loc:80,prod:10, fut:85, label:'구축 (20~30년차)',   badge:'🟡 구축',   minYr:1995,maxYr:2004}
 };
-
 var AGE_BANNER={
   20:{cls:'age-20',tag:'🔥 20대 자산 전략',title:'당신은 사서 고생할 나이!',sub:'신축 라이프는 아직 잠시 보류입니다. 젊음이 최대 무기. 입지 좋은 구축에 몸을 던지는 게 자산 체급을 키울 마지노선입니다.'},
   30:{cls:'age-30',tag:'⚡ 3040대 자산 전략',title:'인생 정점, 소득 황금기!\n고생할 수 있는 마지노선.',sub:'달콤한 신축 라이프는 잠시 뒤로 미룹시다. 자녀 교육과 직주근접, 미래 가치를 모두 쥐려면 입지가 깡패인 구축으로 자산 체급을 키워야 합니다!'},
   50:{cls:'age-50',tag:'☕ 5060대 자산 전략',title:'그동안 많이 고생하셨습니다.\n이제는 안정성의 시대.',sub:'불확실성에 전 재산을 베팅하기엔 리스크가 큽니다. 아이 교육과 정주 여건 모두 챙기면서 거주도 편안한 준신축이 이 시기 황금 밸런스입니다.'},
   70:{cls:'age-70',tag:'👴 70대+ 자산 전략',title:'언제 죽을지도 모르는데\n수익을 미래로 미룹니까?!',sub:'지금 당장 커뮤니티 완비된 신축에서 프리미엄 실거주를 100% 누리는 것이 최적 전략입니다.'}
 };
-
-/* 5060: 1순위=준신축, 공동2순위=구축+신축 */
 var AGE_ORDER={20:['old','semi','new'],30:['old','semi','new'],50:['semi','old','new'],70:['new','semi','old']};
 var AGE_RANK_DESC={
   20:{old:'입지가 깡패. 상품성을 포기하더라도 입지 좋은 구축으로 자산 체급을 키울 마지노선',semi:'준신축으로 입지와 상품성 두 마리 깃털. 구축보다 편하게 살면서 미래 수익도 챙기는 차순위 전략',new:'신축은 현 단계에서 마지막 순위. 감가 리스크보다 자산 상승 레버리지가 우선'},
@@ -900,7 +887,6 @@ function getSizeRec(av,fv){
   if(av>=70){return fv<=2?'20~30평대 <small style="color:rgba(255,255,255,.8)">(노후 보정)</small>':'30평대 이상';}
   if(fv<=2)return '10~20평대'; if(fv<=4)return '20~30평대'; return '30평대 이상';
 }
-
 function barGroupHtml(spec){
   function row(l,p,cls){
     return '<div class="bar-row"><span class="bar-lbl">'+l+'</span>'
@@ -910,8 +896,6 @@ function barGroupHtml(spec){
   return '<div class="bar-group">'+row('입지',spec.loc,'fill-loc')+row('상품성',spec.prod,'fill-prod')+row('미래수익',spec.fut,'fill-fut')
     +'<div class="bar-legend"><div class="leg-dot"><span style="background:#10B981"></span>입지</div><div class="leg-dot"><span style="background:#0EA5E9"></span>상품성</div><div class="leg-dot"><span style="background:#F59E0B"></span>미래수익</div></div></div>';
 }
-
-/* 순위 카드 HTML 생성 (단일) */
 function verdictCardHtml(rankCls,rankLabel,tp,desc){
   return '<div class="verdict-card '+rankCls+'">'
     +'<div class="vc-rank">'+rankLabel+'</div>'
@@ -921,7 +905,6 @@ function verdictCardHtml(rankCls,rankLabel,tp,desc){
     +'<div class="vc-bar-wrap">'+barGroupHtml(tp)+'</div>'
     +'</div>';
 }
-
 function renderFinalSummary(ageVal,famVal){
   var box=document.getElementById('final-summary-box');
   var hasCalc=G.income>0&&G.own;
@@ -943,7 +926,6 @@ function renderFinalSummary(ageVal,famVal){
     var inner=best?'<div class="fsb-zone-price">'+fmtW(best.price)+'</div><div class="fsb-zone-prod">'+best.prodName+'</div>':'<div class="fsb-zone-price fsb-no-val">먼저 계산 필요</div>';
     return '<div class="fsb-zone-cell '+zc+'"><div class="fsb-zone-badge '+bc+'">'+label+'</div>'+inner+'</div>';
   }
-  /* 아파트 추천 WIP */
   var sniperHtml='<div class="fsb-sniper-wrap">'
     +'<div class="fsb-sniper-hd">🎯 내 자산 맞춤형 연식별 최적 저격 추천 단지</div>'
     +'<div class="wip-box wip-apt">'
@@ -951,9 +933,7 @@ function renderFinalSummary(ageVal,famVal){
     +'<div class="wip-title">빅데이터 기반 맞춤형 아파트<br>추천 시스템 준비 중</div>'
     +'<div class="wip-desc">국토교통부 실거래 빅데이터와 AI 매칭 엔진을<br>연동한 맞춤형 단지 추천 시스템을 구축 중입니다.<br>곧 업데이트됩니다.</div>'
     +'</div></div>';
-  /* 프리미엄 리포트 뱃지 */
   var premiumHtml='<div class="fsb-sep"></div><div class="fsb-premium-wrap"><div class="fsb-premium-badge">💡 프리미엄 리포트 서비스 준비 중</div></div>';
-
   box.className=ageCls;
   box.innerHTML='<div class="fsb-title">'+SUMMARY_TITLE[ageKey]+'</div>'
     +'<div class="fsb-sep"></div>'
@@ -968,13 +948,11 @@ function renderFinalSummary(ageVal,famVal){
     +premiumHtml;
   box.style.display='block';
 }
-
 function calcRec(){
   var ageVal=parseInt(document.getElementById('iAge').value);
   var famVal=parseInt(document.getElementById('iFam').value);
   var ageKey=ageVal>=70?70:ageVal>=50?50:ageVal>=30?30:20;
   var isMulti=(G.own==='multi');
-
   if(isMulti){
     var el=document.getElementById('recResult');
     el.innerHTML='<div class="wip-box wip-multi" style="margin-bottom:14px;">'
@@ -987,26 +965,21 @@ function calcRec(){
     el.scrollIntoView({behavior:'smooth',block:'start'});
     return;
   }
-
   var banner=AGE_BANNER[ageKey];
   var order=AGE_ORDER[ageKey];
   var rankDesc=AGE_RANK_DESC[ageKey];
   var size=getSizeRec(ageVal,famVal);
-
   var html='<div class="age-banner '+banner.cls+'">'
     +'<div class="age-banner-tag">'+banner.tag+'</div>'
     +'<div class="age-banner-title">'+banner.title.replace(/\n/g,'<br>')+'</div>'
     +'<div class="age-banner-sub">'+banner.sub+'</div>'
     +'<div class="size-tag">📐 추천 평수: '+size+'</div>'
     +'</div>';
-
   html+='<div class="age-verdict-wrap"><div class="age-verdict-hd">연령대 맞춤 부동산 유형 순위</div>';
-
   if(ageKey===50){
-    /* 5060: 1순위(준신축) + 공동2순위(구축+신축) 그리드 */
-    var tp1=TYPE_SPEC[order[0]]; /* semi */
-    var tp2a=TYPE_SPEC[order[1]]; /* old */
-    var tp2b=TYPE_SPEC[order[2]]; /* new */
+    var tp1=TYPE_SPEC[order[0]];
+    var tp2a=TYPE_SPEC[order[1]];
+    var tp2b=TYPE_SPEC[order[2]];
     html+=verdictCardHtml('rank1','🥇 1순위',tp1,rankDesc[order[0]]);
     html+='<div class="verdict-tied-label">🥈 공동 2순위</div>'
       +'<div class="verdict-tied-grid">'
@@ -1031,33 +1004,12 @@ function calcRec(){
       html+=verdictCardHtml(RANK_BADGES[ri],RANK_LABELS[ri],tp,desc);
     }
   }
-
   html+='<div class="dev-notice-box"><div class="dev-notice-box-hd">🚧 재건축 / 재개발 추천 시스템</div><div class="dev-notice-box-body"><b>현재 재건축·재개발 정비사업 추천 기능은 개발 중입니다.</b><br>정비구역 지정·조합설립 인가·사업시행인가·관리처분인가 등 정비사업 추진 단계 데이터를 연동하는 알고리즘이 준비 중입니다. 곧 업데이트됩니다!</div></div></div>';
-
   var el=document.getElementById('recResult');
   el.innerHTML=html;el.style.display='block';
   renderFinalSummary(ageVal,famVal);
   el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 </script>
-
-<script>
-/* ── iframe → 부모 Streamlit 에 실제 높이 전달 ── */
-(function(){
-  function sendHeight(){
-    var h = document.documentElement.scrollHeight || document.body.scrollHeight;
-    window.parent.postMessage({type:'streamlit:setFrameHeight', height:h}, '*');
-  }
-  // DOM 변화(탭 전환, 결과 출력 등) 감지
-  if(window.ResizeObserver){
-    new ResizeObserver(sendHeight).observe(document.body);
-  }
-  window.addEventListener('load', sendHeight);
-  // 버튼 클릭 후 동적 콘텐츠 반영을 위한 주기적 체크 (3초간)
-  var t=0;
-  var iv=setInterval(function(){sendHeight();t++;if(t>6)clearInterval(iv);},500);
-})();
-</script>
-
 </body>
 </html>
