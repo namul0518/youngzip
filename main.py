@@ -341,3 +341,4 @@ async def streamlit_proxy(request: Request, path: str):
         headers=resp_headers,
         media_type=rp.headers.get("content-type"),
     )
+  
