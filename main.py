@@ -1,34 +1,34 @@
 """
-main.py  ·  영끌내집 FastAPI 서버
+main.py  ·  영끌내집 FastAPI — 단일 포트, Render 최적화
 ═══════════════════════════════════════════════════════════════
-역할:
-  1. 카카오 / 네이버 OAuth 콜백 처리
-  2. 로그인 성공 시 서명된 JWT 세션 토큰 발급
-  3. Streamlit 앱으로 토큰을 전달 (/app?token=XXX)
-  4. 정적 파일(calculator.html) 서빙
-  5. /me API — Streamlit이 토큰으로 유저 정보 조회
+구조:
+  Render $PORT → FastAPI (이 파일)
+    /login/kakao     → 카카오 인증 URL 리다이렉트
+    /login/naver     → 네이버 인증 URL 리다이렉트
+    /callback/kakao  → 코드 수신 → JWT 발급 → Streamlit으로
+    /callback/naver  → 코드 수신 → JWT 발급 → Streamlit으로
+    /me?token=XXX    → JWT 검증 → 유저 정보 반환
+    /*               → Streamlit(localhost:8501) 프록시
 
-흐름:
-  브라우저
-    → FastAPI /login/kakao  (카카오 인증 URL로 리다이렉트)
-    → 카카오 로그인
-    → FastAPI /callback/kakao  (code 수신 → 토큰 발급 → JWT 생성)
-    → Streamlit /app?token=JWT
-    → Streamlit이 /me?token=JWT 호출 → 유저 정보 반환
+시작 방식 (start.sh):
+  1. Streamlit을 백그라운드에서 localhost:8501로 실행
+  2. FastAPI를 $PORT로 실행 (Render가 외부에 노출하는 포트)
 
-환경변수 (Railway Variables):
-  KAKAO_REST_API_KEY
-  NAVER_CLIENT_ID
-  NAVER_CLIENT_SECRET
-  JWT_SECRET          ← 아무 랜덤 문자열 (32자 이상)
-  BASE_URL            ← https://yourapp.up.railway.app
-  STREAMLIT_URL       ← http://localhost:8501  (같은 앱이면 이걸로)
+환경변수:
+  KAKAO_REST_API_KEY    카카오 REST API 키
+  NAVER_CLIENT_ID       네이버 Client ID
+  NAVER_CLIENT_SECRET   네이버 Client Secret
+  JWT_SECRET            랜덤 문자열 32자 이상
+  RENDER_EXTERNAL_URL   Render가 자동 주입 (https://youngzip.onrender.com)
+                        로컬: BASE_URL=http://localhost:8000 으로 대체
 ═══════════════════════════════════════════════════════════════
 """
 
+import base64
 import hashlib
 import hmac
 import json
+import logging
 import os
 import time
 import urllib.parse
@@ -36,78 +36,69 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-# ════════════════════════════════════════════════════════════
-# 환경변수
-# ════════════════════════════════════════════════════════════
-KAKAO_KEY        = os.environ["KAKAO_REST_API_KEY"]
-NAVER_ID         = os.environ["NAVER_CLIENT_ID"]
-NAVER_SECRET     = os.environ["NAVER_CLIENT_SECRET"]
-JWT_SECRET       = os.environ["JWT_SECRET"]
-BASE_URL         = os.environ["BASE_URL"].rstrip("/")   # ex: https://xxx.up.railway.app
-STREAMLIT_URL    = os.environ.get("STREAMLIT_URL", "http://localhost:8501")
-
-KAKAO_REDIRECT   = f"{BASE_URL}/callback/kakao"
-NAVER_REDIRECT   = f"{BASE_URL}/callback/naver"
-
-# OAuth 엔드포인트
-KAKAO_AUTH_URL   = "https://kauth.kakao.com/oauth/authorize"
-KAKAO_TOKEN_URL  = "https://kauth.kakao.com/oauth/token"
-KAKAO_PROFILE    = "https://kapi.kakao.com/v2/user/me"
-
-NAVER_AUTH_URL   = "https://nid.naver.com/oauth2.0/authorize"
-NAVER_TOKEN_URL  = "https://nid.naver.com/oauth2.0/token"
-NAVER_PROFILE    = "https://openapi.naver.com/v1/nid/me"
-
-STATE_TTL        = 600   # state 유효시간(초)
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("youngzip")
 
 # ════════════════════════════════════════════════════════════
-# JWT (서명된 토큰) — 외부 라이브러리 없이 직접 구현
+# 환경변수 — Render는 RENDER_EXTERNAL_URL을 자동으로 주입함
+# ════════════════════════════════════════════════════════════
+KAKAO_KEY    = os.environ["KAKAO_REST_API_KEY"]
+NAVER_ID     = os.environ["NAVER_CLIENT_ID"]
+NAVER_SECRET = os.environ["NAVER_CLIENT_SECRET"]
+JWT_SECRET   = os.environ["JWT_SECRET"]
+
+# BASE_URL: Render는 RENDER_EXTERNAL_URL 자동 주입, 로컬은 BASE_URL 설정
+BASE_URL = (
+    os.environ.get("RENDER_EXTERNAL_URL")   # Render 배포 시 자동
+    or os.environ.get("BASE_URL", "http://localhost:8000")  # 로컬 개발
+).rstrip("/")
+
+# Streamlit은 항상 내부 8501 포트 (외부에 노출 안 됨)
+STREAMLIT_INTERNAL = "http://localhost:8501"
+
+KAKAO_REDIRECT = f"{BASE_URL}/callback/kakao"
+NAVER_REDIRECT = f"{BASE_URL}/callback/naver"
+
+log.info(f"BASE_URL: {BASE_URL}")
+log.info(f"KAKAO_REDIRECT: {KAKAO_REDIRECT}")
+log.info(f"NAVER_REDIRECT: {NAVER_REDIRECT}")
+
+# ════════════════════════════════════════════════════════════
+# JWT
 # ════════════════════════════════════════════════════════════
 
-def _sign(payload_b64: str) -> str:
-    return hmac.new(
-        JWT_SECRET.encode(),
-        payload_b64.encode(),
-        hashlib.sha256,
-    ).hexdigest()
+def _sign(b64: str) -> str:
+    return hmac.new(JWT_SECRET.encode(), b64.encode(), hashlib.sha256).hexdigest()
 
 
-def issue_token(profile: dict, ttl: int = 3600) -> str:
-    """사용자 프로필을 담은 서명 토큰 발급. ttl초 후 만료."""
-    payload = json.dumps({
-        **profile,
-        "exp": int(time.time()) + ttl,
-    }, ensure_ascii=False)
-    import base64
+def issue_token(profile: dict, ttl: int = 7200) -> str:
+    payload = json.dumps({**profile, "exp": int(time.time()) + ttl}, ensure_ascii=False)
     b64 = base64.urlsafe_b64encode(payload.encode()).decode().rstrip("=")
-    sig = _sign(b64)
-    return f"{b64}.{sig}"
+    return f"{b64}.{_sign(b64)}"
 
 
 def verify_token(token: str) -> dict:
-    """토큰 검증 → 프로필 딕셔너리 반환. 실패 시 예외."""
-    import base64
     try:
         b64, sig = token.rsplit(".", 1)
     except ValueError:
         raise HTTPException(401, "토큰 형식 오류")
     if not hmac.compare_digest(sig, _sign(b64)):
-        raise HTTPException(401, "토큰 서명 불일치")
-    padding = "=" * (4 - len(b64) % 4)
+        raise HTTPException(401, "서명 불일치")
+    pad = "=" * (4 - len(b64) % 4)
     try:
-        payload = json.loads(base64.urlsafe_b64decode(b64 + padding))
+        payload = json.loads(base64.urlsafe_b64decode(b64 + pad))
     except Exception:
-        raise HTTPException(401, "토큰 디코딩 실패")
+        raise HTTPException(401, "디코딩 실패")
     if payload.get("exp", 0) < int(time.time()):
         raise HTTPException(401, "토큰 만료")
     return payload
 
 
 # ════════════════════════════════════════════════════════════
-# HMAC state (CSRF 방지)
+# HMAC state (CSRF 방지) — 세션 불필요
 # ════════════════════════════════════════════════════════════
 
 def make_state(provider: str) -> str:
@@ -122,7 +113,7 @@ def verify_state(state: str, provider: str) -> bool:
         prov, ts, sig = state.split(":", 2)
         if prov != provider:
             return False
-        if int(time.time()) - int(ts) > STATE_TTL:
+        if int(time.time()) - int(ts) > 600:
             return False
         expected = hmac.new(JWT_SECRET.encode(), f"{provider}:{ts}".encode(),
                             hashlib.sha256).hexdigest()[:16]
@@ -132,37 +123,39 @@ def verify_state(state: str, provider: str) -> bool:
 
 
 # ════════════════════════════════════════════════════════════
-# FastAPI 앱
+# FastAPI
 # ════════════════════════════════════════════════════════════
 app = FastAPI(docs_url=None, redoc_url=None)
-
-# 정적 파일 서빙 (calculator.html 등)
-STATIC_DIR = Path(__file__).parent / "static"
-if STATIC_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
-
 
 # ── 헬스체크 ──────────────────────────────────────────────────
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "base_url": BASE_URL}
+
+
+# ── 유저 정보 API ────────────────────────────────────────────
+@app.get("/me")
+async def me(token: str = Query(...)):
+    profile = verify_token(token)
+    profile.pop("exp", None)
+    return profile
 
 
 # ════════════════════════════════════════════════════════════
-# 카카오 로그인
+# 카카오 OAuth
 # ════════════════════════════════════════════════════════════
 
 @app.get("/login/kakao")
 async def login_kakao():
-    """카카오 인증 페이지로 리다이렉트"""
-    state = make_state("kakao")
-    params = {
+    state  = make_state("kakao")
+    params = urllib.parse.urlencode({
         "response_type": "code",
         "client_id":     KAKAO_KEY,
         "redirect_uri":  KAKAO_REDIRECT,
         "state":         state,
-    }
-    url = f"{KAKAO_AUTH_URL}?{urllib.parse.urlencode(params)}"
+    })
+    url = f"https://kauth.kakao.com/oauth/authorize?{params}"
+    log.info(f"카카오 로그인 시작 → {url[:80]}...")
     return RedirectResponse(url)
 
 
@@ -172,29 +165,43 @@ async def callback_kakao(
     state: str = Query(""),
     error: str = Query(""),
 ):
-    """카카오 콜백 — code 수신 → 토큰 발급 → JWT → Streamlit으로"""
-    if error:
-        return RedirectResponse(f"{STREAMLIT_URL}?login_error={error}")
-    if not verify_state(state, "kakao"):
-        return RedirectResponse(f"{STREAMLIT_URL}?login_error=state_mismatch")
+    log.info(f"카카오 콜백 수신 code={code[:10]}... state={state[:20]}...")
 
-    async with httpx.AsyncClient() as client:
+    if error:
+        log.error(f"카카오 에러: {error}")
+        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error={error}")
+
+    if not verify_state(state, "kakao"):
+        log.error("state 검증 실패")
+        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=state_mismatch")
+
+    async with httpx.AsyncClient(timeout=15) as client:
         # 액세스 토큰
-        r = await client.post(KAKAO_TOKEN_URL, data={
-            "grant_type":   "authorization_code",
-            "client_id":    KAKAO_KEY,
-            "redirect_uri": KAKAO_REDIRECT,
-            "code":         code,
-        }, headers={"Content-Type": "application/x-www-form-urlencoded"})
+        r = await client.post(
+            "https://kauth.kakao.com/oauth/token",
+            data={
+                "grant_type":   "authorization_code",
+                "client_id":    KAKAO_KEY,
+                "redirect_uri": KAKAO_REDIRECT,
+                "code":         code,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
         if r.status_code != 200:
-            return RedirectResponse(f"{STREAMLIT_URL}?login_error=token_fail")
+            log.error(f"토큰 실패: {r.text}")
+            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=token_fail")
+
         access_token = r.json().get("access_token")
+        log.info("카카오 액세스 토큰 발급 성공")
 
         # 프로필
-        r2 = await client.get(KAKAO_PROFILE,
-                              headers={"Authorization": f"Bearer {access_token}"})
+        r2 = await client.get(
+            "https://kapi.kakao.com/v2/user/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
         if r2.status_code != 200:
-            return RedirectResponse(f"{STREAMLIT_URL}?login_error=profile_fail")
+            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=profile_fail")
+
         data    = r2.json()
         acct    = data.get("kakao_account", {})
         profile = acct.get("profile", {})
@@ -207,24 +214,25 @@ async def callback_kakao(
         "email":         acct.get("email", ""),
     }
     token = issue_token(user)
-    return RedirectResponse(f"{STREAMLIT_URL}?token={token}")
+    log.info(f"카카오 로그인 성공: {user['nickname']}")
+    return RedirectResponse(f"{STREAMLIT_INTERNAL}?token={token}")
 
 
 # ════════════════════════════════════════════════════════════
-# 네이버 로그인
+# 네이버 OAuth
 # ════════════════════════════════════════════════════════════
 
 @app.get("/login/naver")
 async def login_naver():
-    """네이버 인증 페이지로 리다이렉트"""
-    state = make_state("naver")
-    params = {
+    state  = make_state("naver")
+    params = urllib.parse.urlencode({
         "response_type": "code",
         "client_id":     NAVER_ID,
         "redirect_uri":  NAVER_REDIRECT,
         "state":         state,
-    }
-    url = f"{NAVER_AUTH_URL}?{urllib.parse.urlencode(params)}"
+    })
+    url = f"https://nid.naver.com/oauth2.0/authorize?{params}"
+    log.info(f"네이버 로그인 시작 → {url[:80]}...")
     return RedirectResponse(url)
 
 
@@ -234,31 +242,41 @@ async def callback_naver(
     state: str = Query(""),
     error: str = Query(""),
 ):
-    """네이버 콜백 — code 수신 → 토큰 발급 → JWT → Streamlit으로"""
-    if error:
-        return RedirectResponse(f"{STREAMLIT_URL}?login_error={error}")
-    if not verify_state(state, "naver"):
-        return RedirectResponse(f"{STREAMLIT_URL}?login_error=state_mismatch")
+    log.info(f"네이버 콜백 수신 code={code[:10]}...")
 
-    async with httpx.AsyncClient() as client:
-        r = await client.get(NAVER_TOKEN_URL, params={
-            "grant_type":    "authorization_code",
-            "client_id":     NAVER_ID,
-            "client_secret": NAVER_SECRET,
-            "code":          code,
-            "state":         state,
-        })
+    if error:
+        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error={error}")
+
+    if not verify_state(state, "naver"):
+        log.error("state 검증 실패")
+        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=state_mismatch")
+
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.get(
+            "https://nid.naver.com/oauth2.0/token",
+            params={
+                "grant_type":    "authorization_code",
+                "client_id":     NAVER_ID,
+                "client_secret": NAVER_SECRET,
+                "code":          code,
+                "state":         state,
+            },
+        )
         if r.status_code != 200:
-            return RedirectResponse(f"{STREAMLIT_URL}?login_error=token_fail")
+            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=token_fail")
+
         access_token = r.json().get("access_token")
 
-        r2 = await client.get(NAVER_PROFILE,
-                              headers={"Authorization": f"Bearer {access_token}"})
+        r2 = await client.get(
+            "https://openapi.naver.com/v1/nid/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
         if r2.status_code != 200:
-            return RedirectResponse(f"{STREAMLIT_URL}?login_error=profile_fail")
+            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=profile_fail")
+
         data = r2.json()
         if data.get("resultcode") != "00":
-            return RedirectResponse(f"{STREAMLIT_URL}?login_error=profile_fail")
+            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=profile_fail")
         resp = data.get("response", {})
 
     user = {
@@ -269,16 +287,57 @@ async def callback_naver(
         "email":         resp.get("email", ""),
     }
     token = issue_token(user)
-    return RedirectResponse(f"{STREAMLIT_URL}?token={token}")
+    log.info(f"네이버 로그인 성공: {user['nickname']}")
+    return RedirectResponse(f"{STREAMLIT_INTERNAL}?token={token}")
 
 
 # ════════════════════════════════════════════════════════════
-# /me — Streamlit이 호출하는 유저 정보 API
+# Streamlit 프록시 — 위 라우트에 걸리지 않는 모든 요청을
+# 내부 Streamlit(localhost:8501)으로 투명하게 전달
 # ════════════════════════════════════════════════════════════
 
-@app.get("/me")
-async def me(token: str = Query(...)):
-    """JWT 검증 후 사용자 정보 반환. Streamlit에서 호출."""
-    profile = verify_token(token)
-    profile.pop("exp", None)
-    return profile
+_proxy_client = httpx.AsyncClient(base_url=STREAMLIT_INTERNAL, timeout=30)
+
+
+@app.api_route(
+    "/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+)
+async def streamlit_proxy(request: Request, path: str):
+    """모든 나머지 요청을 Streamlit으로 프록시"""
+    url = httpx.URL(
+        path=f"/{path}",
+        query=request.url.query.encode("utf-8"),
+    )
+    headers = dict(request.headers)
+    headers["host"] = "localhost:8501"
+
+    body = await request.body()
+
+    try:
+        rp = await _proxy_client.request(
+            method=request.method,
+            url=url,
+            headers=headers,
+            content=body,
+        )
+    except httpx.ConnectError:
+        return Response(
+            content="Streamlit 서버 시작 중입니다. 잠시 후 새로고침해 주세요.",
+            status_code=503,
+            media_type="text/plain; charset=utf-8",
+        )
+
+    # WebSocket 업그레이드는 프록시 불가 (Streamlit이 직접 처리)
+    excluded = {"transfer-encoding", "connection", "keep-alive"}
+    resp_headers = {
+        k: v for k, v in rp.headers.items()
+        if k.lower() not in excluded
+    }
+
+    return Response(
+        content=rp.content,
+        status_code=rp.status_code,
+        headers=resp_headers,
+        media_type=rp.headers.get("content-type"),
+    )

@@ -1,15 +1,14 @@
 """
 streamlit_app.py  ·  영끌내집 계산기 UI
 ═══════════════════════════════════════════════════════════════
-역할:
-  - 로그인 버튼 → FastAPI /login/kakao 또는 /login/naver 로 이동
-  - 콜백 후 URL ?token=JWT 수신 → /me API로 유저 정보 확인
-  - 계산기 (index.html → components.html)
-  - 탭 권한 제어 (APP_LOGGED_IN JS 변수 주입)
+이 서버는 외부에 직접 노출되지 않음.
+모든 요청은 FastAPI(main.py)를 통해 프록시됨.
 
-환경변수:
-  FASTAPI_URL  ← FastAPI 서버 주소 ex: https://xxx.up.railway.app
-                 로컬 개발 시: http://localhost:8000
+흐름:
+  브라우저 → FastAPI(외부 $PORT) → 프록시 → Streamlit(내부 8501)
+  로그인 버튼 → FastAPI /login/kakao (현재 탭 이동)
+  콜백 → FastAPI /callback/kakao → JWT → ?token=XXX → 이 앱
+  ?token 수신 → FastAPI /me 호출 → 세션 저장
 ═══════════════════════════════════════════════════════════════
 """
 
@@ -24,11 +23,19 @@ import streamlit.components.v1 as components
 # ════════════════════════════════════════════════════════════
 # 설정
 # ════════════════════════════════════════════════════════════
-FASTAPI_URL  = os.environ.get("FASTAPI_URL", "http://localhost:8000").rstrip("/")
-KAKAO_LOGIN  = f"{FASTAPI_URL}/login/kakao"
-NAVER_LOGIN  = f"{FASTAPI_URL}/login/naver"
+# FastAPI는 항상 같은 프로세스 그룹의 localhost:8000
+FASTAPI_INTERNAL = "http://localhost:8000"
 
-CALCULATOR   = Path(__file__).parent / "static" / "calculator.html"
+# 브라우저가 접근하는 외부 URL (로그인 버튼 href용)
+EXTERNAL_URL = (
+    os.environ.get("RENDER_EXTERNAL_URL")
+    or os.environ.get("BASE_URL", "http://localhost:8000")
+).rstrip("/")
+
+KAKAO_LOGIN_URL = f"{EXTERNAL_URL}/login/kakao"
+NAVER_LOGIN_URL = f"{EXTERNAL_URL}/login/naver"
+
+CALCULATOR = Path(__file__).parent / "static" / "calculator.html"
 
 # ════════════════════════════════════════════════════════════
 # 페이지 설정
@@ -46,45 +53,38 @@ st.markdown("""
   header[data-testid="stHeader"]{display:none}
   iframe{border:none !important; display:block;}
 
-  /* 로그인 버튼 영역 */
-  .login-wrap{
-    display:flex; gap:10px; justify-content:center;
-    padding:6px 0 2px; flex-wrap:wrap;
-  }
+  .login-wrap{display:flex;gap:10px;justify-content:center;padding:6px 0 2px;flex-wrap:wrap;}
+
   a.kakao-btn{
-    display:inline-flex; align-items:center; gap:8px;
-    background:#FEE500; color:#191919 !important;
-    font-weight:800; font-size:14px; text-decoration:none !important;
-    padding:11px 22px; border-radius:8px;
+    display:inline-flex;align-items:center;gap:8px;
+    background:#FEE500;color:#191919 !important;
+    font-weight:800;font-size:14px;text-decoration:none !important;
+    padding:11px 22px;border-radius:8px;
     box-shadow:0 2px 8px rgba(254,229,0,.45);
   }
   a.naver-btn{
-    display:inline-flex; align-items:center; gap:8px;
-    background:#03C75A; color:#fff !important;
-    font-weight:800; font-size:14px; text-decoration:none !important;
-    padding:11px 22px; border-radius:8px;
+    display:inline-flex;align-items:center;gap:8px;
+    background:#03C75A;color:#fff !important;
+    font-weight:800;font-size:14px;text-decoration:none !important;
+    padding:11px 22px;border-radius:8px;
     box-shadow:0 2px 8px rgba(3,199,90,.35);
   }
   .naver-n{
-    width:20px; height:20px; background:#fff; border-radius:3px;
-    display:inline-flex; align-items:center; justify-content:center;
-    font-weight:900; color:#03C75A; font-size:13px; flex-shrink:0;
+    width:20px;height:20px;background:#fff;border-radius:3px;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-weight:900;color:#03C75A;font-size:13px;flex-shrink:0;
   }
-
-  /* 환영 배너 */
   .welcome-bar{
-    display:flex; align-items:center; gap:12px;
-    background:#F0F9FF; border:1.5px solid #BAE6FD;
-    border-radius:12px; padding:10px 14px; margin-bottom:4px;
+    display:flex;align-items:center;gap:12px;
+    background:#F0F9FF;border:1.5px solid #BAE6FD;
+    border-radius:12px;padding:10px 14px;margin-bottom:4px;
   }
-  .welcome-name{font-size:14px; font-weight:800; color:#0C4A6E;}
-  .welcome-sub{font-size:11px; color:#6B7280; margin-top:1px;}
-
-  /* 에러 배너 */
+  .welcome-name{font-size:14px;font-weight:800;color:#0C4A6E;}
+  .welcome-sub{font-size:11px;color:#6B7280;margin-top:1px;}
   .err-bar{
-    background:#FEF2F2; border:1px solid #FECACA;
-    border-radius:10px; padding:10px 14px;
-    font-size:13px; color:#991B1B; margin-bottom:6px;
+    background:#FEF2F2;border:1px solid #FECACA;
+    border-radius:10px;padding:10px 14px;
+    font-size:13px;color:#991B1B;margin-bottom:6px;
   }
 </style>
 """, unsafe_allow_html=True)
@@ -92,14 +92,13 @@ st.markdown("""
 
 # ════════════════════════════════════════════════════════════
 # ?token=JWT 콜백 처리
-# FastAPI가 로그인 성공 후 Streamlit URL에 ?token=XXX 붙여서 리다이렉트
+# FastAPI가 OAuth 성공 후 ?token=XXX 붙여서 리다이렉트
 # ════════════════════════════════════════════════════════════
 
-def handle_token_callback() -> None:
+def handle_callback() -> None:
     token       = st.query_params.get("token")
     login_error = st.query_params.get("login_error")
 
-    # 에러 처리
     if login_error:
         st.query_params.clear()
         err_map = {
@@ -107,7 +106,9 @@ def handle_token_callback() -> None:
             "token_fail":     "인증 서버 오류. 잠시 후 다시 시도해 주세요.",
             "profile_fail":   "프로필 조회 실패. 잠시 후 다시 시도해 주세요.",
         }
-        st.session_state["login_error"] = err_map.get(login_error, f"로그인 오류: {login_error}")
+        st.session_state["login_error"] = err_map.get(
+            login_error, f"로그인 오류: {login_error}"
+        )
         return
 
     if not token:
@@ -116,27 +117,30 @@ def handle_token_callback() -> None:
         st.query_params.clear()
         return
 
-    # FastAPI /me 로 토큰 검증 + 유저 정보 수신
+    # FastAPI /me 로 토큰 검증 (내부 통신, 빠름)
     try:
-        r = httpx.get(f"{FASTAPI_URL}/me", params={"token": token}, timeout=10)
+        r = httpx.get(
+            f"{FASTAPI_INTERNAL}/me",
+            params={"token": token},
+            timeout=10,
+        )
         if r.status_code == 200:
-            profile = r.json()
             st.session_state.update({
                 "logged_in":    True,
-                "user_profile": profile,
+                "user_profile": r.json(),
                 "jwt_token":    token,
             })
             st.session_state.pop("login_error", None)
         else:
-            st.session_state["login_error"] = "토큰 검증 실패. 다시 로그인해 주세요."
+            st.session_state["login_error"] = f"토큰 검증 실패 ({r.status_code}). 다시 로그인해 주세요."
     except Exception as e:
-        st.session_state["login_error"] = f"서버 연결 실패: {e}"
+        st.session_state["login_error"] = f"내부 서버 오류: {e}"
 
     st.query_params.clear()
     st.rerun()
 
 
-handle_token_callback()
+handle_callback()
 
 # ════════════════════════════════════════════════════════════
 # 로그인 상태
@@ -150,22 +154,19 @@ login_error  = st.session_state.get("login_error")
 # 상단 UI
 # ════════════════════════════════════════════════════════════
 
-# 에러 배너
 if login_error:
     st.markdown(f'<div class="err-bar">⚠️ {login_error}</div>',
                 unsafe_allow_html=True)
 
 if is_logged_in:
-    # 환영 배너
-    nickname  = profile.get("nickname") or "사용자"
-    email     = profile.get("email", "")
-    img_url   = profile.get("profile_image", "")
-    provider  = profile.get("provider", "")
-    provider_badge = "🟡 카카오" if provider == "kakao" else "🟢 네이버"
+    nickname = profile.get("nickname") or "사용자"
+    email    = profile.get("email", "")
+    img_url  = profile.get("profile_image", "")
+    provider = profile.get("provider", "")
+    badge    = "🟡 카카오" if provider == "kakao" else "🟢 네이버"
 
     img_tag = (
-        f'<img src="{img_url}" '
-        'style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+        f'<img src="{img_url}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">'
         if img_url else '<span style="font-size:26px">👤</span>'
     )
     st.markdown(f"""
@@ -173,7 +174,7 @@ if is_logged_in:
       {img_tag}
       <div>
         <div class="welcome-name">환영합니다, {nickname}님 👋</div>
-        <div class="welcome-sub">{provider_badge} &nbsp;{email}</div>
+        <div class="welcome-sub">{badge}&nbsp;&nbsp;{email}</div>
       </div>
     </div>""", unsafe_allow_html=True)
 
@@ -182,17 +183,17 @@ if is_logged_in:
         st.rerun()
 
 else:
-    # 로그인 버튼 2개 — FastAPI 서버로 직접 이동 (OAuth 처리는 FastAPI 담당)
-    # target="_self" → 현재 탭 이동, sandbox 없음, 100% 동작 보장
+    # 로그인 버튼 — href가 외부 FastAPI URL을 직접 가리킴
+    # target="_self" → 현재 탭에서 이동 (iframe/sandbox 없음)
     st.markdown(f"""
     <div class="login-wrap">
-      <a href="{KAKAO_LOGIN}" target="_self" class="kakao-btn">
+      <a href="{KAKAO_LOGIN_URL}" target="_self" class="kakao-btn">
         <svg width="20" height="20" viewBox="0 0 24 24">
           <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.632 5.076 4.1 6.48L5.1 21l4.72-2.52A11.6 11.6 0 0012 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z" fill="#191919"/>
         </svg>
         카카오 로그인
       </a>
-      <a href="{NAVER_LOGIN}" target="_self" class="naver-btn">
+      <a href="{NAVER_LOGIN_URL}" target="_self" class="naver-btn">
         <span class="naver-n">N</span>
         네이버 로그인
       </a>
@@ -205,12 +206,10 @@ else:
 
 # ════════════════════════════════════════════════════════════
 # 계산기 렌더링
-# APP_LOGGED_IN / APP_AUTH_URL 주입 → 탭 권한 제어
-# APP_AUTH_URL은 더 이상 iframe 안에서 사용 안 함 (빈값)
 # ════════════════════════════════════════════════════════════
 
 if not CALCULATOR.exists():
-    st.error(f"calculator.html을 찾을 수 없습니다: {CALCULATOR}")
+    st.error(f"calculator.html 없음: {CALCULATOR}")
     st.stop()
 
 html_raw = CALCULATOR.read_text(encoding="utf-8")
@@ -218,7 +217,7 @@ html_raw = CALCULATOR.read_text(encoding="utf-8")
 inject = f"""
 <script>
   var APP_LOGGED_IN = {json.dumps(is_logged_in)};
-  var APP_AUTH_URL  = '';  /* 로그인은 메인 프레임 버튼으로만 처리 */
+  var APP_AUTH_URL  = '';
 </script>
 """
 html_injected = html_raw.replace("<head>", "<head>" + inject, 1)

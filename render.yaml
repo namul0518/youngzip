@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: youngzip
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
+    healthCheckPath: /health
+
+    # Render가 RENDER_EXTERNAL_URL을 자동으로 주입함
+    # 아래 envVars는 수동으로 추가해야 하는 것들만 작성
+    envVars:
+      - key: KAKAO_REST_API_KEY
+        sync: false          # Render 대시보드에서 직접 입력
+      - key: NAVER_CLIENT_ID
+        sync: false
+      - key: NAVER_CLIENT_SECRET
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      # BASE_URL, FASTAPI_URL, STREAMLIT_URL 불필요
+      # RENDER_EXTERNAL_URL은 Render가 자동 주입
