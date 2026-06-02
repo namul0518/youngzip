@@ -231,29 +231,32 @@ def handle_callback():
 st.set_page_config(
     page_title="영끌내집 — 내 집 마련 계산기",
     page_icon="🏠",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="collapsed",
 )
 
 st.markdown("""
 <style>
-  .block-container{padding-top:0.8rem !important; padding-bottom:0 !important}
+  /* 브라우저 전체 스크롤 — iframe 내부 스크롤바 제거 */
+  html, body, [data-testid="stAppViewContainer"] {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .block-container{
+    padding-top:0.8rem !important;
+    padding-bottom:0 !important;
+    max-width:720px !important;
+    margin:0 auto !important;
+  }
   header[data-testid="stHeader"]{display:none}
-  iframe{border:none !important; display:block;}
+  iframe{border:none !important; display:block; overflow:hidden;}
 
   .login-wrap{display:flex;gap:10px;justify-content:center;padding:6px 0 2px;flex-wrap:wrap;}
-  a.kakao-btn{
-    display:inline-flex;align-items:center;gap:8px;
-    background:#FEE500;color:#191919 !important;
-    font-weight:800;font-size:14px;text-decoration:none !important;
-    padding:11px 22px;border-radius:8px;
-    box-shadow:0 2px 8px rgba(254,229,0,.45);
-  }
   a.naver-btn{
     display:inline-flex;align-items:center;gap:8px;
     background:#03C75A;color:#fff !important;
     font-weight:800;font-size:14px;text-decoration:none !important;
-    padding:11px 22px;border-radius:8px;
+    padding:11px 28px;border-radius:8px;
     box-shadow:0 2px 8px rgba(3,199,90,.35);
   }
   .naver-n{
@@ -288,14 +291,11 @@ profile      = st.session_state.get("user_profile")
 is_logged_in = bool(profile)
 login_error  = st.session_state.get("login_error")
 
-# auth_url은 세션에 캐싱 (렌더링마다 새 URL 생성 방지)
-if "kakao_url" not in st.session_state:
-    st.session_state["kakao_url"] = kakao_auth_url()
+# auth_url 세션 캐싱 (렌더링마다 새 URL 생성 방지)
 if "naver_url" not in st.session_state:
     st.session_state["naver_url"] = naver_auth_url()
 
-kakao_url = st.session_state["kakao_url"]
-naver_url  = st.session_state["naver_url"]
+naver_url = st.session_state["naver_url"]
 
 # ════════════════════════════════════════════════════════
 # 상단 UI
@@ -335,14 +335,6 @@ else:
     # → sandbox 없음, iframe 없음, 100% 동작
     st.markdown(f"""
     <div class="login-wrap">
-      <a href="{kakao_url}" target="_self" class="kakao-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.632 5.076 4.1
-          6.48L5.1 21l4.72-2.52A11.6 11.6 0 0012 18.6c5.523 0
-          10-3.477 10-7.8S17.523 3 12 3z" fill="#191919"/>
-        </svg>
-        카카오 로그인
-      </a>
       <a href="{naver_url}" target="_self" class="naver-btn">
         <span class="naver-n">N</span>
         네이버 로그인
@@ -363,9 +355,17 @@ if not CALC.exists():
     st.stop()
 
 html = CALC.read_text(encoding="utf-8")
+# 로그인 게이트 버튼 숨김 CSS 추가 주입
+# calculator.html 내부 naverLogin 버튼을 CSS로 숨김 (로직 수정 없음)
+extra_css = """
+<style>
+  /* 2·3탭 로그인 게이트: 버튼 숨김, 자물쇠+안내문구만 표시 */
+  #loginGate button { display: none !important; }
+</style>
+"""
 html = html.replace(
     "<head>",
-    f"<head><script>var APP_LOGGED_IN={json.dumps(is_logged_in)};var APP_AUTH_URL='';</script>",
+    f"<head>{extra_css}<script>var APP_LOGGED_IN={json.dumps(is_logged_in)};var APP_AUTH_URL='';</script>",
     1,
 )
-components.html(html, height=900, scrolling=True)
+components.html(html, height=2400, scrolling=False)
