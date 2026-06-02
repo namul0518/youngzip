@@ -380,4 +380,4 @@ html = html.replace(
     f"<head>{extra_css}<script>var APP_LOGGED_IN={json.dumps(is_logged_in)};var APP_AUTH_URL='';</script>",
     1,
 )
-components.html(html, height=2400, scrolling=False)
+components.html(html, height=5000, scrolling=False)
