@@ -1,19 +1,24 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google" content="notranslate">
 <title>내가 살 수 있는 아파트 최대 가격은?</title>
 <style>
-/* ── iframe 내부 스크롤 최적화 ── */
+/* ── 레이아웃: 컨텐츠 크기에 따라 높이 자동 조절 ── */
 *{box-sizing:border-box;margin:0;padding:0}
-html{height:100%;overflow-x:hidden}
+html{
+  height:auto;          /* 고정 100% 제거 → 컨텐츠 따라 늘어남 */
+  overflow-x:hidden;
+}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
   background:#F8FAFC;
-  padding-bottom:0px !important;
+  height:auto !important;     /* 고정높이 제거 */
+  min-height:0 !important;    /* min-height 제거 */
   overflow-x:hidden !important;
-  min-height:100%;
+  overflow-y:visible !important;  /* 브라우저 스크롤에 위임 */
 }
 /* ── 레이아웃 ── */
 .wrap{max-width:660px;margin:0 auto;padding:18px 14px 40px}
