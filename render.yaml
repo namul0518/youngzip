@@ -4,18 +4,18 @@ services:
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: bash start.sh
-    healthCheckPath: /health
-
-    # Render가 RENDER_EXTERNAL_URL을 자동으로 주입함
-    # 아래 envVars는 수동으로 추가해야 하는 것들만 작성
+    # Render가 $PORT를 Streamlit에 직접 전달
+    # Streamlit이 외부 포트 점유 → WebSocket 403 없음
+    healthCheckPath: /health  # FastAPI /health는 내부 8000에 있으므로
+    # 실제 헬스체크는 Streamlit이 응답하는 / 로 변경 권장
     envVars:
       - key: KAKAO_REST_API_KEY
-        sync: false          # Render 대시보드에서 직접 입력
+        sync: false
       - key: NAVER_CLIENT_ID
         sync: false
       - key: NAVER_CLIENT_SECRET
         sync: false
       - key: JWT_SECRET
         sync: false
-      # BASE_URL, FASTAPI_URL, STREAMLIT_URL 불필요
+      # BASE_URL, FASTAPI_URL, STREAMLIT_URL 모두 불필요
       # RENDER_EXTERNAL_URL은 Render가 자동 주입

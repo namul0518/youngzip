@@ -2,17 +2,18 @@
 main.py  ·  영끌내집 FastAPI — 단일 포트, Render 최적화
 ═══════════════════════════════════════════════════════════════
 구조:
-  Render $PORT → FastAPI (이 파일)
+  Render $PORT → Streamlit (직접 점유, WebSocket 정상)
+  내부 FastAPI(localhost:8000):
     /login/kakao     → 카카오 인증 URL 리다이렉트
     /login/naver     → 네이버 인증 URL 리다이렉트
-    /callback/kakao  → 코드 수신 → JWT 발급 → Streamlit으로
-    /callback/naver  → 코드 수신 → JWT 발급 → Streamlit으로
+    /callback/kakao  → 코드 수신 → JWT 발급 → BASE_URL?token=
+    /callback/naver  → 코드 수신 → JWT 발급 → BASE_URL?token=
     /me?token=XXX    → JWT 검증 → 유저 정보 반환
-    /*               → Streamlit(localhost:8501) 프록시
+    /health          → 헬스체크
 
 시작 방식 (start.sh):
-  1. Streamlit을 백그라운드에서 localhost:8501로 실행
-  2. FastAPI를 $PORT로 실행 (Render가 외부에 노출하는 포트)
+  1. FastAPI → localhost:8000 (내부 전용)
+  2. Streamlit → 0.0.0.0:$PORT (외부 직접 노출, WebSocket 403 없음)
 
 환경변수:
   KAKAO_REST_API_KEY    카카오 REST API 키
@@ -35,8 +36,8 @@ import urllib.parse
 from pathlib import Path
 
 import httpx
-from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import RedirectResponse, Response, StreamingResponse
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 logging.basicConfig(level=logging.INFO)
@@ -56,8 +57,9 @@ BASE_URL = (
     or os.environ.get("BASE_URL", "http://localhost:8000")  # 로컬 개발
 ).rstrip("/")
 
-# Streamlit은 항상 내부 8501 포트 (외부에 노출 안 됨)
-STREAMLIT_INTERNAL = "http://localhost:8501"
+# OAuth 콜백 후 브라우저를 보낼 목적지
+# Streamlit이 $PORT를 직접 점유하므로 외부 URL = BASE_URL
+STREAMLIT_REDIRECT = BASE_URL   # 브라우저 리다이렉트용
 
 KAKAO_REDIRECT = f"{BASE_URL}/callback/kakao"
 NAVER_REDIRECT = f"{BASE_URL}/callback/naver"
@@ -169,11 +171,11 @@ async def callback_kakao(
 
     if error:
         log.error(f"카카오 에러: {error}")
-        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error={error}")
+        return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error={error}")
 
     if not verify_state(state, "kakao"):
         log.error("state 검증 실패")
-        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=state_mismatch")
+        return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error=state_mismatch")
 
     async with httpx.AsyncClient(timeout=15) as client:
         # 액세스 토큰
@@ -189,7 +191,7 @@ async def callback_kakao(
         )
         if r.status_code != 200:
             log.error(f"토큰 실패: {r.text}")
-            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=token_fail")
+            return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error=token_fail")
 
         access_token = r.json().get("access_token")
         log.info("카카오 액세스 토큰 발급 성공")
@@ -200,7 +202,7 @@ async def callback_kakao(
             headers={"Authorization": f"Bearer {access_token}"},
         )
         if r2.status_code != 200:
-            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=profile_fail")
+            return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error=profile_fail")
 
         data    = r2.json()
         acct    = data.get("kakao_account", {})
@@ -215,7 +217,7 @@ async def callback_kakao(
     }
     token = issue_token(user)
     log.info(f"카카오 로그인 성공: {user['nickname']}")
-    return RedirectResponse(f"{STREAMLIT_INTERNAL}?token={token}")
+    return RedirectResponse(f"{STREAMLIT_REDIRECT}?token={token}")
 
 
 # ════════════════════════════════════════════════════════════
@@ -245,11 +247,11 @@ async def callback_naver(
     log.info(f"네이버 콜백 수신 code={code[:10]}...")
 
     if error:
-        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error={error}")
+        return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error={error}")
 
     if not verify_state(state, "naver"):
         log.error("state 검증 실패")
-        return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=state_mismatch")
+        return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error=state_mismatch")
 
     async with httpx.AsyncClient(timeout=15) as client:
         r = await client.get(
@@ -263,7 +265,7 @@ async def callback_naver(
             },
         )
         if r.status_code != 200:
-            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=token_fail")
+            return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error=token_fail")
 
         access_token = r.json().get("access_token")
 
@@ -272,11 +274,11 @@ async def callback_naver(
             headers={"Authorization": f"Bearer {access_token}"},
         )
         if r2.status_code != 200:
-            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=profile_fail")
+            return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error=profile_fail")
 
         data = r2.json()
         if data.get("resultcode") != "00":
-            return RedirectResponse(f"{STREAMLIT_INTERNAL}?login_error=profile_fail")
+            return RedirectResponse(f"{STREAMLIT_REDIRECT}?login_error=profile_fail")
         resp = data.get("response", {})
 
     user = {
@@ -288,57 +290,7 @@ async def callback_naver(
     }
     token = issue_token(user)
     log.info(f"네이버 로그인 성공: {user['nickname']}")
-    return RedirectResponse(f"{STREAMLIT_INTERNAL}?token={token}")
+    return RedirectResponse(f"{STREAMLIT_REDIRECT}?token={token}")
 
 
-# ════════════════════════════════════════════════════════════
-# Streamlit 프록시 — 위 라우트에 걸리지 않는 모든 요청을
-# 내부 Streamlit(localhost:8501)으로 투명하게 전달
-# ════════════════════════════════════════════════════════════
 
-_proxy_client = httpx.AsyncClient(base_url=STREAMLIT_INTERNAL, timeout=30)
-
-
-@app.api_route(
-    "/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
-)
-async def streamlit_proxy(request: Request, path: str):
-    """모든 나머지 요청을 Streamlit으로 프록시"""
-    url = httpx.URL(
-        path=f"/{path}",
-        query=request.url.query.encode("utf-8"),
-    )
-    headers = dict(request.headers)
-    headers["host"] = "localhost:8501"
-
-    body = await request.body()
-
-    try:
-        rp = await _proxy_client.request(
-            method=request.method,
-            url=url,
-            headers=headers,
-            content=body,
-        )
-    except httpx.ConnectError:
-        return Response(
-            content="Streamlit 서버 시작 중입니다. 잠시 후 새로고침해 주세요.",
-            status_code=503,
-            media_type="text/plain; charset=utf-8",
-        )
-
-    # WebSocket 업그레이드는 프록시 불가 (Streamlit이 직접 처리)
-    excluded = {"transfer-encoding", "connection", "keep-alive"}
-    resp_headers = {
-        k: v for k, v in rp.headers.items()
-        if k.lower() not in excluded
-    }
-
-    return Response(
-        content=rp.content,
-        status_code=rp.status_code,
-        headers=resp_headers,
-        media_type=rp.headers.get("content-type"),
-    )
-  

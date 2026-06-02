@@ -23,10 +23,12 @@ import streamlit.components.v1 as components
 # ════════════════════════════════════════════════════════════
 # 설정
 # ════════════════════════════════════════════════════════════
-# FastAPI는 항상 같은 프로세스 그룹의 localhost:8000
+# FastAPI: 내부 8000 고정 (Streamlit과 같은 서버, 외부 노출 안 됨)
 FASTAPI_INTERNAL = "http://localhost:8000"
 
-# 브라우저가 접근하는 외부 URL (로그인 버튼 href용)
+# 로그인 버튼 href — 브라우저가 접근하는 외부 URL
+# Render: RENDER_EXTERNAL_URL 자동 주입
+# 로컬:   BASE_URL=http://localhost:8000 설정 또는 기본값
 EXTERNAL_URL = (
     os.environ.get("RENDER_EXTERNAL_URL")
     or os.environ.get("BASE_URL", "http://localhost:8000")
