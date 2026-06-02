@@ -1,8 +1,0 @@
-[phases.setup]
-nixPkgs = ["nginx", "gettext"]  # gettext = envsubst 명령어 포함
-
-[phases.install]
-cmds = ["pip install -r requirements.txt"]
-
-[start]
-cmd = "bash start.sh"
