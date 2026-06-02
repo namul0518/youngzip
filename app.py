@@ -237,8 +237,20 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-  /* 브라우저 전체 스크롤 — iframe 내부 스크롤바 제거 */
-  html, body, [data-testid="stAppViewContainer"] {
+  /* 브라우저 전체 스크롤 — 내부 스크롤 컨테이너 완전 해제 */
+  html, body {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  [data-testid="stAppViewContainer"] {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .stApp {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  section[data-testid="stMain"] {
     overflow: visible !important;
     height: auto !important;
   }
