@@ -554,7 +554,11 @@ body{
 
 
 <div id="loginGate" style="display:none"></div>
-<div style="text-align:center;padding:18px 0 6px;font-size:11px;color:#9CA3AF">문의사항 : <a href="mailto:ihappy0304@naver.com" style="color:#6B7280;text-decoration:none">ihappy0304@naver.com</a></div>
+<div style="text-align:center;padding:20px 16px 10px;font-size:11px;color:#9CA3AF;line-height:1.8">
+  프리미엄 멤버십 가입 문의와 앱 사용 후기, 개선 의견은 아래 메일로 보내주세요.<br>
+  보내주시는 모든 의견은 꼼꼼히 확인하여 더 좋은 서비스로 보답하겠습니다.<br>
+  <a href="mailto:ihappy0304@naver.com" style="color:#2563EB;font-weight:700;text-decoration:none">ihappy0304@naver.com</a>
+</div>
 </div><script>
 /* 앱 로그인 상태 (주입없으면 기본값) */
 if(typeof APP_LOGGED_IN==='undefined') var APP_LOGGED_IN=false;
@@ -728,14 +732,23 @@ function cz(iW,aW,own,zone){
     bind=fl===d52?'dsr':(fl===ltv?'ltv':'cap');
     return{loan:fl,price:fp,dsrLoan:d52,ltvLoan:ltv,bind:bind};
   }
-  var ltvR=own==='first'?(zone==='non'?0.8:0.7):(zone==='reg'?0.4:0.7);
+  /* 서민실수요자: 무주택 & 소득 9천 이하 → 규제지역도 LTV 60% */
+  var isRealUser=(own!=='multi'&&own!=='first'&&iW<=90000000);
+  var regLtv=isRealUser?0.6:0.4;
+  /* 단, 실수요자 LTV 60%는 주택가격 8억 이하일 때만 적용 — 계산 후 검증 */
+  var ltvR=own==='first'?(zone==='non'?0.8:0.7):(zone==='reg'?regLtv:0.7);
   ltv=ltvAsset(aW,ltvR);
   if(zone==='reg'){
-    var tent=Math.min(d75,ltv),tp=aW+tent;cap=pcap(tp);
-    if(tent<=cap){bind=tent===d75?'dsr':'ltv';return{loan:tent,price:tp,dsrLoan:d75,ltvLoan:ltv,cap:cap,bind:bind};}
+    var tent=Math.min(d75,ltv),tp=aW+tent;
+    /* 실수요자인데 주택가격 8억 초과 → 일반 LTV 40%로 재계산 */
+    if(isRealUser&&tp>800000000){
+      ltvR=0.4;ltv=ltvAsset(aW,ltvR);tent=Math.min(d75,ltv);tp=aW+tent;
+    }
+    cap=pcap(tp);
+    if(tent<=cap){bind=tent===d75?'dsr':'ltv';return{loan:tent,price:tp,dsrLoan:d75,ltvLoan:ltv,cap:cap,bind:bind,isRealUser:isRealUser};}
     fl=Math.min(d75,ltv,cap);fp=aW+fl;
     bind=(fl===d75&&d75<=ltv&&d75<=cap)?'dsr':(fl===ltv&&ltv<cap?'ltv':'cap');
-    return{loan:fl,price:fp,dsrLoan:d75,ltvLoan:ltv,cap:cap,bind:bind};
+    return{loan:fl,price:fp,dsrLoan:d75,ltvLoan:ltv,cap:cap,bind:bind,isRealUser:isRealUser};
   }
   if(zone==='metro'){
     fl=Math.min(d75,ltv,600000000);fp=aW+fl;
@@ -746,16 +759,17 @@ function cz(iW,aW,own,zone){
   return{loan:fl,price:fp,dsrLoan:d52,ltvLoan:ltv,bind:fl===d52?'dsr':'ltv'};
 }
 
-function ltvLbl(own,zone){
+function ltvLbl(own,zone,isRealUser){
   if(own==='multi')return zone==='non'?'LTV 60%':'LTV 0% (대출금지)';
   if(own==='first')return zone==='non'?'LTV 80%':'LTV 70%';
-  return zone==='reg'?'LTV 40%':'LTV 70%';
+  if(zone==='reg')return (isRealUser?'LTV 60% (서민실수요자)':'LTV 40%');
+  return 'LTV 70%';
 }
 
 function rsn(bind,zone,own,cap){
   if(bind==='block')return{h:'다주택자 대출 제한',b:'10·15 대책으로 수도권 다주택자 주담대가 원천 금지됩니다.'};
   if(bind==='dsr')return{h:'DSR 40% 소득 한도에 걸림',b:'연소득 기준 원리금 상환 가능액이 대출 상한선입니다.'};
-  if(bind==='ltv')return{h:ltvLbl(own,zone)+' 규제에 걸림',b:'LTV 한도가 DSR보다 낮아 대출이 제한됩니다.'};
+  if(bind==='ltv')return{h:ltvLbl(own,zone,r&&r.isRealUser)+' 규제에 걸림',b:'LTV 한도가 DSR보다 낮아 대출이 제한됩니다.'};
   if(zone==='metro')return{h:'주담대 최대 한도 6억에 걸림',b:'수도권 비규제 주담대 절대 상한 6억 원입니다.'};
   var cs=cap>=600000000?'6억':cap>=400000000?'4억':'2억';
   var ps=cap>=600000000?'15억 이하':cap>=400000000?'15억~25억':'25억 초과';
@@ -774,7 +788,7 @@ function mkCard(cls,label,r,aW,zone,own){
     +'<div class="rsep"></div>'
     +'<div class="ir"><span class="irlb">예상 주담대</span><span class="irvl '+lCls+'">'+lVal+'</span></div>'
     +'<div class="ir"><span class="irlb">내 순자산</span><span class="irvl">'+fmtW(aW)+'</span></div>'
-    +'<div class="ir"><span class="irlb">적용 LTV</span><span class="irvl">'+ltvLbl(own,zone)+'</span></div>'
+    +'<div class="ir"><span class="irlb">적용 LTV</span><span class="irvl">'+ltvLbl(own,zone,r.isRealUser)+'</span></div>'
     +'<div class="ir"><span class="irlb">실제 LTV</span><span class="irvl">'+rLtv+'%</span></div>'
     +dRow
     +'<div class="rbox"><div class="rbh">'+rs.h+'</div>'+rs.b+'</div>'
@@ -964,7 +978,7 @@ function computeDetail(pid){
   if(pid==='p3'){
     var termYr3=getBgzTerm(),finalRate3=getBgzFinalRate(termYr3),discInfo3=getBgzDisc();
     var bgz=bgzLoanCalc(aW,iW,G.own),ltvPct=Math.round(bgz.ltvRate*100),dtiPct=Math.round(bgz.dtiRate*100);
-    var specNote=bgz.ltvRate===0.7?'생애최초/실수요자 LTV 70% 완화 적용':'규제지역 기본 LTV 60% / DTI 50% 적용';
+    var specNote=bgz.ltvRate===0.7?'생애최초/실수요자(소득 7천·주택 6억 이하) LTV 70% 완화':'기본 LTV 60% / DTI 50% 적용';
     var tl=getBgzTermLabel();
     var termInfoHtml='<div class="bgz-term-box">⏱ <b>적용 만기: '+tl.yr+'년</b> — '+tl.reason+'</div>';
     var hardMax=G.own==='first'?420000000:((G.baby||G.child2||G.child3)?400000000:360000000);
