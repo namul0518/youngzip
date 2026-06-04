@@ -1,5 +1,5 @@
 """
-app.py  ·  영집 — 영끌로 사는 똘똘한 내 집  ·  Streamlit 단독 배포
+app.py  ·  영집  ·  Streamlit 단독 배포
 ════════════════════════════════════════════════════════
 구조: FastAPI 없음 · Nginx 없음 · 프록시 없음
 
@@ -290,15 +290,25 @@ st.markdown("""
   }
 </style>
 <script>
-/* iframe → 부모창: 콘텐츠 높이만큼 iframe 늘리기 */
-window.addEventListener('message', function(e){
-  if(!e.data || e.data.type !== 'iframeHeight') return;
-  var frames = window.document.querySelectorAll('iframe');
-  frames.forEach(function(f){
-    var h = parseInt(e.data.height, 10);
-    if(h > 400){ f.style.height = (h + 60) + 'px'; }
+(function(){
+  var _lastH=0;
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='iframeHeight')return;
+    var h=parseInt(e.data.height,10);
+    if(h<400||h===_lastH)return;
+    _lastH=h;
+    /* Streamlit iframe은 stIframe 클래스 또는 data-testid로 찾음 */
+    var frames=document.querySelectorAll('iframe');
+    frames.forEach(function(f){
+      /* calculator.html이 들어있는 iframe만 조정 (높이가 현재보다 클 때만) */
+      var fh=parseInt(f.style.height||f.height||0,10);
+      if(h>fh-80){
+        f.style.height=(h+80)+'px';
+        f.style.minHeight=(h+80)+'px';
+      }
+    });
   });
-});
+})();
 </script>
 """, unsafe_allow_html=True)
 
