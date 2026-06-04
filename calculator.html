@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google" content="notranslate">
-<title>내가 살 수 있는 아파트 최대 가격은?</title>
+<title>영집 — 영끌로 사는 똘똘한 내 집</title>
 <style>
 /* ── 레이아웃: 컨텐츠 크기에 따라 높이 자동 조절 ── */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -26,7 +26,7 @@ body{
 .pill{display:inline-block;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:10px}
 .hd h1{font-size:20px;font-weight:800;color:#111827;margin-bottom:4px;line-height:1.35}
 .hd p{font-size:12px;color:#6B7280}
-.tabs{display:flex;background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:3px;margin-bottom:16px;gap:2px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.tabs{display:flex;background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:3px;margin-bottom:16px;gap:2px;position:sticky;top:0;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .tab{flex:1;padding:8px 4px;border:none;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:#64748B;transition:all .15s;white-space:nowrap}
 .tab.on{background:#2563EB;color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.25)}
 .card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
@@ -266,7 +266,7 @@ body{
 
 <div class="hd">
   <div class="pill">10·15 부동산 대책 완전 반영</div>
-  <h1>내가 살 수 있는<br>아파트 최대 가격은?</h1>
+  <h1>영집<br><span style="font-size:14px;font-weight:600;color:#6B7280">영끌로 사는 똘똘한 내 집</span></h1>
   <p>주담대 한도 계산 + 정책대출 자격 진단 + 맞춤 유형 추천</p>
 </div>
 
@@ -1041,8 +1041,7 @@ function calcRec(){
       +'</div>';
     el.style.display='block';
     renderFinalSummary(ageVal,famVal);
-    try{window.parent.postMessage({type:'scrollToTop'},'*');}catch(e){}
-    el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    _notifyHeight();
     return;
   }
   var banner=AGE_BANNER[ageKey];
@@ -1088,9 +1087,22 @@ function calcRec(){
   var el=document.getElementById('recResult');
   el.innerHTML=html;el.style.display='block';
   renderFinalSummary(ageVal,famVal);
-  try{window.parent.postMessage({type:'scrollToTop'},'*');}catch(e){}
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  _notifyHeight();
 }
+/* ══ iframe 높이 자동 보고 ══ */
+function _notifyHeight(){
+  /* 약간 딜레이: 렌더 완료 후 실제 높이 측정 */
+  setTimeout(function(){
+    var h=document.body.scrollHeight;
+    try{window.parent.postMessage({type:'iframeHeight',height:h},'*');}catch(e){}
+  },120);
+}
+/* DOM 변화 감지 → 높이 재보고 */
+(function(){
+  var mo=new MutationObserver(function(){_notifyHeight();});
+  mo.observe(document.body,{childList:true,subtree:true});
+  window.addEventListener('load',_notifyHeight);
+})();
 </script>
 </body>
 </html>

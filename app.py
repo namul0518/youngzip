@@ -1,5 +1,5 @@
 """
-app.py  ·  영끌내집  ·  Streamlit 단독 배포
+app.py  ·  영집 — 영끌로 사는 똘똘한 내 집  ·  Streamlit 단독 배포
 ════════════════════════════════════════════════════════
 구조: FastAPI 없음 · Nginx 없음 · 프록시 없음
 
@@ -229,7 +229,7 @@ def handle_callback():
 # 페이지 설정
 # ════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="영끌내집 — 내 집 마련 계산기",
+    page_title="영집 — 영끌로 사는 똘똘한 내 집",
     page_icon="🏠",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -289,6 +289,17 @@ st.markdown("""
     font-size:13px;color:#991B1B;margin-bottom:6px;
   }
 </style>
+<script>
+/* iframe → 부모창: 콘텐츠 높이만큼 iframe 늘리기 */
+window.addEventListener('message', function(e){
+  if(!e.data || e.data.type !== 'iframeHeight') return;
+  var frames = window.document.querySelectorAll('iframe');
+  frames.forEach(function(f){
+    var h = parseInt(e.data.height, 10);
+    if(h > 400){ f.style.height = (h + 60) + 'px'; }
+  });
+});
+</script>
 """, unsafe_allow_html=True)
 
 # ════════════════════════════════════════════════════════
@@ -380,4 +391,4 @@ html = html.replace(
     f"<head>{extra_css}<script>var APP_LOGGED_IN={json.dumps(is_logged_in)};var APP_AUTH_URL='';</script>",
     1,
 )
-components.html(html, height=2400, scrolling=False)
+components.html(html, height=3200, scrolling=False)
