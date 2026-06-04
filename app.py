@@ -261,7 +261,7 @@ st.markdown("""
     margin:0 auto !important;
   }
   header[data-testid="stHeader"]{display:none}
-  iframe{border:none !important; display:block; overflow:hidden;}
+  iframe{border:none !important; display:block; overflow:hidden; transition:height 0.3s ease;}
 
   .login-wrap{display:flex;gap:10px;justify-content:center;padding:6px 0 2px;flex-wrap:wrap;}
   a.naver-btn{
@@ -289,6 +289,22 @@ st.markdown("""
     font-size:13px;color:#991B1B;margin-bottom:6px;
   }
 </style>
+<script>
+(function(){
+  window.addEventListener('message', function(e){
+    if(!e.data || e.data.type !== 'iframeHeight') return;
+    var h = parseInt(e.data.height, 10);
+    if(!h || h < 400) return;
+    var frames = document.querySelectorAll('iframe');
+    frames.forEach(function(f){
+      var current = parseInt(f.style.height || f.getAttribute('height') || 0, 10);
+      if(h > current) {
+        f.style.height = (h + 80) + 'px';
+      }
+    });
+  });
+})();
+</script>
 """, unsafe_allow_html=True)
 
 # ════════════════════════════════════════════════════════
@@ -380,4 +396,4 @@ html = html.replace(
     f"<head>{extra_css}<script>var APP_LOGGED_IN={json.dumps(is_logged_in)};var APP_AUTH_URL='';</script>",
     1,
 )
-components.html(html, height=2400, scrolling=False)
+components.html(html, height=3600, scrolling=False)
