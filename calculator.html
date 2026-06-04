@@ -9,17 +9,16 @@
 /* ── 레이아웃: 컨텐츠 크기에 따라 높이 자동 조절 ── */
 *{box-sizing:border-box;margin:0;padding:0}
 html{
-  height:auto;
-  min-height:100vh;
+  height:auto;          /* 고정 100% 제거 → 컨텐츠 따라 늘어남 */
   overflow-x:hidden;
 }
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
   background:#F8FAFC;
-  height:auto !important;
-  min-height:100vh;
+  height:auto !important;     /* 고정높이 제거 */
+  min-height:0 !important;    /* min-height 제거 */
   overflow-x:hidden !important;
-  overflow-y:auto !important;
+  overflow-y:visible !important;  /* 브라우저 스크롤에 위임 */
 }
 /* ── 레이아웃 ── */
 .wrap{max-width:660px;margin:0 auto;padding:18px 14px 40px}
@@ -260,6 +259,92 @@ body{
 .age-50 .fsb-sniper-wrap{border-top-color:#BBF7D0}
 .age-70 .fsb-sniper-wrap{border-top-color:#DDD6FE}
 .fsb-sniper-hd{font-size:12px;font-weight:900;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* ── 혼합 대출 시뮬레이터 ── */
+#mixSim{margin-top:16px}
+.mix-hd{font-size:14px;font-weight:900;color:#1E293B;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.mix-sub{font-size:11px;color:#6B7280;margin-bottom:14px;line-height:1.6}
+.mix-zone-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.mix-ztab{flex:1;min-width:80px;padding:7px 4px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:11px;font-weight:700;color:#64748B;cursor:pointer;background:#F8FAFC;text-align:center;transition:all .15s}
+.mix-ztab.on{background:#1E40AF;color:#fff;border-color:#1E40AF;box-shadow:0 2px 6px rgba(30,64,175,.25)}
+.mix-bank-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;background:#F0F9FF;border:1.5px solid #BAE6FD;border-radius:10px;padding:10px 12px}
+.mix-bank-lbl{font-size:11px;font-weight:800;color:#0C4A6E;flex:1}
+.mix-bank-inp{width:80px;border:1.5px solid #BAE6FD;border-radius:7px;padding:6px 8px;font-size:13px;font-weight:700;color:#0C4A6E;background:#fff;text-align:right;outline:none}
+.mix-bank-inp:focus{border-color:#2563EB}
+.mix-bank-su{font-size:11px;color:#64748B;white-space:nowrap}
+/* policy table */
+.mix-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
+.mix-tbl thead th{background:#F1F5F9;color:#374151;font-weight:800;padding:7px 8px;text-align:left;font-size:10px;border-bottom:2px solid #E2E8F0}
+.mix-tbl thead th:not(:first-child){text-align:right}
+.mix-tbl tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s}
+.mix-tbl tbody tr.eligible{cursor:default}
+.mix-tbl tbody tr.ineligible td{opacity:.4}
+.mix-tbl tbody td{padding:7px 8px;vertical-align:middle}
+.mix-tbl tbody td:not(:first-child){text-align:right;font-weight:700}
+.mix-prod-name{font-weight:800;color:#111827;font-size:11px}
+.mix-prod-sub{font-size:9px;color:#9CA3AF;margin-top:1px}
+.mix-rate-chip{display:inline-block;background:#D1FAE5;color:#065F46;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:800}
+.mix-rate-chip.na{background:#F1F5F9;color:#9CA3AF}
+.mix-elig-dot{display:inline-block;width:8px;height:8px;border-radius:50%}
+.mix-elig-dot.ok{background:#10B981}
+.mix-elig-dot.no{background:#D1D5DB}
+.mix-btn{width:100%;padding:12px;background:linear-gradient(90deg,#1E40AF,#2563EB);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:-.2px;transition:opacity .15s;margin-bottom:14px}
+.mix-btn:hover{opacity:.9}
+/* result */
+#mixResult{display:none}
+.mix-res-hero{border-radius:14px;padding:18px;background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 60%,#1E40AF 100%);color:#fff;margin-bottom:12px;position:relative;overflow:hidden}
+.mix-res-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05)}
+.mix-hero-tag{font-size:10px;font-weight:800;background:rgba(255,255,255,.18);border-radius:10px;padding:2px 10px;display:inline-block;margin-bottom:10px;letter-spacing:.5px}
+.mix-hero-label{font-size:11px;opacity:.75;margin-bottom:3px}
+.mix-hero-price{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:14px}
+.mix-hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mix-hero-stat{background:rgba(255,255,255,.12);border-radius:9px;padding:9px 8px;text-align:center}
+.mix-hero-stat-lbl{font-size:9px;opacity:.75;margin-bottom:3px}
+.mix-hero-stat-val{font-size:13px;font-weight:900}
+/* portfolio bar */
+.mix-port-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:10px}
+.mix-port-hd{font-size:11px;font-weight:800;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.mix-port-hd::before{content:"📊"}
+.mix-stack{height:22px;border-radius:8px;overflow:hidden;display:flex;margin-bottom:10px}
+.mix-stack-seg{height:100%;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.mix-seg-legend{display:flex;flex-direction:column;gap:5px}
+.mix-seg-row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.mix-seg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.mix-seg-name{font-size:11px;color:#374151;font-weight:700;flex:1}
+.mix-seg-amt{font-size:11px;font-weight:800;color:#111827;text-align:right}
+.mix-seg-pct{font-size:10px;color:#9CA3AF;text-align:right;width:36px}
+/* logic report */
+.mix-logic-card{background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:10px}
+.mix-logic-hd{font-size:11px;font-weight:800;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.mix-logic-hd::before{content:"🧠"}
+.mix-logic-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.mix-step-num{width:22px;height:22px;border-radius:50%;background:#2563EB;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.mix-step-body{flex:1}
+.mix-step-title{font-size:11px;font-weight:800;color:#1E293B;margin-bottom:2px}
+.mix-step-desc{font-size:10px;color:#64748B;line-height:1.6}
+.mix-step-result{font-size:10px;font-weight:800;color:#059669;background:#ECFDF5;border:1px solid #BBF7D0;border-radius:5px;padding:3px 8px;margin-top:4px;display:inline-block}
+/* monthly payment */
+.mix-pay-card{background:#fff;border:1.5px solid #FDE68A;border-radius:12px;padding:14px;margin-bottom:10px}
+.mix-pay-hd{font-size:11px;font-weight:800;color:#92400E;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.mix-pay-hd::before{content:"💸"}
+.mix-pay-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #FEF3C7}
+.mix-pay-row:last-child{border-bottom:none}
+.mix-pay-lbl{font-size:11px;color:#78350F}
+.mix-pay-val{font-size:11px;font-weight:800;color:#92400E}
+.mix-pay-total{background:#FEF9C3;border-radius:8px;padding:10px;margin-top:8px;text-align:center}
+.mix-pay-total-lbl{font-size:10px;color:#92400E;margin-bottom:2px}
+.mix-pay-total-val{font-size:20px;font-weight:900;color:#78350F}
+/* alert */
+.mix-alert{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px;font-size:11px;color:#991B1B;line-height:1.6;margin-bottom:10px}
+/* param table */
+.mix-param-wrap{margin-bottom:14px}
+.mix-param-toggle{font-size:10px;font-weight:700;color:#6B7280;cursor:pointer;display:flex;align-items:center;gap:4px;margin-bottom:6px;user-select:none}
+.mix-param-toggle:hover{color:#2563EB}
+.mix-param-tbl{display:none;width:100%;border-collapse:collapse;font-size:10px;border-radius:8px;overflow:hidden;border:1px solid #E2E8F0}
+.mix-param-tbl.open{display:table}
+.mix-param-tbl thead th{background:#F1F5F9;padding:6px 8px;font-weight:800;color:#374151;text-align:left}
+.mix-param-tbl tbody td{padding:6px 8px;border-bottom:1px solid #F3F4F6;color:#374151;vertical-align:top;line-height:1.5}
+.mix-param-tbl tbody tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
@@ -413,14 +498,50 @@ body{
   </div>
   <div id="recResult" style="display:none"></div>
   <div id="final-summary-box"></div>
+
+  <!-- ✦ 최적 혼합 대출 시뮬레이터 -->
+  <div id="mixSim" style="display:none">
+    <div class="mix-hd">🔀 최적 혼합 대출 루트 시뮬레이터</div>
+    <div class="mix-sub">정책대출 5종을 우선 배치해 한도를 극대화하고, 부족분을 일반 주담대로 채워 가중평균 금리가 최소화되는 최적 조합을 계산합니다.</div>
+    <div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:6px">매수 희망 지역</div>
+    <div class="mix-zone-tabs">
+      <div class="mix-ztab on" id="mzt-reg"   onclick="setMixZone('reg')">🔴 규제지역</div>
+      <div class="mix-ztab"   id="mzt-metro" onclick="setMixZone('metro')">🟢 수도권 비규제</div>
+      <div class="mix-ztab"   id="mzt-non"   onclick="setMixZone('non')">🟡 비수도권</div>
+    </div>
+    <div class="mix-bank-row">
+      <div class="mix-bank-lbl">🏦 일반 시중은행 주담대 금리 (연, %)</div>
+      <input class="mix-bank-inp" id="mixBankRate" type="number" value="4.2" step="0.1" min="1" max="10">
+      <span class="mix-bank-su">%</span>
+    </div>
+    <div class="mix-param-wrap">
+      <div class="mix-param-toggle" onclick="toggleParamTable()">
+        <span id="paramToggleIcon">▶</span> 정책대출 파라미터 테이블 (관리자 수정용)
+      </div>
+      <table class="mix-param-tbl" id="paramTable">
+        <thead>
+          <tr><th>상품명</th><th>최대한도</th><th>기준금리</th><th>만기(년)</th><th>LTV</th><th>DTI</th><th>주택가격상한</th><th>소득상한(만)</th><th>자산상한(만)</th></tr>
+        </thead>
+        <tbody id="paramTableBody"></tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:6px">자격 요건 필터링 결과</div>
+    <table class="mix-tbl" id="mixProdTable">
+      <thead><tr><th>상품</th><th>기준금리</th><th>최대한도</th><th>자격</th></tr></thead>
+      <tbody id="mixProdBody"></tbody>
+    </table>
+    <button class="mix-btn" onclick="runMixSim()">🚀 최적 혼합 대출 조합 계산하기</button>
+    <div id="mixResult">
+      <div class="mix-res-hero" id="mixHero"></div>
+      <div class="mix-port-card" id="mixPort"></div>
+      <div class="mix-logic-card" id="mixLogic"></div>
+      <div class="mix-pay-card" id="mixPay"></div>
+    </div>
+  </div>
 </div>
 
 
 <div id="loginGate" style="display:none"></div>
-<div style="margin-top:32px;padding:16px 0 24px;border-top:1px solid #E2E8F0;text-align:center;font-size:11px;color:#9CA3AF;line-height:1.8">
-  영끌내집 · 내 집 마련 플랫폼<br>
-  문의: <a href="mailto:ihappy0304@naver.com" style="color:#6B7280;text-decoration:underline">ihappy0304@naver.com</a>
-</div>
 </div><script>
 /* 앱 로그인 상태 (주입없으면 기본값) */
 if(typeof APP_LOGGED_IN==='undefined') var APP_LOGGED_IN=false;
@@ -443,6 +564,7 @@ function goTab(n){
   document.getElementById('tb1').className='tab'+(n===1?' on':'');
   document.getElementById('tb2').className='tab'+(n===2?' on':'');
   if(n===1) runPol();
+  if(n===2) initMixSim();
 }
 /* mode: 'login' | 'needCalc' */
 function _showLoginGate(tabIdx, mode){
@@ -943,6 +1065,375 @@ function runPol(){
   document.getElementById('plCds').innerHTML=html;
   applyBonusBadges();
   document.getElementById('plFb').style.display=allFail?'block':'none';
+}
+
+
+/* ══════════════════════════════════════════════════════
+   최적 혼합 대출 시뮬레이터
+   ══════════════════════════════════════════════════════ */
+
+/* ── 정책대출 파라미터 테이블 (관리자 수정 영역) ── */
+var MIX_PARAMS = [
+  {
+    id: 'p1', name: '신생아 특례 디딤돌',
+    baseRate: 0.021,      /* 최저 기준금리 (소득별 가변 — computeMixRate 참조) */
+    maxCap: 400000000,    /* 최대 한도 4억 */
+    term: 30,             /* 만기(년) */
+    ltv: 0.70,            /* LTV 70% */
+    dti: 0.60,            /* DTI 60% */
+    priceCap: 900000000,  /* 주택가격 상한 9억 */
+    incomeMax: 200000,    /* 소득상한 (맞벌이 2억 = 20000만, 단위: 만원 — check 함수에서 별도 검증) */
+    assetMax:  51100      /* 자산상한 5.11억 (만원) */
+  },
+  {
+    id: 'p2', name: '내집마련 디딤돌',
+    baseRate: 0.0298,
+    maxCap: 320000000,    /* 신혼/2자녀 3.2억 (일반 2억 — eligibleCap에서 결정) */
+    term: 30,
+    ltv: 0.70,
+    dti: 0.60,
+    priceCap: 600000000,
+    incomeMax: 8500,
+    assetMax:  51100
+  },
+  {
+    id: 'p3', name: '보금자리론',
+    baseRate: 0.042,
+    maxCap: 420000000,    /* 생애최초 4.2억 (일반 3.6억 — eligibleCap에서 결정) */
+    term: 30,             /* 만기 30~50년 — getBgzTerm()에서 결정 */
+    ltv: 0.60,
+    dti: 0.50,
+    priceCap: 600000000,
+    incomeMax: null,      /* 소득 제한 없음 */
+    assetMax:  null
+  },
+  {
+    id: 'p4', name: '수익공유형 모기지',
+    baseRate: 0.018,
+    maxCap: 200000000,
+    term: 20,
+    ltv: 0.70,
+    dti: 0.60,
+    priceCap: 600000000,
+    incomeMax: 7000,
+    assetMax:  51100
+  },
+  {
+    id: 'p5', name: '손익공유형 모기지',
+    baseRate: 0.013,      /* 최초 5년 1.3% (이후 2.3% — 가중평균 계산용 혼합) */
+    maxCap: 200000000,
+    term: 20,
+    ltv: 0.40,
+    dti: 0.60,
+    priceCap: 600000000,
+    incomeMax: 7000,
+    assetMax:  51100
+  }
+];
+
+/* ── 전역 지역 상태 ── */
+var G_MIX_ZONE = 'reg';
+
+function setMixZone(zone) {
+  G_MIX_ZONE = zone;
+  ['reg','metro','non'].forEach(function(z) {
+    document.getElementById('mzt-'+z).className = 'mix-ztab' + (z===zone?' on':'');
+  });
+  renderMixProdTable();
+}
+
+/* ── 파라미터 테이블 토글 ── */
+function toggleParamTable() {
+  var tbl = document.getElementById('paramTable');
+  var icon = document.getElementById('paramToggleIcon');
+  var open = tbl.classList.toggle('open');
+  icon.textContent = open ? '▼' : '▶';
+}
+
+/* ── 파라미터 테이블 렌더링 (관리자 확인용) ── */
+function renderParamTable() {
+  var tbody = document.getElementById('paramTableBody');
+  var rows = '';
+  MIX_PARAMS.forEach(function(p) {
+    rows += '<tr>'
+      + '<td><b>' + p.name + '</b></td>'
+      + '<td>' + fmtW(p.maxCap) + '</td>'
+      + '<td>' + (p.baseRate*100).toFixed(1) + '%' + (p.id==='p5'?' (5yr)':'') + '</td>'
+      + '<td>' + p.term + '</td>'
+      + '<td>' + Math.round(p.ltv*100) + '%</td>'
+      + '<td>' + Math.round(p.dti*100) + '%</td>'
+      + '<td>' + fmtW(p.priceCap) + '</td>'
+      + '<td>' + (p.incomeMax ? p.incomeMax.toLocaleString() : '제한없음') + '</td>'
+      + '<td>' + (p.assetMax ? p.assetMax.toLocaleString() : '제한없음') + '</td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = rows;
+}
+
+/* ── 상품별 자격 검증 (checkFail 재사용) ── */
+function mixEligible(pid) {
+  return !checkFail(pid);
+}
+
+/* ── 상품별 실제 적용 금리 계산 ── */
+function computeMixRate(pid) {
+  var i = G.income;
+  if (pid==='p1') return i<=2000?0.021:i<=5000?0.0285:i<=8500?0.0365:0.0425;
+  if (pid==='p2') return i<=2000?0.0298:i<=4000?0.033:i<=6000?0.0365:0.0398;
+  if (pid==='p3') return 0.042;
+  if (pid==='p4') return 0.018;
+  if (pid==='p5') return 0.018; /* 가중평균: 5yr@1.3 + 15yr@2.3 ≈ 1.8% */
+  return 0.042;
+}
+
+/* ── 상품별 실제 한도 역산 ── */
+function computeMixLoanCap(pid, aW, iW, zone) {
+  var p = MIX_PARAMS.filter(function(x){return x.id===pid;})[0];
+  if (!p) return 0;
+  var ltvRate = p.ltv;
+  var termYr  = p.term;
+  if (pid==='p3') { ltvRate = (G.own==='first')?0.7:0.6; termYr = getBgzTerm(); }
+  if (pid==='p2') { ltvRate = (G.own==='first')?0.8:0.7; }
+  var dtiRate = p.dti;
+  var rate    = computeMixRate(pid);
+  /* 상품별 실제 최대 한도 */
+  var eligibleCap = p.maxCap;
+  if (pid==='p2') {
+    var nb2 = G.newlywed||G.baby;
+    eligibleCap = nb2?320000000:(G.own==='first'?240000000:200000000);
+  }
+  if (pid==='p3') {
+    eligibleCap = G.own==='first'?420000000:(G.baby?400000000:360000000);
+  }
+  var ltvL  = aW * ltvRate / (1 - ltvRate);
+  var dtiL  = dtiLoan(iW, rate, termYr, dtiRate);
+  var raw   = Math.min(eligibleCap, ltvL, dtiL);
+  /* 주택가격 상한 반영 */
+  var priceIfUsed = aW + raw;
+  if (priceIfUsed > p.priceCap) raw = Math.max(0, p.priceCap - aW);
+  return Math.max(0, raw);
+}
+
+/* ── 정책대출 할당 우선순위 (한도 극대화 → 금리 최적화) ── */
+var MIX_PRIORITY = ['p1','p2','p3','p4','p5'];
+
+/* ── 월 원리금 계산 ── */
+function monthlyPayment(principal, annualRate, termYears) {
+  if (principal <= 0) return 0;
+  var r = annualRate / 12, n = termYears * 12;
+  if (r === 0) return principal / n;
+  return principal * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+}
+
+/* ── 상품 목록 테이블 렌더링 ── */
+function renderMixProdTable() {
+  if (!G.income || !G.own) return;
+  var aW = G.asset*10000, iW = G.income*10000;
+  var tbody = document.getElementById('mixProdBody');
+  var rows = '';
+  MIX_PARAMS.forEach(function(p) {
+    var ok = mixEligible(p.id);
+    var rate = computeMixRate(p.id);
+    var cap  = ok ? computeMixLoanCap(p.id, aW, iW, G_MIX_ZONE) : 0;
+    var failReason = checkFail(p.id);
+    rows += '<tr class="' + (ok?'eligible':'ineligible') + '">'
+      + '<td><div class="mix-prod-name">' + p.name + '</div>'
+      + (ok?'':'<div class="mix-prod-sub">탈락: ' + failReason + '</div>') + '</td>'
+      + '<td><span class="mix-rate-chip'+(ok?'':' na')+'">' + (rate*100).toFixed(2) + '%</span></td>'
+      + '<td>' + (ok ? fmtW(cap) : '—') + '</td>'
+      + '<td><span class="mix-elig-dot '+(ok?'ok':'no')+'"></span></td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = rows;
+}
+
+/* ── 핵심 알고리즘: 최적 혼합 대출 계산 ── */
+function runMixSim() {
+  if (!G.income || !G.own) {
+    alert('주담대 한도 탭에서 연소득·순자산·주택보유수를 먼저 입력하고 계산해 주세요.');
+    return;
+  }
+  var aW = G.asset * 10000;
+  var iW = G.income * 10000;
+  var zone = G_MIX_ZONE;
+  var bankRateRaw = parseFloat(document.getElementById('mixBankRate').value);
+  if (isNaN(bankRateRaw) || bankRateRaw <= 0) { alert('일반 주담대 금리를 올바르게 입력해 주세요.'); return; }
+  var bankRate = bankRateRaw / 100;
+
+  /* STEP 1: 지역별 일반 주담대 총 한도 (최대 매수 가능 자산 기준) */
+  var bankResult = cz(iW, aW, G.own, zone);
+  var maxBankLoan = bankResult.loan; /* DSR/LTV/CAP 필터링된 일반 주담대 최대 */
+
+  /* STEP 2: 정책대출 우선순위별 할당 */
+  var allocated = [];      /* {pid, name, loan, rate, term} */
+  var totalPolicyLoan = 0;
+  var logSteps = [];
+
+  MIX_PRIORITY.forEach(function(pid) {
+    if (!mixEligible(pid)) {
+      logSteps.push({pid:pid, skip:true, reason: checkFail(pid)});
+      return;
+    }
+    var cap = computeMixLoanCap(pid, aW, iW, zone);
+    if (cap <= 0) { logSteps.push({pid:pid, skip:true, reason:'한도 0원 (LTV/DTI/자산 부족)'}); return; }
+    /* 이미 할당된 정책대출과 합산 → 일반 주담대 최대 한도를 넘지 않도록 */
+    var remaining = Math.max(0, maxBankLoan - totalPolicyLoan);
+    var alloc = Math.min(cap, remaining);
+    if (alloc <= 0) { logSteps.push({pid:pid, skip:true, reason:'기 할당 정책대출로 한도 소진'}); return; }
+    var rate = computeMixRate(pid);
+    var p = MIX_PARAMS.filter(function(x){return x.id===pid;})[0];
+    var term = (pid==='p3') ? getBgzTerm() : p.term;
+    allocated.push({pid:pid, name:p.name, loan:alloc, rate:rate, term:term});
+    totalPolicyLoan += alloc;
+    logSteps.push({pid:pid, skip:false, alloc:alloc, cap:cap, rate:rate, term:term});
+  });
+
+  /* STEP 3: 잔여분 일반 주담대로 충당 */
+  var remainingBank = Math.max(0, maxBankLoan - totalPolicyLoan);
+  var bankTerm = 30;
+  if (remainingBank > 0) {
+    allocated.push({pid:'bank', name:'시중은행 일반 주담대', loan:remainingBank, rate:bankRate, term:bankTerm});
+  }
+
+  var totalLoan = totalPolicyLoan + remainingBank;
+  var maxBuyPrice = aW + totalLoan;
+
+  /* STEP 4: 가중평균 금리 계산 */
+  var weightedRate = 0;
+  if (totalLoan > 0) {
+    allocated.forEach(function(seg) {
+      weightedRate += seg.rate * (seg.loan / totalLoan);
+    });
+  }
+
+  /* STEP 5: 총 월 원리금 */
+  var totalMonthly = 0;
+  allocated.forEach(function(seg) {
+    totalMonthly += monthlyPayment(seg.loan, seg.rate, seg.term);
+  });
+
+  /* ── 결과 렌더링 ── */
+  renderMixResult(aW, totalLoan, maxBuyPrice, weightedRate, totalMonthly, allocated, logSteps, bankRate, zone, bankResult);
+}
+
+var SEG_COLORS = {
+  p1:'#10B981', p2:'#2563EB', p3:'#7C3AED', p4:'#F59E0B', p5:'#EF4444', bank:'#64748B'
+};
+
+function renderMixResult(aW, totalLoan, maxBuyPrice, wRate, totalMonthly, allocated, logSteps, bankRate, zone, bankResult) {
+  document.getElementById('mixResult').style.display = 'block';
+  var zoneLabel = zone==='reg'?'규제지역':zone==='metro'?'수도권 비규제':'비수도권';
+
+  /* Hero */
+  document.getElementById('mixHero').innerHTML =
+    '<div class="mix-hero-tag">🔀 최적 혼합 대출 결과 — ' + zoneLabel + '</div>'
+    + '<div class="mix-hero-label">최대 매수 가능 아파트 가격</div>'
+    + '<div class="mix-hero-price">' + fmtW(maxBuyPrice) + '</div>'
+    + '<div class="mix-hero-stats">'
+    + '<div class="mix-hero-stat"><div class="mix-hero-stat-lbl">총 대출액</div><div class="mix-hero-stat-val">' + fmtW(totalLoan) + '</div></div>'
+    + '<div class="mix-hero-stat"><div class="mix-hero-stat-lbl">가중평균 금리</div><div class="mix-hero-stat-val">' + (wRate*100).toFixed(2) + '%</div></div>'
+    + '<div class="mix-hero-stat"><div class="mix-hero-stat-lbl">월 원리금 합계</div><div class="mix-hero-stat-val">' + Math.round(totalMonthly/10000).toLocaleString() + '만 원</div></div>'
+    + '</div>';
+
+  /* Portfolio 스택 바 */
+  var stackHtml = '<div class="mix-stack">';
+  var legendHtml = '<div class="mix-seg-legend">';
+  allocated.forEach(function(seg) {
+    var pct = totalLoan > 0 ? (seg.loan/totalLoan*100).toFixed(1) : '0';
+    var col = SEG_COLORS[seg.pid] || '#94A3B8';
+    stackHtml += '<div class="mix-stack-seg" style="width:'+pct+'%;background:'+col+'"></div>';
+    legendHtml += '<div class="mix-seg-row">'
+      + '<div style="display:flex;align-items:center;gap:6px;flex:1">'
+      + '<div class="mix-seg-dot" style="background:'+col+'"></div>'
+      + '<span class="mix-seg-name">' + seg.name + '</span>'
+      + '</div>'
+      + '<span class="mix-seg-pct">' + pct + '%</span>'
+      + '<span class="mix-seg-amt">' + fmtW(seg.loan) + '</span>'
+      + '</div>';
+  });
+  stackHtml += '</div>';
+  legendHtml += '</div>';
+  document.getElementById('mixPort').innerHTML =
+    '<div class="mix-port-hd">최적 대출 포트폴리오 구성</div>'
+    + stackHtml + legendHtml;
+
+  /* 논리 리포트 */
+  var stepsHtml = '';
+  var stepNum = 0;
+  logSteps.forEach(function(s) {
+    if (s.skip) {
+      stepsHtml += '<div class="mix-logic-step" style="opacity:.5">'
+        + '<div class="mix-step-num" style="background:#CBD5E1">' + '✕' + '</div>'
+        + '<div class="mix-step-body">'
+        + '<div class="mix-step-title">' + (MIX_PARAMS.filter(function(x){return x.id===s.pid;})[0]||{}).name + '</div>'
+        + '<div class="mix-step-desc">제외 사유: ' + s.reason + '</div>'
+        + '</div></div>';
+    } else {
+      stepNum++;
+      var ratePct = (s.rate*100).toFixed(2);
+      stepsHtml += '<div class="mix-logic-step">'
+        + '<div class="mix-step-num">' + stepNum + '</div>'
+        + '<div class="mix-step-body">'
+        + '<div class="mix-step-title">' + (MIX_PARAMS.filter(function(x){return x.id===s.pid;})[0]||{}).name + ' 배정</div>'
+        + '<div class="mix-step-desc">자격 통과 · 적용 금리 ' + ratePct + '% · 상품 한도 ' + fmtW(s.cap) + '<br>'
+        + '한도 극대화 원칙에 따라 가능 한도를 전액 선배정합니다.</div>'
+        + '<div class="mix-step-result">배정액: ' + fmtW(s.alloc) + '</div>'
+        + '</div></div>';
+    }
+  });
+  /* 일반 주담대 스텝 */
+  var bankSeg = allocated.filter(function(x){return x.pid==='bank';})[0];
+  if (bankSeg && bankSeg.loan > 0) {
+    stepNum++;
+    stepsHtml += '<div class="mix-logic-step">'
+      + '<div class="mix-step-num">' + stepNum + '</div>'
+      + '<div class="mix-step-body">'
+      + '<div class="mix-step-title">잔여분 — 시중은행 일반 주담대</div>'
+      + '<div class="mix-step-desc">정책대출 배정 후 잔여 한도 ' + fmtW(bankSeg.loan) + '을 일반 주담대로 충당합니다. (금리 ' + (bankRate*100).toFixed(2) + '%)</div>'
+      + '<div class="mix-step-result">배정액: ' + fmtW(bankSeg.loan) + '</div>'
+      + '</div></div>';
+  }
+  document.getElementById('mixLogic').innerHTML =
+    '<div class="mix-logic-hd">왜 이 조합이 최적인가? — 단계별 논리 리포트</div>'
+    + stepsHtml
+    + '<div style="margin-top:10px;padding:9px 11px;background:#EFF6FF;border-radius:8px;font-size:10px;color:#1E40AF;line-height:1.7">'
+    + '📌 <b>한도 극대화 원칙:</b> DSR/LTV 내 최대 차입 가능 금액 ' + fmtW(bankResult.loan) + ' 중 정책대출이 '
+    + fmtW(totalPolicyLoaned(allocated)) + '를 선점. 나머지 ' + fmtW(Math.max(0,bankResult.loan-totalPolicyLoaned(allocated))) + '을 일반 주담대가 보충.<br>'
+    + '📌 <b>금리 최적화:</b> 저금리 정책대출을 최대한 채우고, 잔여분에만 은행 금리(' + (bankRate*100).toFixed(2) + '%)를 적용해 전체 가중평균 ' + (wRate*100).toFixed(2) + '%를 달성.'
+    + '</div>';
+
+  /* 월 원리금 상세 */
+  var payRows = '';
+  allocated.forEach(function(seg) {
+    var mp = monthlyPayment(seg.loan, seg.rate, seg.term);
+    payRows += '<div class="mix-pay-row">'
+      + '<span class="mix-pay-lbl">' + seg.name + ' (' + (seg.rate*100).toFixed(2) + '% / ' + seg.term + '년)</span>'
+      + '<span class="mix-pay-val">' + Math.round(mp/10000).toLocaleString() + '만 원/월</span>'
+      + '</div>';
+  });
+  document.getElementById('mixPay').innerHTML =
+    '<div class="mix-pay-hd">상품별 월 원리금 상세 (원리금균등상환 기준)</div>'
+    + payRows
+    + '<div class="mix-pay-total">'
+    + '<div class="mix-pay-total-lbl">총 월 원리금 합계</div>'
+    + '<div class="mix-pay-total-val">' + Math.round(totalMonthly/10000).toLocaleString() + '만 원 / 월</div>'
+    + '</div>';
+
+  document.getElementById('mixResult').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function totalPolicyLoaned(allocated) {
+  var t = 0;
+  allocated.forEach(function(seg){ if(seg.pid!=='bank') t+=seg.loan; });
+  return t;
+}
+
+/* ── 탭2 진입 시 시뮬레이터 초기화 ── */
+function initMixSim() {
+  if (!G.income || !G.own) return;
+  renderParamTable();
+  renderMixProdTable();
+  document.getElementById('mixSim').style.display = 'block';
 }
 
 /* ══ 탭2: 맞춤 부동산 유형 ══ */
