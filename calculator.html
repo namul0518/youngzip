@@ -114,7 +114,7 @@ body{
 .plc-rate.ok{color:#065F46;background:#D1FAE5}
 .plc-rate.no{color:#64748B;background:#F1F5F9}
 .plc-detail{max-height:0;overflow:hidden;transition:max-height 0.42s cubic-bezier(.4,0,.2,1),opacity 0.35s ease;opacity:0}
-.plc.open .plc-detail{max-height:2400px;opacity:1}
+.plc.open .plc-detail{max-height:3600px;opacity:1}
 .detail-sep{height:1px;background:#BBF7D0;margin:10px 0}
 .det-lbl{font-size:10px;font-weight:800;color:#065F46;margin-bottom:7px;letter-spacing:.3px}
 .det-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
@@ -855,7 +855,7 @@ function getTermText(pid){
 }
 
 var PRODS=[
-  {id:'p1',name:'신생아 특례 디딤돌대출',rate:'연 1.8%~4.50%',limit:'최대 4억 원 / 9억 이하 주택 / 전용 85㎡ 이하',incomeNote:'외벌이 1.3억 이하 / 맞벌이 2억 이하',
+  {id:'p1',name:'신생아 특례 디딤돌대출',rate:'연 1.8%~4.50%',limit:'최대 4억 원 / 9억 이하 주택 / 전용 85㎡ 이하',incomeNote:'소득 1.3억 이하 (맞벌이 2억, 단 각 1인 1.3억 이하)',
     check:function(){
       if(!G.baby)return '출산(예정) 자녀 없음';
       if(G.own==='multi')return '2주택 이상 해당 없음';
@@ -935,7 +935,7 @@ function computeDetail(pid){
     var br=bindReason(rawLoan,ltvL,dtiL,400000000,'상품 한도 (4억)');
     if(price<aW+rawLoan) br={label:'주택가격 상한',desc:'매수 가능 가격이 상품의 주택가격 상한선(9억)에 막혀 있습니다.'};
     var monthly1=calcMonthly(actualLoan,r1,30);
-    return{term:getTermText('p1'),rate:getP1RateLbl(i),monthly:monthly1,maxPrice:price,loanUsed:actualLoan,ltvLoan:ltvL,dtiLoan:dtiL,capLoan:400000000,capLabel:'상품 한도 (4억)',bindReason:br,loanStr:'4억 원',capNote:'주택가격 상한선 9억 원 / DTI 60% / LTV 70%',condTags:['순자산 5.11억 이하','외벌이 1.3억 이하 / 맞벌이 2억 이하','무주택자 전용','※ 맞벌이: 부부 각 1인 소득 1.3억 이하']};
+    return{term:getTermText('p1'),rate:getP1RateLbl(i),monthly:monthly1,maxPrice:price,loanUsed:actualLoan,ltvLoan:ltvL,dtiLoan:dtiL,capLoan:400000000,capLabel:'상품 한도 (4억)',bindReason:br,loanStr:'4억 원',capNote:'주택가격 상한선 9억 원 / DTI 60% / LTV 70%',condTags:['순자산 5.11억 이하','소득 1.3억 이하 (맞벌이 2억, 단 각 1인 1.3억 이하)','무주택자 전용']};
   }
   if(pid==='p2'){
     var i2=G.income,r2=getP2Rate(i2);
@@ -1013,9 +1013,17 @@ function bestForZone(zone){
     var bgz=bgzLoanCalc(aW,iW,own);
     candidates.push({price:bgz.price,prodName:'보금자리론',loanUsed:bgz.loan});
   }
-  var best=candidates[0];
-  for(var ci=1;ci<candidates.length;ci++){if(candidates[ci].price>best.price)best=candidates[ci];}
-  return best;
+  // 최대 매수가 기준 정렬
+  // 동일 가격이면: 정책대출 > 시중은행, 정책대출 간엔 금리 낮은 것 우선
+  candidates.sort(function(a,b){
+    if(b.price!==a.price) return b.price-a.price;
+    var aIsBank=(a.prodName==='시중은행 주담대'||a.prodName==='대출 불가 (다주택 제한)');
+    var bIsBank=(b.prodName==='시중은행 주담대'||b.prodName==='대출 불가 (다주택 제한)');
+    if(aIsBank&&!bIsBank) return 1;
+    if(!aIsBank&&bIsBank) return -1;
+    return a.monthly-b.monthly;
+  });
+  return candidates[0];
 }
 
 /* ══ 금리 테이블 ══ */
@@ -1139,7 +1147,7 @@ function runPol(){
         +vrowHtml
         +'</div>';
     }
-    html+='<div class="plc '+(ok?'ok':'no')+'" id="card-'+p.id+'" onclick="if('+ok+')this.classList.toggle(\'open\')">'
+    html+='<div class="plc '+(ok?'ok':'no')+'" id="card-'+p.id+'" onclick="if('+ok+'){this.classList.toggle(\'open\');setTimeout(_notifyHeight,500);}">'
       +bonusHtml
       +'<div class="plc-top"><div><div class="plc-name">'+p.name+'</div><div class="plc-sub2">'+p.limit+'</div>'+(p.incomeNote?'<div style="font-size:9px;color:#9CA3AF;margin-top:2px">소득: '+p.incomeNote+'</div>':'')+'</div>'+stampHtml+'</div>'
       +rateHtml+failHtml+detailHtml+'</div>';
@@ -1157,32 +1165,32 @@ var TYPE_SPEC={
   'old' :{loc:80,prod:10, fut:85, label:'구축 (20~30년차)',   badge:'🟡 구축',   minYr:1995,maxYr:2004}
 };
 var AGE_BANNER={
-  20:{cls:'age-20',tag:'🔥 20대 자산 전략',title:'당신은 사서 고생할 나이!',sub:'신축 깔고 앉아서 감가 먹을 나이가 아닙니다. 지금은 무조건 입지빨로 자산 체급부터 키울 때. 젊음이 레버리지입니다. 불편해도 버티면 자산이 됩니다.'},
-  30:{cls:'age-30',tag:'⚡ 3040대 자산 전략',title:'인생 정점, 소득 황금기!\n고생할 수 있는 마지노선.',sub:'이 나이 지나면 무리할 명분도 없고, 체력도 없습니다. 지금 이 순간이 영끌해도 버틸 수 있는 마지막 타이밍. 신축 라이프는 10년 뒤에 즐기고, 지금은 입지 좋은 구축으로 자산 체급부터 올려야 합니다.'},
-  50:{cls:'age-50',tag:'☕ 5060대 자산 전략',title:'그동안 많이 고생하셨습니다.\n이제는 안정성의 시대.',sub:'전 재산 몰빵에 성공해도 스트레스로 못 즐깁니다. 실패하면 노후가 없습니다. 이 시기엔 자산 방어가 먼저. 교육·직주근접·편의시설 다 챙기면서 거주도 쾌적한 준신축이 정답입니다.'},
-  70:{cls:'age-70',tag:'👴 70대+ 자산 전략',title:'언제 삶이 끝날지도 모르는데,\n수익을 미래로 미룹니까?!',sub:'구축 사서 재건축 기다리다가 기다리는 게 일이 됩니다. 70대에 20년 기다릴 시간 없습니다. 지금 당장 엘리베이터 있고, 커뮤니티 있고, 관리 잘 되는 신축에서 프리미엄 실거주를 누리는 게 최적 전략입니다.'}
+  20:{cls:'age-20',tag:'🔥 20대 자산 전략',title:'당신은 사서 고생할 나이!',sub:'20대가 신축 프리미엄에 돈을 쓸 이유는 많지 않습니다. 지금은 편안함보다 자산 규모를 키우는 것이 우선입니다. 좋은 입지의 구축을 사서 시간을 내 편으로 만드는 것이 훨씬 중요합니다. 20대에게는 10년, 20년을 기다릴 시간이 있습니다. 재건축도 기다릴 수 있고, 도시 발전도 기다릴 수 있습니다. 조금 불편한 집에서 살더라도 좋은 입지를 선택한 사람과 좋은 집에서 편하게 산 사람의 격차는 시간이 지날수록 벌어집니다. 20대에게 중요한 것은 오늘의 삶의 질보다 미래의 자산 규모입니다.'},
+  30:{cls:'age-30',tag:'⚡ 3040대 자산 전략',title:'인생 정점, 소득 황금기!\n고생할 수 있는 마지노선.',sub:'30~40대는 인생에서 가장 공격적으로 움직일 수 있는 마지막 구간입니다. 이 시기를 지나면 대출도 부담스럽고, 실패를 만회할 시간도 부족해집니다. 지금은 신축의 편안함을 살 때가 아니라 입지의 희소성을 살 때입니다. 신축의 만족감은 오늘 끝나지만, 입지의 가치는 시간이 갈수록 쌓입니다. 상급지 진입의 기회는 지금 놓치면 다시 오지 않을 수 있습니다.'},
+  50:{cls:'age-50',tag:'☕ 5060대 자산 전략',title:'그동안 많이 고생하셨습니다.\n이제는 안정성의 시대.',sub:'50~60대에 전 재산 몰빵은 투자라기보다 도박에 가깝습니다. 성공해도 남는 것은 스트레스고, 실패하면 노후가 흔들립니다. 이제는 자산을 키우는 것보다 지키는 것이 더 중요한 나이입니다. 입지와 생활 편의성, 쾌적한 주거환경을 모두 갖춘 준신축이 훨씬 합리적입니다. 노후는 수익률로 사는 것이 아니라 안정감으로 사는 것입니다.'},
+  70:{cls:'age-70',tag:'👴 70대+ 자산 전략',title:'언제 삶이 끝날지도 모르는데,\n수익을 미래로 미룹니까?!',sub:'구축 사서 재건축 기다리라는 말, 70대에게는 무책임한 조언일 수 있습니다. 10~20년 뒤 신축 입주를 바라본다고요? 그때 무슨 일이 있을지 아무도 장담할 수 없습니다. 남은 시간을 불편한 구축에서 기다리며 보낼 여유가 없습니다. 70대에게 중요한 것은 미래의 집값이 아니라 오늘의 삶의 질입니다. 엘리베이터 있고, 주차 편하고, 관리 잘 되는 신축에서 편하게 사세요.'}
 };
 var AGE_ORDER={20:['old','semi','new'],30:['old','semi','new'],50:['semi','old','new'],70:['new','semi','old']};
 var AGE_RANK_DESC={
   20:{
-    old:'지금 당장 불편해도 괜찮습니다. 입지가 전부입니다. 20대에 구축 들고 10년 버티면 그게 자산 도약의 발판이 됩니다. 신축 감가 맞으면서 폼 잡을 나이가 아닙니다.',
-    semi:'구축이 부담스럽다면 준신축이 차선입니다. 입지 어느 정도 챙기면서 주거 퀄리티도 타협 가능. 단, 구축보다 초기 비용이 높다는 것을 감안해야 합니다.',
-    new:'신축은 20대에 최하 순위입니다. 감가 시작과 동시에 자산이 녹습니다. 신축 살고 싶으면 자산 충분히 키운 뒤에 즐기십시오. 지금은 아닙니다.'
+    old:'입지가 전부입니다. 좋은 입지의 구축을 사서 시간을 내 편으로 만드세요. 재건축도 기다릴 수 있고, 도시 발전도 기다릴 수 있습니다. 젊음이 가장 큰 무기입니다.',
+    semi:'구축이 부담스럽다면 준신축이 차선입니다. 입지 어느 정도 챙기면서 주거 퀄리티도 타협 가능. 다만 구축보다 초기 비용이 높고, 자산 성장 속도는 다소 느릴 수 있습니다.',
+    new:'신축은 20대에 최하 순위입니다. 감가 시작과 동시에 자산이 녹습니다. 오늘의 편안함을 위해 미래의 자산을 포기하는 선택입니다. 자산 충분히 키운 뒤에 즐기십시오.'
   },
   30:{
-    old:'이 나이에 입지 좋은 구축 잡는 게 진짜 영끌 전략입니다. 불편함을 감수할 수 있는 마지막 나이입니다. 10년 뒤 재건축 연한 돌아오면 그 구축이 황금이 됩니다.',
+    old:'이 나이에 입지 좋은 구축 잡는 게 진짜 전략입니다. 불편함을 감수할 수 있는 마지막 나이입니다. 신축의 만족감은 오늘로 끝나지만, 입지의 가치는 시간이 갈수록 쌓입니다.',
     semi:'자녀 교육과 직주근접을 동시에 챙기고 싶다면 준신축이 현실적 대안입니다. 구축보다 쾌적하고, 신축보다 가격 부담이 낮습니다. 미래 수익도 준수합니다.',
-    new:'신축은 지금 당장 살기엔 최고입니다. 그러나 3040에게는 자산 증식보다 감가 리스크가 더 큽니다. 여유 자금이 충분하다면 고려해볼 수 있습니다.'
+    new:'신축은 지금 당장 살기엔 최고입니다. 그러나 3040에게는 자산 증식보다 감가 리스크가 더 큽니다. 하지만 상급지 신축 진입이라면 이야기가 달라집니다. 여유 자금이 충분하다면 고려해볼 수 있습니다.'
   },
   50:{
     semi:'이제 불편함을 감수할 이유가 없습니다. 준신축은 교육·교통·편의 모두 챙기면서 주거 퀄리티도 확보하는 이 시기의 황금 선택입니다. 안정적으로 자산을 지키십시오.',
-    old:'재건축 연한이 가까운 구축이라면 시세 차익 기대가 가능합니다. 단, 사업 진행 리스크와 기간 불확실성을 반드시 감안해야 합니다. 입지 검증이 필수입니다.',
-    new:'충분한 자금이 있다면 신축으로 자산 방어하면서 쾌적하게 거주하는 것도 나쁘지 않습니다. 단, 대출 레버리지로 무리하게 신축을 잡는 것은 이 나이에 금물입니다.'
+    old:'재건축 연한이 가까운 구축이라면 시세 차익 기대가 가능합니다. 단, 사업 리스크와 기간 불확실성을 반드시 감안해야 합니다. 50~60대에 10년 이상 기다리는 베팅은 신중해야 합니다.',
+    new:'자금 여유가 있다면 신축으로 자산 방어하면서 쾌적하게 거주하는 것도 나쁘지 않습니다. 단, 대출 레버리지로 무리하게 신축을 잡는 것은 이 나이에 금물입니다.'
   },
   70:{
-    new:'더 이상 미루지 마십시오. 커뮤니티·엘리베이터·주차·관리 모두 완비된 신축에서 지금 이 순간을 최대한 누리십시오. 기다리는 전략은 70대에 통하지 않습니다.',
+    new:'더 이상 미루지 마십시오. 기다리는 전략은 70대에 통하지 않습니다. 커뮤니티·엘리베이터·주차·관리 모두 완비된 신축에서 지금 이 순간을 온전히 누리는 것이 최적입니다.',
     semi:'신축 대비 가격 부담을 낮추면서 생활 편의는 거의 동급으로 유지할 수 있습니다. 준신축도 충분히 쾌적합니다. 자산 여유가 신축까지 안 된다면 준신축이 정답입니다.',
-    old:'구축은 이 나이에 최악의 선택입니다. 수리비, 불편함, 재건축 대기까지 감당할 시간도 에너지도 없습니다. 삶의 질이 먼저입니다.'
+    old:'구축은 이 나이에 최후 선택입니다. 재건축을 기다릴 시간이 없고, 낡은 시설의 불편함을 감당할 에너지도 아깝습니다. 지금 당장의 삶의 질이 먼저입니다.'
   }
 };
 var RANK_LABELS=['🥇 1순위','🥈 2순위','🥉 3순위'];
@@ -1271,9 +1279,10 @@ function renderReport(){
     var tp=TYPE_SPEC[order[ri2]];
     var rdesc=rankDesc[order[ri2]]||'';
     var rankBg=ri2===0?'rank1':ri2===1?'rank2':'rank3';
+    var rankLabel=(ageKey===50&&ri2>=1)?'🥈 공동 2순위':RANK_LABELS[ri2];
     html+='<div class="sol-rank-item '+rankBg+'">'
       +'<div class="sol-rank-top">'
-      +'<span class="sol-rank-badge">'+RANK_LABELS[ri2]+'</span>'
+      +'<span class="sol-rank-badge">'+rankLabel+'</span>'
       +'<span class="sol-rank-name">'+tp.label+'</span>'
       +'<span class="sol-rank-yr">'+tp.minYr+'~'+tp.maxYr+'년</span>'
       +'</div>'
@@ -1399,9 +1408,17 @@ function bestForZoneDetail(zone){
     var termDisc=tyr!==30?[tl.reason.replace(' →','')+'  →  만기 '+tyr+'년 적용']:[];
     candidates.push({price:bgz.price,loan:bgz.loan,prodName:'보금자리론',rate:'연 '+(fr*100).toFixed(2)+'%',rateBasis:'소득 '+G.income.toLocaleString('ko-KR')+'만 원 이하 / '+tyr+'년 기준',monthly:calcMonthly(bgz.loan,fr,tyr),discItems:di.items.concat(termDisc)});
   }
-  var best=candidates[0];
-  for(var ci=1;ci<candidates.length;ci++){if(candidates[ci].price>best.price)best=candidates[ci];}
-  return best;
+  // 최대 매수가 기준 정렬
+  // 동일 가격이면: 정책대출 > 시중은행, 정책대출 간엔 금리 낮은 것 우선
+  candidates.sort(function(a,b){
+    if(b.price!==a.price) return b.price-a.price;
+    var aIsBank=(a.prodName==='시중은행 주담대'||a.prodName==='대출 불가 (다주택 제한)');
+    var bIsBank=(b.prodName==='시중은행 주담대'||b.prodName==='대출 불가 (다주택 제한)');
+    if(aIsBank&&!bIsBank) return 1;
+    if(!aIsBank&&bIsBank) return -1;
+    return a.monthly-b.monthly;
+  });
+  return candidates[0];
 }
 
 function _notifyHeight(){

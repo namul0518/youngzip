@@ -289,27 +289,6 @@ st.markdown("""
     font-size:13px;color:#991B1B;margin-bottom:6px;
   }
 </style>
-<script>
-(function(){
-  var _lastH=0;
-  window.addEventListener('message',function(e){
-    if(!e.data||e.data.type!=='iframeHeight')return;
-    var h=parseInt(e.data.height,10);
-    if(h<400||h===_lastH)return;
-    _lastH=h;
-    /* Streamlit iframe은 stIframe 클래스 또는 data-testid로 찾음 */
-    var frames=document.querySelectorAll('iframe');
-    frames.forEach(function(f){
-      /* calculator.html이 들어있는 iframe만 조정 (높이가 현재보다 클 때만) */
-      var fh=parseInt(f.style.height||f.height||0,10);
-      if(h>fh-80){
-        f.style.height=(h+80)+'px';
-        f.style.minHeight=(h+80)+'px';
-      }
-    });
-  });
-})();
-</script>
 """, unsafe_allow_html=True)
 
 # ════════════════════════════════════════════════════════
@@ -401,4 +380,4 @@ html = html.replace(
     f"<head>{extra_css}<script>var APP_LOGGED_IN={json.dumps(is_logged_in)};var APP_AUTH_URL='';</script>",
     1,
 )
-components.html(html, height=3200, scrolling=False)
+components.html(html, height=2400, scrolling=False)
