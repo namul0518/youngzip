@@ -229,7 +229,7 @@ def handle_callback():
 # 페이지 설정
 # ════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="영끌내집 — 내 집 마련 계산기",
+    page_title="영집  — 영끌로 사는 똘똘한 내 집",
     page_icon="🏠",
     layout="wide",
     initial_sidebar_state="collapsed",
