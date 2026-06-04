@@ -4,28 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google" content="notranslate">
-<title>내가 살 수 있는 아파트 최대 가격은?</title>
+<title>영집: 영끌로 사는 똘똘한 내 집</title>
 <style>
-/* ── 레이아웃: 컨텐츠 크기에 따라 높이 자동 조절 ── */
 *{box-sizing:border-box;margin:0;padding:0}
-html{
-  height:auto;          /* 고정 100% 제거 → 컨텐츠 따라 늘어남 */
-  overflow-x:hidden;
-}
+html{height:auto;overflow-x:hidden;}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
   background:#F8FAFC;
-  height:auto !important;     /* 고정높이 제거 */
-  min-height:0 !important;    /* min-height 제거 */
+  height:auto !important;
+  min-height:0 !important;
   overflow-x:hidden !important;
-  overflow-y:visible !important;  /* 브라우저 스크롤에 위임 */
+  overflow-y:visible !important;
 }
-/* ── 레이아웃 ── */
 .wrap{max-width:660px;margin:0 auto;padding:18px 14px 40px}
-.hd{text-align:center;padding:6px 0 18px}
-.pill{display:inline-block;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:10px}
-.hd h1{font-size:20px;font-weight:800;color:#111827;margin-bottom:4px;line-height:1.35}
-.hd p{font-size:12px;color:#6B7280}
+.hd{padding:6px 0 18px}
+.hd-inner{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.hd-logo{width:52px;height:52px;object-fit:contain;flex-shrink:0}
+.hd-text{flex:1}
+.pill{display:inline-block;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:8px}
+.hd h1{font-size:19px;font-weight:900;color:#111827;line-height:1.3}
+.hd p{font-size:12px;color:#6B7280;margin-top:4px}
 .tabs{display:flex;background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:3px;margin-bottom:16px;gap:2px}
 .tab{flex:1;padding:8px 4px;border:none;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:#64748B;transition:all .15s;white-space:nowrap}
 .tab.on{background:#2563EB;color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.25)}
@@ -72,18 +70,29 @@ body{
 .fnr b{color:#6B7280}
 .btreset{display:flex;align-items:center;justify-content:center;gap:5px;margin:10px auto 0;padding:7px 14px;background:#fff;border:1.5px solid #E2E8F0;border-radius:8px;font-size:11px;color:#6B7280;cursor:pointer;width:fit-content}
 .btreset:hover{border-color:#93C5FD;color:#2563EB}
+
+/* ── 2탭 체크박스 ── */
 .ck-item{display:flex;align-items:flex-start;gap:11px;cursor:pointer;user-select:none;padding:2px 0}
 .ck-box{width:22px;height:22px;border:2px solid #CBD5E1;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s}
 .ck-box.chk{background:#2563EB;border-color:#2563EB}
 .ck-lbl{font-size:12px;font-weight:700;color:#111827;margin-bottom:2px;line-height:1.4}
 .ck-sub{font-size:10px;color:#6B7280;line-height:1.4}
 .ck-sep{height:1px;background:#F3F4F6;margin:11px 0}
-.ck-sub-wrap{margin-top:10px;margin-left:33px;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;transition:opacity .2s}
+.ck-sub-wrap{margin-top:8px;margin-left:33px;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;transition:opacity .2s}
 .ck-sub-wrap:hover{border-color:#93C5FD}
 .ck-box-sm{width:18px;height:18px;border:2px solid #CBD5E1;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .ck-box-sm.chk{background:#7C3AED;border-color:#7C3AED}
 .ck-sub-lbl{font-size:11px;font-weight:600;color:#374151}
 .ck-sub-lbl span{font-weight:400;color:#9CA3AF}
+/* 자녀 하위 항목 */
+.child-sub-area{margin-top:8px;margin-left:33px;display:flex;flex-direction:column;gap:6px}
+.ck-radio-wrap{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;transition:all .2s}
+.ck-radio-wrap:hover{border-color:#93C5FD}
+.ck-radio-wrap.selected{background:#F5F3FF;border-color:#7C3AED}
+.ck-radio{width:18px;height:18px;border:2px solid #CBD5E1;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ck-radio.chk{background:#7C3AED;border-color:#7C3AED}
+.ck-radio-dot{width:8px;height:8px;border-radius:50%;background:#fff}
+
 .notice{background:#FEF9C3;border:1px solid #FDE047;border-radius:9px;padding:9px 12px;font-size:11px;color:#92400E;margin-bottom:10px}
 .plc{border-radius:12px;padding:14px;margin-bottom:9px;border:1.5px solid #E2E8F0;background:#fff;transition:border-color .2s,box-shadow .2s}
 .plc.ok{border-color:#BBF7D0;background:#F0FDF4;cursor:pointer}
@@ -114,7 +123,7 @@ body{
 .plc-rate.ok{color:#065F46;background:#D1FAE5}
 .plc-rate.no{color:#64748B;background:#F1F5F9}
 .plc-detail{max-height:0;overflow:hidden;transition:max-height 0.42s cubic-bezier(.4,0,.2,1),opacity 0.35s ease;opacity:0}
-.plc.open .plc-detail{max-height:800px;opacity:1}
+.plc.open .plc-detail{max-height:1200px;opacity:1}
 .detail-sep{height:1px;background:#BBF7D0;margin:10px 0}
 .det-lbl{font-size:10px;font-weight:800;color:#065F46;margin-bottom:7px;letter-spacing:.3px}
 .det-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
@@ -260,91 +269,34 @@ body{
 .age-70 .fsb-sniper-wrap{border-top-color:#DDD6FE}
 .fsb-sniper-hd{font-size:12px;font-weight:900;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 
-/* ── 혼합 대출 시뮬레이터 ── */
-#mixSim{margin-top:16px}
-.mix-hd{font-size:14px;font-weight:900;color:#1E293B;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.mix-sub{font-size:11px;color:#6B7280;margin-bottom:14px;line-height:1.6}
-.mix-zone-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.mix-ztab{flex:1;min-width:80px;padding:7px 4px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:11px;font-weight:700;color:#64748B;cursor:pointer;background:#F8FAFC;text-align:center;transition:all .15s}
-.mix-ztab.on{background:#1E40AF;color:#fff;border-color:#1E40AF;box-shadow:0 2px 6px rgba(30,64,175,.25)}
-.mix-bank-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;background:#F0F9FF;border:1.5px solid #BAE6FD;border-radius:10px;padding:10px 12px}
-.mix-bank-lbl{font-size:11px;font-weight:800;color:#0C4A6E;flex:1}
-.mix-bank-inp{width:80px;border:1.5px solid #BAE6FD;border-radius:7px;padding:6px 8px;font-size:13px;font-weight:700;color:#0C4A6E;background:#fff;text-align:right;outline:none}
-.mix-bank-inp:focus{border-color:#2563EB}
-.mix-bank-su{font-size:11px;color:#64748B;white-space:nowrap}
-/* policy table */
-.mix-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
-.mix-tbl thead th{background:#F1F5F9;color:#374151;font-weight:800;padding:7px 8px;text-align:left;font-size:10px;border-bottom:2px solid #E2E8F0}
-.mix-tbl thead th:not(:first-child){text-align:right}
-.mix-tbl tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s}
-.mix-tbl tbody tr.eligible{cursor:default}
-.mix-tbl tbody tr.ineligible td{opacity:.4}
-.mix-tbl tbody td{padding:7px 8px;vertical-align:middle}
-.mix-tbl tbody td:not(:first-child){text-align:right;font-weight:700}
-.mix-prod-name{font-weight:800;color:#111827;font-size:11px}
-.mix-prod-sub{font-size:9px;color:#9CA3AF;margin-top:1px}
-.mix-rate-chip{display:inline-block;background:#D1FAE5;color:#065F46;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:800}
-.mix-rate-chip.na{background:#F1F5F9;color:#9CA3AF}
-.mix-elig-dot{display:inline-block;width:8px;height:8px;border-radius:50%}
-.mix-elig-dot.ok{background:#10B981}
-.mix-elig-dot.no{background:#D1D5DB}
-.mix-btn{width:100%;padding:12px;background:linear-gradient(90deg,#1E40AF,#2563EB);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:-.2px;transition:opacity .15s;margin-bottom:14px}
-.mix-btn:hover{opacity:.9}
-/* result */
-#mixResult{display:none}
-.mix-res-hero{border-radius:14px;padding:18px;background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 60%,#1E40AF 100%);color:#fff;margin-bottom:12px;position:relative;overflow:hidden}
-.mix-res-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05)}
-.mix-hero-tag{font-size:10px;font-weight:800;background:rgba(255,255,255,.18);border-radius:10px;padding:2px 10px;display:inline-block;margin-bottom:10px;letter-spacing:.5px}
-.mix-hero-label{font-size:11px;opacity:.75;margin-bottom:3px}
-.mix-hero-price{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:14px}
-.mix-hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.mix-hero-stat{background:rgba(255,255,255,.12);border-radius:9px;padding:9px 8px;text-align:center}
-.mix-hero-stat-lbl{font-size:9px;opacity:.75;margin-bottom:3px}
-.mix-hero-stat-val{font-size:13px;font-weight:900}
-/* portfolio bar */
-.mix-port-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:10px}
-.mix-port-hd{font-size:11px;font-weight:800;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:5px}
-.mix-port-hd::before{content:"📊"}
-.mix-stack{height:22px;border-radius:8px;overflow:hidden;display:flex;margin-bottom:10px}
-.mix-stack-seg{height:100%;transition:width .6s cubic-bezier(.4,0,.2,1)}
-.mix-seg-legend{display:flex;flex-direction:column;gap:5px}
-.mix-seg-row{display:flex;align-items:center;gap:8px;justify-content:space-between}
-.mix-seg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.mix-seg-name{font-size:11px;color:#374151;font-weight:700;flex:1}
-.mix-seg-amt{font-size:11px;font-weight:800;color:#111827;text-align:right}
-.mix-seg-pct{font-size:10px;color:#9CA3AF;text-align:right;width:36px}
-/* logic report */
-.mix-logic-card{background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:10px}
-.mix-logic-hd{font-size:11px;font-weight:800;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:5px}
-.mix-logic-hd::before{content:"🧠"}
-.mix-logic-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
-.mix-step-num{width:22px;height:22px;border-radius:50%;background:#2563EB;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.mix-step-body{flex:1}
-.mix-step-title{font-size:11px;font-weight:800;color:#1E293B;margin-bottom:2px}
-.mix-step-desc{font-size:10px;color:#64748B;line-height:1.6}
-.mix-step-result{font-size:10px;font-weight:800;color:#059669;background:#ECFDF5;border:1px solid #BBF7D0;border-radius:5px;padding:3px 8px;margin-top:4px;display:inline-block}
-/* monthly payment */
-.mix-pay-card{background:#fff;border:1.5px solid #FDE68A;border-radius:12px;padding:14px;margin-bottom:10px}
-.mix-pay-hd{font-size:11px;font-weight:800;color:#92400E;margin-bottom:10px;display:flex;align-items:center;gap:5px}
-.mix-pay-hd::before{content:"💸"}
-.mix-pay-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #FEF3C7}
-.mix-pay-row:last-child{border-bottom:none}
-.mix-pay-lbl{font-size:11px;color:#78350F}
-.mix-pay-val{font-size:11px;font-weight:800;color:#92400E}
-.mix-pay-total{background:#FEF9C3;border-radius:8px;padding:10px;margin-top:8px;text-align:center}
-.mix-pay-total-lbl{font-size:10px;color:#92400E;margin-bottom:2px}
-.mix-pay-total-val{font-size:20px;font-weight:900;color:#78350F}
-/* alert */
-.mix-alert{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px;font-size:11px;color:#991B1B;line-height:1.6;margin-bottom:10px}
-/* param table */
-.mix-param-wrap{margin-bottom:14px}
-.mix-param-toggle{font-size:10px;font-weight:700;color:#6B7280;cursor:pointer;display:flex;align-items:center;gap:4px;margin-bottom:6px;user-select:none}
-.mix-param-toggle:hover{color:#2563EB}
-.mix-param-tbl{display:none;width:100%;border-collapse:collapse;font-size:10px;border-radius:8px;overflow:hidden;border:1px solid #E2E8F0}
-.mix-param-tbl.open{display:table}
-.mix-param-tbl thead th{background:#F1F5F9;padding:6px 8px;font-weight:800;color:#374151;text-align:left}
-.mix-param-tbl tbody td{padding:6px 8px;border-bottom:1px solid #F3F4F6;color:#374151;vertical-align:top;line-height:1.5}
-.mix-param-tbl tbody tr:last-child td{border-bottom:none}
+/* ── 3탭 리포트 카드 ── */
+.report-card{background:linear-gradient(135deg,#EFF6FF 0%,#F0FDF4 100%);border:2px solid #BFDBFE;border-radius:16px;padding:18px;margin-top:14px}
+.report-card-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.report-icon{font-size:28px}
+.report-title{font-size:14px;font-weight:900;color:#1E40AF;line-height:1.3}
+.report-sub{font-size:11px;color:#6B7280;margin-top:2px}
+.report-income-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:10px;border:1px solid #DBEAFE}
+.report-income-label{font-size:11px;font-weight:700;color:#6B7280;flex:1}
+.report-income-vals{display:flex;gap:16px}
+.report-income-item{text-align:right}
+.report-income-item-label{font-size:9px;color:#9CA3AF;font-weight:600}
+.report-income-item-val{font-size:14px;font-weight:900;color:#1E40AF}
+.report-loan-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.loan-report-row{border-radius:10px;padding:12px 14px;background:#fff;border:1.5px solid #E2E8F0;position:relative}
+.loan-report-row.best{border-color:#10B981;background:linear-gradient(135deg,#F0FDF4 0%,#ECFDF5 100%)}
+.loan-report-row.best::before{content:"✅ 최저금리";position:absolute;top:-10px;left:12px;background:#10B981;color:#fff;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px}
+.lrr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.lrr-name{font-size:12px;font-weight:800;color:#111827}
+.lrr-rate{font-size:13px;font-weight:900;color:#1E40AF;background:#EFF6FF;padding:3px 10px;border-radius:6px}
+.loan-report-row.best .lrr-rate{color:#065F46;background:#D1FAE5}
+.lrr-detail{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.lrr-item{background:#F8FAFC;border-radius:6px;padding:6px 8px;text-align:center}
+.loan-report-row.best .lrr-item{background:#ECFDF5}
+.lrr-item-label{font-size:9px;color:#9CA3AF;font-weight:600;margin-bottom:2px}
+.lrr-item-val{font-size:12px;font-weight:900;color:#111827}
+.loan-report-row.best .lrr-item-val{color:#065F46}
+.lrr-pref{margin-top:7px;font-size:10px;color:#059669;font-weight:700;background:#ECFDF5;border-radius:6px;padding:4px 8px;display:inline-block}
+.report-note{font-size:10px;color:#6B7280;margin-top:10px;line-height:1.6;padding-top:10px;border-top:1px solid #DBEAFE}
 </style>
 </head>
 <body>
@@ -352,8 +304,13 @@ body{
 
 <div class="hd">
   <div class="pill">10·15 부동산 대책 완전 반영</div>
-  <h1>내가 살 수 있는<br>아파트 최대 가격은?</h1>
-  <p>주담대 한도 계산 + 정책대출 자격 진단 + 맞춤 유형 추천</p>
+  <div class="hd-inner">
+    <img class="hd-logo" src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAKWAmoDASIAAhEBAxEB/8QAHQABAAEFAQEBAAAAAAAAAAAAAAIBAwUGBwQICf/EAF4QAAEDAgQEAQcHBQsICQIEBwEAAgMEEQUGITESQVFhBxMiMnGBkbEUI0JiocHRCDNScrMVFiQ0VXOCssLS8DY3Q3WDkuHxFzVTY3STlKKjREUlJmRlVFeEhcPT4v/EABwBAAICAwEBAAAAAAAAAAAAAAAGBAUCAwcBCP/EADgRAAICAQMDAQYFBAEEAgMAAAABAgMEBREhBhIxUSIyM0FhgRM0UnGRFBUjsUJDodHhBzUkU2L/2gAMAwEAAhEDEQA/APjJERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABEWTy7gmIY9Xikw+EvOnG8+iwdSV7GLk9keSkordnkw6hq8RrGUlFA+aZ5sGtH2noO67NlTw9w2gwaWLFI2VVVUs4ZXEaN7N5gDrvz00tlsnZWw/LVEGRtEtS4fOzEDicfuHQfHc517iTqUy4GlKK77lu/QW87VXJ9tT2XqcCztlOty5WE8L5qF5+antt9V3fvsfeBra+maump62mfTVUbJIXt4S1wBBXGs+ZHqsFe+uoGunw8+cbaui9fVvflz6mv1DTZUPvhzH/AEWGBqUb12T4l/s0tERVJahERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABEW25DyRW5kmbPLx01ADYy21f2b+Px1tnXXKyXbFbswssjXHuk9keHJuWK3MdbwRAx0rD87MRoOw6n4e6/csu4Nh+BUDaKghDWt9J+7nu5uJ6lejDMOosIoYqGhhbHCwWsBv3V9u+qa9P06OOu6XMhWz9Qle+2PESp7qhUjqFS3ZWhVFFGQNfEY5AHsO7VPlsqED2LxpNbMyi+17o5N4gZAkpzJimBxF8BPFJTtGrOpb27e7oOcL6dOlxbiaeR5rn+fsgR17ZMUwZgjqjd0kP0ZDzPY/YefMpa1DS3D/JUuPQZMDU1PaFr59TkSKUsb4pXRSscyRji1zXCxaRuCORUVRl2EREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEUo2PlkbHGxz3vIa1rRcknYALq3h74fxQGPEsda18o1jg3azuep+wd+W/Hx53y7YI0X5EKI902Yfw5yBNi72Yji0b4qEecyM6Ol7no34+q1+yxxQUtMyCmjEcTRZrALADknGGN4Y/NA2soOeTrdN2FgwxY8efUVMzOnky58FCTcndFRVCmkEqLpdBsq/BegU+CKt1XS6AIWurjDwjS1/UqckXh7vsah4gZHpMfhdW0AbBiLG720ktyd+P/JcRr6OqoKt9LWQPhmjNnMcP8XHcbr6b4+E7mywGcssYdmWjLJQIqpg+anaNWn7x2/4EUWoaWp72VefQu9P1Nw2rt8ep8+IsnmPA6/Aq80ldFa9+B49F46j8FjEttOL2YxpqS3QREXh6EREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAEREAFeoqWoraplLSxOlmk0axu50urK2Hw5F85UI/nP2bllCPdJR9TGcu2Ll6ERk3NBF/wBxqn7PxT95maP5GqPs/Fd+cTwj1K255GxKYP7HH9RQ/wB7f6Tgv7zM0fyNUfZ+KfvMzR/I1R9n4rvjXH1qRcbI/scf1B/epfpOBfvLzT/ItT9n4p+8vNP8i1H2fiu/sdrYlTc6x6oWhx/UePW5fpPn795Wav5Fqfs/FYfEqGrw2rdSV0D4JmgEsdvrsvp6IrhHi+LZ0m/mY/goWfpyxYKSe+5NwdQeVJxa22NPREVUWgREQAV6ipaitqo6WlidNNIbMY0akq/g2GVmLVzKOiiL3u3J9Fg6uPIf8hcrtuRsr0OX6bia0S1T2+fK4ece1uQ7fFTMTDnky2Xj1ImXmQxo7vz6HgyDkamwRja7EA2bECP6MYPJt/tP/G+43t6JPtVXEm+11E67pux8aGPDtgKWRkzvl3SZIEk6m4Ur6KA5quikEcnoqAjqo3TQm3JAIuDurFVX0lK+OOeZjHyO4GNc8AuPQdT2WCznmqiy9RkPcJal4+ahadT+A7/FcQxvFq7GK11XXzGR59Fv0WDo0ch/gqozdVjQ+2HLLfC0uV67p8I+lGSMezia4Edbqt1yHIefZIJIqDGZOJh81lQ4+7j/AL3v5ldYhkZPH5SN17/YpeJm15Md159CJl4VmNLZ+C9dDayjt6kJ03UwhlHaqIBupHdUXgGPx3BqHHKF9HiETXtI8x2xaeo6ELiOc8q1+W6y0rXS0jz83MBp6ndD8feB30qzXwU1dRvpayFssLxZwc2+iq87To3rujxItMHUZUPtlyj5nRbfn3JlRgUzquja+bD3G99zF2Pbv7DyJ1BKtlcq5dslyNNdkbI90XwERFgZhERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERABERA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" alt="영집 로고">
+    <div class="hd-text">
+      <h1>내가 살 수 있는<br>아파트 최대 가격은?</h1>
+      <p>주담대 한도 계산 + 정책대출 자격 진단 + 맞춤 유형 추천</p>
+    </div>
+  </div>
 </div>
 
 <div class="tabs">
@@ -362,6 +319,7 @@ body{
   <button class="tab" id="tb2" onclick="goTab(2)">🎯 맞춤 유형 추천</button>
 </div>
 
+<!-- ═══ 탭0: 주담대 한도 ═══ -->
 <div id="tp0">
   <div class="card">
     <div class="field">
@@ -401,17 +359,12 @@ body{
   </div>
 </div>
 
+<!-- ═══ 탭1: 정책대출 진단 ═══ -->
 <div id="tp1" style="display:none">
   <div class="card">
     <div id="plNotice"></div>
-    <div class="ck-item" onclick="toggle('baby')">
-      <div class="ck-box" id="ck-baby"></div>
-      <div>
-        <div class="ck-lbl">최근 2년 내 출산 또는 예정인 자녀가 있습니다</div>
-        <div class="ck-sub">신생아 특례 디딤돌대출 자격 판정 및 보금자리론 다자녀 한도 적용</div>
-      </div>
-    </div>
-    <div class="ck-sep"></div>
+
+    <!-- 신혼가구 -->
     <div class="ck-item" onclick="toggle('newlywed')">
       <div class="ck-box" id="ck-newlywed"></div>
       <div>
@@ -430,7 +383,10 @@ body{
         <div class="ck-sub-lbl">만 40~49세 신혼가구 <span>→ 보금자리론 최대 40년</span></div>
       </div>
     </div>
+
     <div class="ck-sep"></div>
+
+    <!-- 청년가구 -->
     <div class="ck-item" onclick="toggle('under34')">
       <div class="ck-box" id="ck-under34"></div>
       <div>
@@ -442,6 +398,33 @@ body{
       <div class="ck-box-sm" id="ck-under39"></div>
       <div class="ck-sub-lbl">만 39세 이하 청년입니다 <span>(보금자리론 40년 만기용)</span></div>
     </div>
+
+    <div class="ck-sep"></div>
+
+    <!-- 자녀 계층형 UI -->
+    <div class="ck-item" onclick="toggle('hasChild')">
+      <div class="ck-box" id="ck-hasChild"></div>
+      <div>
+        <div class="ck-lbl">자녀가 있습니다</div>
+        <div class="ck-sub">자녀 현황에 따라 우대금리·한도 적용</div>
+      </div>
+    </div>
+    <div id="child-sub-area" class="child-sub-area" style="display:none">
+      <!-- 출산/임신: 다른 항목과 중복 선택 가능 -->
+      <div class="ck-sub-wrap" onclick="toggle('baby')" style="margin-top:0;margin-left:0">
+        <div class="ck-box-sm" id="ck-baby"></div>
+        <div class="ck-sub-lbl">최근 2년 내 출산 또는 임신 <span>중복 선택 가능</span></div>
+      </div>
+      <!-- 자녀 수: 라디오 버튼처럼 상호 배타 -->
+      <div class="ck-radio-wrap" id="wrap-child2" onclick="toggleChildCount('child2')" style="margin-left:0">
+        <div class="ck-radio" id="ck-child2"></div>
+        <div class="ck-sub-lbl">자녀 2인 <span>우대금리 0.5%</span></div>
+      </div>
+      <div class="ck-radio-wrap" id="wrap-child3" onclick="toggleChildCount('child3')" style="margin-left:0">
+        <div class="ck-radio" id="ck-child3"></div>
+        <div class="ck-sub-lbl">자녀 3인 이상 <span>우대금리 0.7%</span></div>
+      </div>
+    </div>
   </div>
   <div id="plCds"></div>
   <div id="plFb" style="display:none" class="fb-card">
@@ -451,6 +434,7 @@ body{
   </div>
 </div>
 
+<!-- ═══ 탭2: 맞춤 유형 추천 ═══ -->
 <div id="tp2" style="display:none">
   <div class="card">
     <div class="field-row">
@@ -498,63 +482,61 @@ body{
   </div>
   <div id="recResult" style="display:none"></div>
   <div id="final-summary-box"></div>
-
-  <!-- ✦ 최적 혼합 대출 시뮬레이터 -->
-  <div id="mixSim" style="display:none">
-    <div class="mix-hd">🔀 최적 혼합 대출 루트 시뮬레이터</div>
-    <div class="mix-sub">정책대출 5종을 우선 배치해 한도를 극대화하고, 부족분을 일반 주담대로 채워 가중평균 금리가 최소화되는 최적 조합을 계산합니다.</div>
-    <div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:6px">매수 희망 지역</div>
-    <div class="mix-zone-tabs">
-      <div class="mix-ztab on" id="mzt-reg"   onclick="setMixZone('reg')">🔴 규제지역</div>
-      <div class="mix-ztab"   id="mzt-metro" onclick="setMixZone('metro')">🟢 수도권 비규제</div>
-      <div class="mix-ztab"   id="mzt-non"   onclick="setMixZone('non')">🟡 비수도권</div>
-    </div>
-    <div class="mix-bank-row">
-      <div class="mix-bank-lbl">🏦 일반 시중은행 주담대 금리 (연, %)</div>
-      <input class="mix-bank-inp" id="mixBankRate" type="number" value="4.2" step="0.1" min="1" max="10">
-      <span class="mix-bank-su">%</span>
-    </div>
-    <div class="mix-param-wrap">
-      <div class="mix-param-toggle" onclick="toggleParamTable()">
-        <span id="paramToggleIcon">▶</span> 정책대출 파라미터 테이블 (관리자 수정용)
-      </div>
-      <table class="mix-param-tbl" id="paramTable">
-        <thead>
-          <tr><th>상품명</th><th>최대한도</th><th>기준금리</th><th>만기(년)</th><th>LTV</th><th>DTI</th><th>주택가격상한</th><th>소득상한(만)</th><th>자산상한(만)</th></tr>
-        </thead>
-        <tbody id="paramTableBody"></tbody>
-      </table>
-    </div>
-    <div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:6px">자격 요건 필터링 결과</div>
-    <table class="mix-tbl" id="mixProdTable">
-      <thead><tr><th>상품</th><th>기준금리</th><th>최대한도</th><th>자격</th></tr></thead>
-      <tbody id="mixProdBody"></tbody>
-    </table>
-    <button class="mix-btn" onclick="runMixSim()">🚀 최적 혼합 대출 조합 계산하기</button>
-    <div id="mixResult">
-      <div class="mix-res-hero" id="mixHero"></div>
-      <div class="mix-port-card" id="mixPort"></div>
-      <div class="mix-logic-card" id="mixLogic"></div>
-      <div class="mix-pay-card" id="mixPay"></div>
-    </div>
-  </div>
 </div>
 
-
 <div id="loginGate" style="display:none"></div>
-</div><script>
-/* 앱 로그인 상태 (주입없으면 기본값) */
+</div>
+<script>
 if(typeof APP_LOGGED_IN==='undefined') var APP_LOGGED_IN=false;
 if(typeof APP_AUTH_URL==='undefined')  var APP_AUTH_URL='';
 
 /* ══ 전역 상태 ══ */
-var G={income:0,asset:0,own:'',baby:false,newlywed:false,newlywed_u39:false,newlywed_u49:false,under34:false,under39:false};
+var G={income:0,asset:0,own:'',
+  hasChild:false,baby:false,child2:false,child3:false,
+  newlywed:false,newlywed_u39:false,newlywed_u49:false,
+  under34:false,under39:false};
+
+/* ══ 금리 테이블 ══ */
+/* 내집마련 디딤돌 (30년) - 소득 단위: 만원 */
+var DIDIMDOL_RATE=[
+  {max:2000,rate:0.0310},{max:4000,rate:0.0345},{max:7000,rate:0.0380},{max:8500,rate:0.0415}
+];
+/* 신생아 특례 디딤돌 (30년) */
+var BABY_RATE=[
+  {max:2000,rate:0.0205},{max:4000,rate:0.0240},{max:6000,rate:0.0265},
+  {max:8500,rate:0.0290},{max:10000,rate:0.0320},{max:13000,rate:0.0350},
+  {max:15000,rate:0.0380},{max:17000,rate:0.0415},{max:20000,rate:0.0450}
+];
+/* 보금자리론 만기별 금리 */
+var BGZ_RATE={30:0.0490,40:0.0495,50:0.0500};
+
+function lookupRate(table,income){
+  for(var i=0;i<table.length;i++){if(income<=table[i].max)return table[i].rate;}
+  return table[table.length-1].rate;
+}
+
+/* ══ 우대금리 계산 ══ */
+function getPreferential(prodId){
+  var disc=0;
+  var labels=[];
+  if(G.newlywed){disc+=0.003;labels.push('신혼 -0.3%');}
+  if(G.baby&&G.income<=7000){disc+=0.002;labels.push('신생아 -0.2%');}
+  if(G.child3){disc+=0.007;labels.push('다자녀(3인+) -0.7%');}
+  else if(G.child2){disc+=0.005;labels.push('2자녀 -0.5%');}
+  return{disc:disc,labels:labels};
+}
+
+/* ══ 원리금균등상환 월납입액 ══ */
+function calcMonthly(loan,annualRate,termYears){
+  if(loan<=0)return 0;
+  var r=annualRate/12,n=termYears*12;
+  if(r===0)return loan/n;
+  return loan*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+}
 
 /* ══ 탭 전환 ══ */
 function goTab(n){
-  /* 2·3탭: 비로그인이면 로그인 게이트 */
   if((n===1||n===2)&&!APP_LOGGED_IN){_showLoginGate(n,'login');return;}
-  /* 2·3탭: 로그인은 됐지만 1탭 계산 미완료 */
   if((n===1||n===2)&&APP_LOGGED_IN&&(!G.income||!G.own)){_showLoginGate(n,'needCalc');return;}
   _hideLoginGate();
   document.getElementById('tp0').style.display=n===0?'block':'none';
@@ -564,10 +546,8 @@ function goTab(n){
   document.getElementById('tb1').className='tab'+(n===1?' on':'');
   document.getElementById('tb2').className='tab'+(n===2?' on':'');
   if(n===1) runPol();
-  if(n===2) initMixSim();
 }
-/* mode: 'login' | 'needCalc' */
-function _showLoginGate(tabIdx, mode){
+function _showLoginGate(tabIdx,mode){
   document.getElementById('tp0').style.display='none';
   document.getElementById('tp1').style.display='none';
   document.getElementById('tp2').style.display='none';
@@ -576,82 +556,81 @@ function _showLoginGate(tabIdx, mode){
   document.getElementById('tb2').className='tab'+(tabIdx===2?' on':'');
   var gate=document.getElementById('loginGate');
   var tabName=tabIdx===1?'정책대출 진단':'맞춤 유형 추천';
-
   if(mode==='needCalc'){
-    /* 로그인은 됐지만 1탭 미완료 */
-    gate.innerHTML=''
-      +'<div style="text-align:center;padding:48px 20px 36px">'
+    gate.innerHTML='<div style="text-align:center;padding:48px 20px 36px">'
       +'<div style="font-size:38px;margin-bottom:14px">📋</div>'
       +'<div style="font-size:16px;font-weight:800;color:#1E293B;margin-bottom:8px">1탭 계산을 먼저 완료해 주세요</div>'
-      +'<div style="font-size:13px;color:#64748B;margin-bottom:28px">'
-      +'<b>'+tabName+'</b> 탭은 <b>주담대 한도</b> 탭에서<br>'
-      +'연소득·순자산·주택보유수를 입력하고 계산을 완료한 후 이용할 수 있습니다.</div>'
-      +'<button onclick="goTab(0)" style="'
-      +'display:inline-flex;align-items:center;gap:8px;'
-      +'background:#2563EB;color:#fff;font-weight:800;font-size:14px;border:none;cursor:pointer;'
-      +'padding:13px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(37,99,235,.3)">'
-      +'📊 주담대 한도 탭으로 이동</button>'
+      +'<div style="font-size:13px;color:#64748B;margin-bottom:28px"><b>'+tabName+'</b> 탭은 <b>주담대 한도</b> 탭에서<br>연소득·순자산·주택보유수를 입력하고 계산을 완료한 후 이용할 수 있습니다.</div>'
+      +'<button onclick="goTab(0)" style="display:inline-flex;align-items:center;gap:8px;background:#2563EB;color:#fff;font-weight:800;font-size:14px;border:none;cursor:pointer;padding:13px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(37,99,235,.3)">📊 주담대 한도 탭으로 이동</button>'
       +'<div style="font-size:11px;color:#CBD5E1;margin-top:16px">계산 완료 후 이 탭을 다시 눌러 주세요.</div>'
       +'</div>';
-  } else {
-    /* 비로그인 → 네이버 로그인 유도 */
-    /* window.top.location.href 직접 할당 — iframe sandbox 우회 가장 확실한 방법 */
-    gate.innerHTML=''
-      +'<div style="text-align:center;padding:48px 20px 36px">'
+  }else{
+    gate.innerHTML='<div style="text-align:center;padding:48px 20px 36px">'
       +'<div style="font-size:38px;margin-bottom:14px">🔒</div>'
       +'<div style="font-size:16px;font-weight:800;color:#1E293B;margin-bottom:8px">로그인이 필요한 서비스입니다</div>'
       +'<div style="font-size:13px;color:#64748B;margin-bottom:28px"><b>'+tabName+'</b> 탭은 로그인 후 이용할 수 있습니다.</div>'
-      +'<button onclick="naverLogin()" style="'
-      +'display:inline-flex;align-items:center;gap:10px;'
-      +'background:#03C75A;color:#fff;font-weight:800;font-size:15px;border:none;cursor:pointer;'
-      +'padding:13px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(3,199,90,.35)">'
-      +'<span style="width:24px;height:24px;background:#fff;border-radius:4px;'
-      +'display:inline-flex;align-items:center;justify-content:center;'
-      +'font-weight:900;color:#03C75A;font-size:16px;flex-shrink:0">N</span>'
+      +'<button onclick="naverLogin()" style="display:inline-flex;align-items:center;gap:10px;background:#03C75A;color:#fff;font-weight:800;font-size:15px;border:none;cursor:pointer;padding:13px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(3,199,90,.35)">'
+      +'<span style="width:24px;height:24px;background:#fff;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;color:#03C75A;font-size:16px;flex-shrink:0">N</span>'
       +'네이버 계정으로 로그인</button>'
       +'<div style="font-size:11px;color:#CBD5E1;margin-top:16px">로그인 후 모든 기능을 무료로 이용할 수 있습니다.</div>'
       +'</div>';
   }
   gate.style.display='block';
 }
-function _hideLoginGate(){
-  var gate=document.getElementById('loginGate');
-  if(gate)gate.style.display='none';
-}
-/* iframe → 최상위 창 강제 이동: target="_top" 보다 확실한 방법 */
-function naverLogin(){
-  try{
-    window.top.location.href=APP_AUTH_URL;
-  }catch(e){
-    /* 크로스오리진 차단 시 fallback */
-    window.location.href=APP_AUTH_URL;
-  }
-}
+function _hideLoginGate(){var gate=document.getElementById('loginGate');if(gate)gate.style.display='none';}
+function naverLogin(){try{window.top.location.href=APP_AUTH_URL;}catch(e){window.location.href=APP_AUTH_URL;}}
 
 /* ══ 체크박스 ══ */
 function setCk(id,checked,small){
-  var el=document.getElementById('ck-'+id);
-  if(!el)return;
+  var el=document.getElementById('ck-'+id);if(!el)return;
   var bc=small?'ck-box-sm':'ck-box';
   el.className=bc+(checked?' chk':'');
   el.innerHTML=checked?'<svg width="'+(small?'10':'12')+'" height="'+(small?'10':'12')+'" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>':'';
 }
+function setRadio(id,checked){
+  var el=document.getElementById('ck-'+id);if(!el)return;
+  el.className='ck-radio'+(checked?' chk':'');
+  el.innerHTML=checked?'<div class="ck-radio-dot"></div>':'';
+  var wrap=document.getElementById('wrap-'+id);
+  if(wrap)wrap.className='ck-radio-wrap'+(checked?' selected':'');
+}
+
 function toggle(key){
   G[key]=!G[key];
-  if(key==='under34'){
+  if(key==='hasChild'){
+    setCk('hasChild',G.hasChild,false);
+    document.getElementById('child-sub-area').style.display=G.hasChild?'flex':'none';
+    if(!G.hasChild){
+      G.baby=false;G.child2=false;G.child3=false;
+      setCk('baby',false,true);setRadio('child2',false);setRadio('child3',false);
+    }
+  }else if(key==='baby'){
+    setCk('baby',G.baby,true);
+  }else if(key==='under34'){
     setCk('under34',G.under34,false);
     if(G.under34){G.under39=false;setCk('under39',false,true);}
     document.getElementById('ck39wrap').style.display=G.under34?'none':'flex';
-  }else if(key==='under39'){setCk('under39',G.under39,true);}
-  else if(key==='newlywed'){
+  }else if(key==='under39'){
+    setCk('under39',G.under39,true);
+  }else if(key==='newlywed'){
     setCk('newlywed',G.newlywed,false);
     var wrap=document.getElementById('newlywed-age-wrap');
     wrap.style.display=G.newlywed?'block':'none';
-    if(!G.newlywed){
-      G.newlywed_u39=false;G.newlywed_u49=false;
-      setCk('nw-u39',false,true);setCk('nw-u49',false,true);
-    }
+    if(!G.newlywed){G.newlywed_u39=false;G.newlywed_u49=false;setCk('nw-u39',false,true);setCk('nw-u49',false,true);}
   }else{setCk(key,G[key],false);}
+  runPol();
+}
+function toggleChildCount(key){
+  /* 상호 배타 */
+  if(key==='child2'){
+    G.child2=!G.child2;
+    if(G.child2){G.child3=false;setRadio('child3',false);}
+    setRadio('child2',G.child2);
+  }else{
+    G.child3=!G.child3;
+    if(G.child3){G.child2=false;setRadio('child2',false);}
+    setRadio('child3',G.child3);
+  }
   runPol();
 }
 function toggleNewlywedAge(sub){
@@ -675,12 +654,14 @@ function fmtW(won){
   if(uk>0)return uk+'억 원';
   return man.toLocaleString('ko-KR')+'만 원';
 }
+function fmtM(won){
+  return Math.round(won/10000).toLocaleString('ko-KR')+'만 원';
+}
 
 /* ══ 탭0: 주담대 연산 ══ */
 function dsrLoan(iW,rate){var r=rate/12,n=360,mp=iW*0.4/12;return mp*(1-Math.pow(1+r,-n))/r;}
 function ltvAsset(aW,ltv){return aW*ltv/(1-ltv);}
 function pcap(p){if(p<=1500000000)return 600000000;if(p<=2500000000)return 400000000;return 200000000;}
-
 function cz(iW,aW,own,zone){
   var d75=dsrLoan(iW,0.075),d52=dsrLoan(iW,0.0525),fl,fp,ltv,bind,cap;
   if(own==='multi'){
@@ -706,13 +687,11 @@ function cz(iW,aW,own,zone){
   fl=Math.min(d52,ltv);fp=aW+fl;
   return{loan:fl,price:fp,dsrLoan:d52,ltvLoan:ltv,bind:fl===d52?'dsr':'ltv'};
 }
-
 function ltvLbl(own,zone){
   if(own==='multi')return zone==='non'?'LTV 60%':'LTV 0% (대출금지)';
   if(own==='first')return zone==='non'?'LTV 80%':'LTV 70%';
   return zone==='reg'?'LTV 40%':'LTV 70%';
 }
-
 function rsn(bind,zone,own,cap){
   if(bind==='block')return{h:'다주택자 대출 제한',b:'10·15 대책으로 수도권 다주택자 주담대가 원천 금지됩니다.'};
   if(bind==='dsr')return{h:'DSR 40% 소득 한도에 걸림',b:'연소득 기준 원리금 상환 가능액이 대출 상한선입니다.'};
@@ -722,7 +701,6 @@ function rsn(bind,zone,own,cap){
   var ps=cap>=600000000?'15억 이하':cap>=400000000?'15억~25억':'25억 초과';
   return{h:'집값별 한도 '+cs+' 원에 걸림',b:'아파트 가격 '+ps+' 구간 최대 대출 '+cs+' 원 적용.'};
 }
-
 function mkCard(cls,label,r,aW,zone,own){
   var isB=r.bind==='block',rs=rsn(r.bind,zone,own,r.cap||0);
   var rLtv=r.price>0?(r.loan/r.price*100).toFixed(1):'0.0';
@@ -731,7 +709,7 @@ function mkCard(cls,label,r,aW,zone,own){
   var dRow=isB?'':'<div class="ir"><span class="irlb">DSR 최대 대출</span><span class="irvl">'+fmtW(r.dsrLoan)+'</span></div>';
   return '<div class="'+cc+'"><div class="rbadge">'+label+'</div>'
     +'<div class="rpl">내가 살 수 있는 아파트 최대 가격</div>'
-    +'<div class="rpm'+(isB?' rd':'')+'">'+fmtW(r.price)+'</div>'
+    +'<div class="rpm'+(isB?' rd':'')+'" >'+fmtW(r.price)+'</div>'
     +'<div class="rsep"></div>'
     +'<div class="ir"><span class="irlb">예상 주담대</span><span class="irvl '+lCls+'">'+lVal+'</span></div>'
     +'<div class="ir"><span class="irlb">내 순자산</span><span class="irvl">'+fmtW(aW)+'</span></div>'
@@ -741,7 +719,6 @@ function mkCard(cls,label,r,aW,zone,own){
     +'<div class="rbox"><div class="rbh">'+rs.h+'</div>'+rs.b+'</div>'
     +'<div class="vrow">검증: '+fmtW(aW)+' + '+fmtW(r.loan)+' = '+fmtW(r.price)+'</div></div>';
 }
-
 function calc(){
   var inc=Number(document.getElementById('iInc').value);
   var ass=Number(document.getElementById('iAss').value);
@@ -750,7 +727,6 @@ function calc(){
   if(isNaN(ass)||ass<0){alert('보유 순자산을 입력해 주세요.');return;}
   if(!own){alert('현재 주택 보유 수를 선택해 주세요.');return;}
   G.income=inc;G.asset=ass;G.own=own;
-  /* 계산 완료 → needCalc 게이트가 떠 있다면 숨김 (로그인된 경우) */
   _hideLoginGate();
   var iW=inc*10000,aW=ass*10000;
   var reg=cz(iW,aW,own,'reg'),met=cz(iW,aW,own,'metro'),non=cz(iW,aW,own,'non');
@@ -761,7 +737,6 @@ function calc(){
   document.getElementById('res').style.display='block';
   document.getElementById('res').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-
 function resetCalc(){
   document.getElementById('res').style.display='none';
   ['iInc','iAss'].forEach(function(id){document.getElementById(id).value='';});
@@ -770,31 +745,30 @@ function resetCalc(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ══ 정책대출: 보금자리론 만기 계산 ══ */
+/* ══ 보금자리론 만기 ══ */
 function getBgzTerm(){
-  if(G.under34) return 50;
-  if(G.newlywed && G.newlywed_u39) return 50;
-  if(G.under39) return 40;
-  if(G.newlywed && G.newlywed_u49) return 40;
+  if(G.under34)return 50;
+  if(G.newlywed&&G.newlywed_u39)return 50;
+  if(G.under39)return 40;
+  if(G.newlywed&&G.newlywed_u49)return 40;
   return 30;
 }
 function getBgzTermLabel(){
-  if(G.under34) return {yr:50, reason:'만 34세 이하 청년 우대 → 최대 50년 만기 적용'};
-  if(G.newlywed && G.newlywed_u39) return {yr:50, reason:'만 39세 이하 신혼가구 → 최대 50년 만기 적용'};
-  if(G.under39) return {yr:40, reason:'만 39세 이하 청년 우대 → 최대 40년 만기 적용'};
-  if(G.newlywed && G.newlywed_u49) return {yr:40, reason:'만 40~49세 신혼가구 → 최대 40년 만기 적용'};
-  if(G.newlywed) return {yr:30, reason:'신혼가구 나이 구간 미선택 → 기본 30년 적용 (위 나이 구간을 선택해 주세요)'};
-  return {yr:30, reason:'일반 조건 → 기본 30년 만기 적용'};
+  if(G.under34)return{yr:50,reason:'만 34세 이하 청년 우대 → 최대 50년 만기 적용'};
+  if(G.newlywed&&G.newlywed_u39)return{yr:50,reason:'만 39세 이하 신혼가구 → 최대 50년 만기 적용'};
+  if(G.under39)return{yr:40,reason:'만 39세 이하 청년 우대 → 최대 40년 만기 적용'};
+  if(G.newlywed&&G.newlywed_u49)return{yr:40,reason:'만 40~49세 신혼가구 → 최대 40년 만기 적용'};
+  if(G.newlywed)return{yr:30,reason:'신혼가구 나이 구간 미선택 → 기본 30년 적용'};
+  return{yr:30,reason:'일반 조건 → 기본 30년 만기 적용'};
 }
-
 function dtiLoan(iW,rate,termYears,dtiRatio){
   var r=rate/12,n=termYears*12,maxMonthly=iW*dtiRatio/12;
   if(r===0)return maxMonthly*n;
   return maxMonthly*(1-Math.pow(1+r,-n))/r;
 }
-
 function bgzLoanCalc(aW,iW,own){
-  var rate=0.042,termYr=getBgzTerm();
+  var termYr=getBgzTerm();
+  var rate=BGZ_RATE[termYr]||0.0490;
   var ltvRate=0.6,dtiRate=0.5;
   if(own==='first'){ltvRate=0.7;dtiRate=0.6;}
   else if(iW<=70000000){
@@ -810,90 +784,90 @@ function bgzLoanCalc(aW,iW,own){
   var hardMax=own==='first'?420000000:(G.baby?400000000:360000000);
   var loan=Math.max(0,Math.min(hardMax,ltvL,dtiL));
   var price=Math.min(aW+loan,600000000);
-  return{loan:Math.max(0,price-aW),price:price,ltvRate:ltvRate,dtiRate:dtiRate,term:termYr};
+  return{loan:Math.max(0,price-aW),price:price,ltvRate:ltvRate,dtiRate:dtiRate,term:termYr,rate:rate};
 }
-
 function getTermText(pid){
   if(pid==='p1'||pid==='p2')return '최대 30년';
   if(pid==='p3'){var t=getBgzTerm();return t===50?'최대 50년':t===40?'최대 40년':'최대 30년';}
   return '최대 20년';
 }
 
+/* ══ 정책대출 상품 정의 ══ */
 var PRODS=[
-  {id:'p1',name:'신생아 특례 디딤돌대출',rate:'연 1.8%~4.5%',limit:'최대 4억 원 / 9억 이하 주택',
-    check:function(){
-      if(!G.baby)return '출산(예정) 자녀 없음';
-      if(G.own==='multi')return '2주택 이상 해당 없음';
-      if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
-      if(G.income>20000)return '소득 초과 (맞벌이 2억·외벌이 1.3억 이하 조건)';
-      return null;
-    }},
-  {id:'p2',name:'내집마련 디딤돌대출',rate:'연 2.85%~4.15%',limit:'일반 2억 / 생애최초 2.4억 / 신혼·2자녀 3.2억 원',
-    check:function(){
-      if(G.own==='multi')return '유주택 (무주택자 전용)';
-      if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
-      var lim=(G.newlywed||G.baby)?8500:(G.own==='first'?7000:6000);
-      if(G.income>lim){var txt=(G.newlywed||G.baby)?'신혼/출산 8,500만':(G.own==='first'?'생애최초 7,000만':'일반 6,000만');return '소득 초과 ('+txt+' 이하 조건)';}
-      return null;
-    }},
-  {id:'p3',name:'보금자리론',rate:'연 4.05%~4.35%',limit:'일반 3.6억 / 다자녀 4억 / 생애최초 4.2억 원',
-    check:function(){if(G.own==='multi')return '2주택 이상 해당 없음';return null;}},
-  {id:'p4',name:'수익공유형 모기지',rate:'연 1.8% 고정 (처분이익 공유)',limit:'최대 2억 원 / 주택가격 70% 이내 / 6억 이하',
-    check:function(){
-      if(G.own==='multi')return '유주택 (무주택자 전용)';
-      if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
-      var lim=G.own==='first'?7000:6000;
-      if(G.income>lim)return '소득 초과 (생초 7,000만·일반 6,000만 이하 조건)';
-      return null;
-    }},
-  {id:'p5',name:'손익공유형 모기지',rate:'최초 5년 연 1.3%, 이후 연 2.3%',limit:'최대 2억 원 / 주택가격 40% 이내 / 6억 이하',
-    check:function(){
-      if(G.own==='multi')return '유주택 (무주택자 전용)';
-      if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
-      var lim=G.own==='first'?7000:6000;
-      if(G.income>lim)return '소득 초과 (생초 7,000만·일반 6,000만 이하 조건)';
-      return null;
-    }}
+  {id:'p1',name:'신생아 특례 디딤돌대출',
+   rate:'연 2.05%~4.50%',
+   limit:'대출 최대 4억 원 / 9억 이하 주택',
+   check:function(){
+     if(!G.baby)return '출산(예정) 자녀 없음';
+     if(G.own==='multi')return '2주택 이상 해당 없음';
+     if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
+     if(G.income>20000)return '소득 초과 (맞벌이 2억·외벌이 1.3억 이하 조건)';
+     return null;
+   }},
+  {id:'p2',name:'내집마련 디딤돌대출',
+   rate:'연 3.10%~4.15%',
+   limit:'대출 최대 2.5억 원 / 5억 이하 주택',
+   check:function(){
+     if(G.own==='multi')return '유주택 (무주택자 전용)';
+     if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
+     var lim=(G.newlywed||G.baby)?8500:(G.own==='first'?7000:6000);
+     if(G.income>lim){var txt=(G.newlywed||G.baby)?'신혼/출산 8,500만':(G.own==='first'?'생애최초 7,000만':'일반 6,000만');return '소득 초과 ('+txt+' 이하 조건)';}
+     return null;
+   }},
+  {id:'p3',name:'보금자리론',
+   rate:'연 4.90%~5.00%',
+   limit:'대출 최대 3.6억 원 / 주택가격 상한 없음',
+   check:function(){if(G.own==='multi')return '2주택 이상 해당 없음';return null;}},
+  {id:'p4',name:'수익공유형 모기지',
+   rate:'연 1.8% 고정 (처분이익 공유)',
+   limit:'대출 최대 2억 원 / 6억 이하 주택',
+   check:function(){
+     if(G.own==='multi')return '유주택 (무주택자 전용)';
+     if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
+     var lim=G.own==='first'?7000:6000;
+     if(G.income>lim)return '소득 초과 (생초 7,000만·일반 6,000만 이하 조건)';
+     return null;
+   }},
+  {id:'p5',name:'손익공유형 모기지',
+   rate:'최초 5년 연 1.3%, 이후 연 2.3%',
+   limit:'대출 최대 2억 원 / 6억 이하 주택',
+   check:function(){
+     if(G.own==='multi')return '유주택 (무주택자 전용)';
+     if(G.asset>51100)return '순자산 초과 (5.11억 이하 조건)';
+     var lim=G.own==='first'?7000:6000;
+     if(G.income>lim)return '소득 초과 (생초 7,000만·일반 6,000만 이하 조건)';
+     return null;
+   }}
 ];
 
-function checkFail(pid){
-  for(var i=0;i<PRODS.length;i++){if(PRODS[i].id===pid)return PRODS[i].check();}
-  return '상품 없음';
-}
+function checkFail(pid){for(var i=0;i<PRODS.length;i++){if(PRODS[i].id===pid)return PRODS[i].check();}return '상품 없음';}
 
-function bindReason(loan, ltvL, dtiL, cap, capLabel){
+function bindReason(loan,ltvL,dtiL,cap,capLabel){
   var vals=[{v:ltvL,l:'LTV 한도'},{v:dtiL,l:'DTI 한도'}];
-  if(cap!==undefined) vals.push({v:cap,l:capLabel||'상품 한도'});
-  var minV=loan, minL='';
+  if(cap!==undefined)vals.push({v:cap,l:capLabel||'상품 한도'});
+  var minV=loan,minL='';
   for(var k=0;k<vals.length;k++){if(Math.abs(vals[k].v-minV)<1){minL=vals[k].l;break;}}
-  if(!minL){
-    var smallest=vals[0];
-    for(var k=1;k<vals.length;k++){if(vals[k].v<smallest.v)smallest=vals[k];}
-    minL=smallest.l;
-  }
-  var reasons={
-    'LTV 한도':'보유 순자산 대비 LTV 한도가 대출액을 제한하고 있습니다. 자산을 더 모으면 한도가 늘어납니다.',
-    'DTI 한도':'연소득 기준 DTI 상환 가능액이 대출 상한입니다. 소득이 높아지면 한도가 늘어납니다.',
-    '상품 한도':'해당 정책상품의 최대 대출 한도에 도달했습니다.',
-    '주택가격 상한':'매수 가능 가격이 상품의 주택가격 상한선에 막혀 있습니다.'
-  };
-  return {label:minL, desc:reasons[minL]||'해당 조건에 의해 한도가 결정됩니다.'};
+  if(!minL){var smallest=vals[0];for(var k=1;k<vals.length;k++){if(vals[k].v<smallest.v)smallest=vals[k];}minL=smallest.l;}
+  var reasons={'LTV 한도':'보유 순자산 대비 LTV 한도가 대출액을 제한합니다.','DTI 한도':'연소득 기준 DTI 상환 가능액이 대출 상한입니다.','상품 한도':'해당 정책상품의 최대 대출 한도에 도달했습니다.','주택가격 상한':'매수 가능 가격이 상품의 주택가격 상한선에 막혀 있습니다.'};
+  return{label:minL,desc:reasons[minL]||'해당 조건에 의해 한도가 결정됩니다.'};
 }
 
 function computeDetail(pid){
   var aW=G.asset*10000,iW=G.income*10000;
   if(pid==='p1'){
-    var i=G.income,r1=i<=2000?0.021:i<=5000?0.0285:i<=8500?0.0365:0.0425;
+    var r1=lookupRate(BABY_RATE,G.income);
+    var pref=getPreferential('p1');var finalRate=Math.max(0.01,r1-pref.disc);
     var ltvL=aW*0.7/0.3,dtiL=dtiLoan(iW,r1,30,0.6);
     var rawLoan=Math.min(400000000,ltvL,dtiL);
     var loan=Math.max(0,rawLoan),price=Math.min(aW+loan,900000000);
     var actualLoan=Math.max(0,price-aW);
     var br=bindReason(rawLoan,ltvL,dtiL,400000000,'상품 한도 (4억)');
-    if(price<aW+rawLoan) br={label:'주택가격 상한',desc:'매수 가능 가격이 상품의 주택가격 상한선(9억)에 막혀 있습니다.'};
-    return{term:getTermText('p1'),rate:i<=2000?'연 1.80%~2.40%':i<=5000?'연 2.40%~3.30%':i<=8500?'연 3.30%~4.00%':'연 4.00%~4.50%',maxPrice:price,loanUsed:actualLoan,ltvLoan:ltvL,dtiLoan:dtiL,capLoan:400000000,capLabel:'상품 한도 (4억)',bindReason:br,loanStr:'4억 원',capNote:'주택가격 상한선 9억 원 / DTI 60% / LTV 70%',condTags:['순자산 5.11억 이하','맞벌이 2억·외벌이 1.3억 이하','무주택자 전용']};
+    if(price<aW+rawLoan)br={label:'주택가격 상한',desc:'주택가격 상한선(9억)에 막혀 있습니다.'};
+    return{term:getTermText('p1'),rate:'연 '+( r1*100).toFixed(2)+'%',finalRate:finalRate,actualLoan:actualLoan,termYr:30,pref:pref,maxPrice:price,loanUsed:actualLoan,ltvLoan:ltvL,dtiLoan:dtiL,capLoan:400000000,capLabel:'상품 한도 (4억)',bindReason:br,loanStr:'4억 원',capNote:'주택가격 상한선 9억 원 / DTI 60% / LTV 70%',condTags:['순자산 5.11억 이하','맞벌이 2억·외벌이 1.3억 이하','무주택자 전용']};
   }
   if(pid==='p2'){
-    var i2=G.income,r2=i2<=2000?0.0298:i2<=4000?0.033:i2<=6000?0.0365:0.0398;
+    var r2=lookupRate(DIDIMDOL_RATE,G.income);
+    var pref2=getPreferential('p2');var finalRate2=Math.max(0.01,r2-pref2.disc);
     var nb=G.newlywed||G.baby,ltvR2=G.own==='first'?0.8:0.7;
     var ltvL2=aW*ltvR2/(1-ltvR2),dtiL2=dtiLoan(iW,r2,30,0.6);
     var hm2=nb?320000000:(G.own==='first'?240000000:200000000),pm2=nb?600000000:500000000;
@@ -901,36 +875,38 @@ function computeDetail(pid){
     var loan2=Math.max(0,rawLoan2),price2=Math.min(aW+loan2,pm2);
     var actualLoan2=Math.max(0,price2-aW);
     var br2=bindReason(rawLoan2,ltvL2,dtiL2,hm2,'상품 한도 ('+fmtW(hm2)+')');
-    if(price2<aW+rawLoan2) br2={label:'주택가격 상한',desc:'매수 가능 가격이 상품의 주택가격 상한선('+fmtW(pm2)+')에 막혀 있습니다.'};
-    return{term:getTermText('p2'),rate:i2<=2000?'연 2.85%~3.10%':i2<=4000?'연 3.10%~3.50%':i2<=6000?'연 3.50%~3.80%':'연 3.80%~4.15%',maxPrice:price2,loanUsed:actualLoan2,ltvLoan:ltvL2,dtiLoan:dtiL2,capLoan:hm2,capLabel:'상품 한도 ('+fmtW(hm2)+')',bindReason:br2,loanStr:nb?'3.2억 원 (신혼/2자녀)':(G.own==='first'?'2.4억 원 (생애최초)':'2억 원 (일반)'),capNote:'주택가격 상한선 '+fmtW(pm2)+' / DTI 60% / LTV '+Math.round(ltvR2*100)+'%',condTags:['순자산 5.11억 이하','무주택자 전용',nb?'신혼/출산: 소득 8,500만 이하':(G.own==='first'?'생애최초: 소득 7,000만 이하':'일반: 소득 6,000만 이하')]};
+    if(price2<aW+rawLoan2)br2={label:'주택가격 상한',desc:'주택가격 상한선('+fmtW(pm2)+')에 막혀 있습니다.'};
+    return{term:getTermText('p2'),rate:'연 '+(r2*100).toFixed(2)+'%',finalRate:finalRate2,actualLoan:actualLoan2,termYr:30,pref:pref2,maxPrice:price2,loanUsed:actualLoan2,ltvLoan:ltvL2,dtiLoan:dtiL2,capLoan:hm2,capLabel:'상품 한도 ('+fmtW(hm2)+')',bindReason:br2,loanStr:nb?'3.2억 원 (신혼/2자녀)':(G.own==='first'?'2.4억 원 (생애최초)':'2억 원 (일반)'),capNote:'주택가격 상한선 '+fmtW(pm2)+' / DTI 60% / LTV '+Math.round(ltvR2*100)+'%',condTags:['순자산 5.11억 이하','무주택자 전용',nb?'신혼/출산: 소득 8,500만 이하':(G.own==='first'?'생애최초: 소득 7,000만 이하':'일반: 소득 6,000만 이하')]};
   }
   if(pid==='p3'){
-    var bgz=bgzLoanCalc(aW,iW,G.own),ltvPct=Math.round(bgz.ltvRate*100),dtiPct=Math.round(bgz.dtiRate*100);
-    var specNote=bgz.ltvRate===0.7?'생애최초/실수요자 LTV 70% 완화 적용':'규제지역 기본 LTV 60% / DTI 50% 적용';
+    var bgz=bgzLoanCalc(aW,iW,G.own);
+    var termYr3=bgz.term;var rate3=BGZ_RATE[termYr3]||0.0490;
+    var pref3=getPreferential('p3');/* 보금자리론은 우대금리 미적용 */
+    var ltvPct=Math.round(bgz.ltvRate*100),dtiPct=Math.round(bgz.dtiRate*100);
     var tl=getBgzTermLabel();
     var termInfoHtml='<div class="bgz-term-box">⏱ <b>적용 만기: '+tl.yr+'년</b> — '+tl.reason+'</div>';
     var hardMax=G.own==='first'?420000000:(G.baby?400000000:360000000);
     var bgzLtvL=aW*bgz.ltvRate/(1-bgz.ltvRate);
-    var bgzDtiL=dtiLoan(iW,0.042,bgz.term,bgz.dtiRate);
+    var bgzDtiL=dtiLoan(iW,rate3,termYr3,bgz.dtiRate);
     var bgzRaw=Math.min(hardMax,bgzLtvL,bgzDtiL);
     var br3=bindReason(bgzRaw,bgzLtvL,bgzDtiL,hardMax,'상품 한도 ('+fmtW(hardMax)+')');
-    if(bgz.price<aW+bgzRaw) br3={label:'주택가격 상한',desc:'매수 가능 가격이 상품의 주택가격 상한선(6억)에 막혀 있습니다.'};
-    return{term:getTermText('p3'),rate:'연 4.05%~4.35%',maxPrice:bgz.price,loanUsed:bgz.loan,ltvLoan:bgzLtvL,dtiLoan:bgzDtiL,capLoan:hardMax,capLabel:'상품 한도 ('+fmtW(hardMax)+')',bindReason:br3,loanStr:G.own==='first'?'4.2억 원 (생애최초)':(G.baby?'4억 원 (다자녀)':'3.6억 원 (일반)'),capNote:'주택가격 상한선 6억 / LTV '+ltvPct+'% / DTI '+dtiPct+'% | '+specNote,condTags:['소득·자산 제한 없음','무주택~1주택 가능','만기 '+bgz.term+'년 적용'],termInfoHtml:termInfoHtml};
+    if(bgz.price<aW+bgzRaw)br3={label:'주택가격 상한',desc:'주택가격 상한선(6억)에 막혀 있습니다.'};
+    return{term:getTermText('p3'),rate:'연 '+(rate3*100).toFixed(2)+'%',finalRate:rate3,actualLoan:bgz.loan,termYr:termYr3,pref:{disc:0,labels:[]},maxPrice:bgz.price,loanUsed:bgz.loan,ltvLoan:bgzLtvL,dtiLoan:bgzDtiL,capLoan:hardMax,capLabel:'상품 한도 ('+fmtW(hardMax)+')',bindReason:br3,loanStr:G.own==='first'?'4.2억 원 (생애최초)':(G.baby?'4억 원 (다자녀)':'3.6억 원 (일반)'),capNote:'주택가격 상한선 6억 / LTV '+ltvPct+'% / DTI '+dtiPct+'%',condTags:['소득·자산 제한 없음','무주택~1주택 가능','만기 '+bgz.term+'년 적용'],termInfoHtml:termInfoHtml};
   }
   if(pid==='p4'){
     var ltvL4=aW*0.7/0.3,dtiL4=dtiLoan(iW,0.018,20,0.6);
     var rawLoan4=Math.min(200000000,ltvL4,dtiL4);
     var loan4=Math.max(0,rawLoan4),price4=Math.min(aW+loan4,600000000);
     var br4=bindReason(rawLoan4,ltvL4,dtiL4,200000000,'상품 한도 (2억)');
-    if(price4<aW+rawLoan4) br4={label:'주택가격 상한',desc:'매수 가능 가격이 상품의 주택가격 상한선(6억)에 막혀 있습니다.'};
-    return{term:getTermText('p4'),rate:'연 1.8% 고정 (처분이익 공유)',maxPrice:price4,loanUsed:Math.max(0,price4-aW),ltvLoan:ltvL4,dtiLoan:dtiL4,capLoan:200000000,capLabel:'상품 한도 (2억)',bindReason:br4,loanStr:'2억 원 이내 (주택가격 70%)',capNote:'주택가격 상한선 6억 원 / LTV 70% / DTI 60%',condTags:['순자산 5.11억 이하','만기 20년','생초 7,000만·일반 6,000만 이하']};
+    if(price4<aW+rawLoan4)br4={label:'주택가격 상한',desc:'주택가격 상한선(6억)에 막혀 있습니다.'};
+    return{term:getTermText('p4'),rate:'연 1.80%',finalRate:0.018,actualLoan:Math.max(0,price4-aW),termYr:20,pref:{disc:0,labels:[]},maxPrice:price4,loanUsed:Math.max(0,price4-aW),ltvLoan:ltvL4,dtiLoan:dtiL4,capLoan:200000000,capLabel:'상품 한도 (2억)',bindReason:br4,loanStr:'2억 원 이내 (주택가격 70%)',capNote:'주택가격 상한선 6억 원 / LTV 70% / DTI 60%',condTags:['순자산 5.11억 이하','만기 20년','생초 7,000만·일반 6,000만 이하']};
   }
   var ltvL5=aW*0.4/0.6,dtiL5=dtiLoan(iW,0.018,20,0.6);
   var rawLoan5=Math.min(200000000,ltvL5,dtiL5);
   var loan5=Math.max(0,rawLoan5),price5=Math.min(aW+loan5,600000000);
   var br5=bindReason(rawLoan5,ltvL5,dtiL5,200000000,'상품 한도 (2억)');
-  if(price5<aW+rawLoan5) br5={label:'주택가격 상한',desc:'매수 가능 가격이 상품의 주택가격 상한선(6억)에 막혀 있습니다.'};
-  return{term:getTermText('p5'),rate:'최초 5년 연 1.3%, 이후 연 2.3%',maxPrice:price5,loanUsed:Math.max(0,price5-aW),ltvLoan:ltvL5,dtiLoan:dtiL5,capLoan:200000000,capLabel:'상품 한도 (2억)',bindReason:br5,loanStr:'2억 원 이내 (주택가격 40%)',capNote:'주택가격 상한선 6억 원 / LTV 40% / DTI 60%',condTags:['순자산 5.11억 이하','만기 20년','생초 7,000만·일반 6,000만 이하']};
+  if(price5<aW+rawLoan5)br5={label:'주택가격 상한',desc:'주택가격 상한선(6억)에 막혀 있습니다.'};
+  return{term:getTermText('p5'),rate:'연 1.30%~2.30%',finalRate:0.013,actualLoan:Math.max(0,price5-aW),termYr:20,pref:{disc:0,labels:[]},maxPrice:price5,loanUsed:Math.max(0,price5-aW),ltvLoan:ltvL5,dtiLoan:dtiL5,capLoan:200000000,capLabel:'상품 한도 (2억)',bindReason:br5,loanStr:'2억 원 이내 (주택가격 40%)',capNote:'주택가격 상한선 6억 원 / LTV 40% / DTI 60%',condTags:['순자산 5.11억 이하','만기 20년','생초 7,000만·일반 6,000만 이하']};
 }
 
 function bestForZone(zone){
@@ -938,59 +914,32 @@ function bestForZone(zone){
   var candidates=[];
   var bankR=cz(iW,aW,own,zone);
   candidates.push({price:bankR.price,prodName:bankR.bind==='block'?'대출 불가 (다주택 제한)':'시중은행 주담대',loanUsed:bankR.loan});
-  if(!checkFail('p1')){
-    var i=G.income,r1=i<=2000?0.021:i<=5000?0.0285:i<=8500?0.0365:0.0425;
-    var ltvL1=aW*(zone==='non'&&own==='first'?0.8:0.7)/(zone==='non'&&own==='first'?0.2:0.3);
-    var loan1=Math.max(0,Math.min(400000000,ltvL1,dtiLoan(iW,r1,30,0.6)));
-    candidates.push({price:Math.min(aW+loan1,900000000),prodName:'신생아 특례 디딤돌',loanUsed:Math.max(0,Math.min(aW+loan1,900000000)-aW)});
-  }
-  if(!checkFail('p2')){
-    var i2=G.income,r2=i2<=2000?0.0298:i2<=4000?0.033:i2<=6000?0.0365:0.0398;
-    var nb=G.newlywed||G.baby,ltvR2=own==='first'?(zone==='non'?0.8:0.7):0.7;
-    var hm2=nb?320000000:(own==='first'?240000000:200000000),pm2=nb?600000000:500000000;
-    var loan2=Math.max(0,Math.min(hm2,ltvAsset(aW,ltvR2),dtiLoan(iW,r2,30,0.6)));
-    candidates.push({price:Math.min(aW+loan2,pm2),prodName:'내집마련 디딤돌',loanUsed:Math.max(0,Math.min(aW+loan2,pm2)-aW)});
-  }
-  if(!checkFail('p3')){
-    var bgz=bgzLoanCalc(aW,iW,own);
-    candidates.push({price:bgz.price,prodName:'보금자리론',loanUsed:bgz.loan});
-  }
-  var best=candidates[0];
-  for(var ci=1;ci<candidates.length;ci++){if(candidates[ci].price>best.price)best=candidates[ci];}
+  if(!checkFail('p1')){var r1=lookupRate(BABY_RATE,G.income);var ltvL1=aW*0.7/0.3;var loan1=Math.max(0,Math.min(400000000,ltvL1,dtiLoan(iW,r1,30,0.6)));candidates.push({price:Math.min(aW+loan1,900000000),prodName:'신생아 특례 디딤돌',loanUsed:Math.max(0,Math.min(aW+loan1,900000000)-aW)});}
+  if(!checkFail('p2')){var r2=lookupRate(DIDIMDOL_RATE,G.income);var nb=G.newlywed||G.baby,ltvR2=own==='first'?0.8:0.7;var hm2=nb?320000000:(own==='first'?240000000:200000000),pm2=nb?600000000:500000000;var loan2=Math.max(0,Math.min(hm2,ltvAsset(aW,ltvR2),dtiLoan(iW,r2,30,0.6)));candidates.push({price:Math.min(aW+loan2,pm2),prodName:'내집마련 디딤돌',loanUsed:Math.max(0,Math.min(aW+loan2,pm2)-aW)});}
+  if(!checkFail('p3')){var bgz=bgzLoanCalc(aW,iW,own);candidates.push({price:bgz.price,prodName:'보금자리론',loanUsed:bgz.loan});}
+  var best=candidates[0];for(var ci=1;ci<candidates.length;ci++){if(candidates[ci].price>best.price)best=candidates[ci];}
   return best;
 }
 
 var BONUS_MAP={
-  p1:{baby:{msg:'🍼 출산 특례 적용 중! 금리 최저 1.8% 우대'}},
+  p1:{baby:{msg:'🍼 출산 특례 적용 중! 금리 최저 2.05% 우대'}},
   p2:{baby:{msg:'👶 출산가구 특례: 한도 3.2억·금리 우대 적용 중!'},newlywed:{msg:'💍 신혼가구 특례: 한도 3.2억·금리 우대 적용 중!'}},
   p3:{baby:{msg:'🎉 다자녀 특례: 한도 4억 원 상향 적용 중!'},under34:{msg:'⚡ 청년 우대: 만기 최대 50년 적용 중!'},under39:{msg:'⚡ 청년 우대: 만기 최대 40년 적용 중!'}}
 };
-
 function applyBonusBadges(){
   var pids=['p1','p2','p3','p4','p5'];
   for(var i=0;i<pids.length;i++){
-    var pid=pids[i];
-    var card=document.getElementById('card-'+pid);
-    if(!card)continue;
-    var bonusEl=card.querySelector('.plc-bonus');
-    if(!bonusEl)continue;
-    var map=BONUS_MAP[pid]||{};
-    var msg=null;
-    if(pid==="p3"&&G.newlywed&&G.newlywed_u39)msg='💍 신혼 우대: 만기 최대 50년 적용 중! (만 39세 이하)';
-    else if(pid==="p3"&&G.newlywed&&G.newlywed_u49)msg='💍 신혼 우대: 만기 최대 40년 적용 중! (만 40~49세)';
+    var pid=pids[i];var card=document.getElementById('card-'+pid);if(!card)continue;
+    var bonusEl=card.querySelector('.plc-bonus');if(!bonusEl)continue;
+    var map=BONUS_MAP[pid]||{};var msg=null;
+    if(pid==='p3'&&G.newlywed&&G.newlywed_u39)msg='💍 신혼 우대: 만기 최대 50년 적용 중!';
+    else if(pid==='p3'&&G.newlywed&&G.newlywed_u49)msg='💍 신혼 우대: 만기 최대 40년 적용 중!';
     else if(G.under34&&map.under34)msg=map.under34.msg;
     else if(G.newlywed&&map.newlywed)msg=map.newlywed.msg;
     else if(G.baby&&map.baby)msg=map.baby.msg;
     else if(G.under39&&map.under39)msg=map.under39.msg;
-    if(msg){
-      bonusEl.textContent=msg;bonusEl.classList.add('show');card.classList.add('bonus-active');
-      var tb=card.querySelector('.det-badge.blue,.det-badge.purple,.det-badge.fire');
-      if(tb){tb.className='det-badge fire';tb.textContent='만기: '+getTermText(pid);}
-    }else{
-      bonusEl.textContent='';bonusEl.classList.remove('show');card.classList.remove('bonus-active');
-      var tb2=card.querySelector('.det-badge.fire');
-      if(tb2){var isBgz=pid==='p3';tb2.className='det-badge '+(isBgz&&(G.newlywed||G.under34)?'purple':'blue');tb2.textContent='만기: '+getTermText(pid);}
-    }
+    if(msg){bonusEl.textContent=msg;bonusEl.classList.add('show');card.classList.add('bonus-active');}
+    else{bonusEl.textContent='';bonusEl.classList.remove('show');card.classList.remove('bonus-active');}
   }
 }
 
@@ -1015,18 +964,11 @@ function runPol(){
     if(ok){
       var det=computeDetail(p.id),aStr=fmtW(G.asset*10000),mStr=fmtW(det.maxPrice),lStr=fmtW(det.loanUsed);
       var tagsHtml='';
-      if(det.condTags&&det.condTags.length){
-        tagsHtml='<div class="cond-row">';
-        for(var t=0;t<det.condTags.length;t++)tagsHtml+='<span class="cond-tag">'+det.condTags[t]+'</span>';
-        tagsHtml+='</div>';
-      }
-      var termBadge='blue';
-      if(p.id==='p3'&&(G.newlywed||G.under34))termBadge='purple';
+      if(det.condTags&&det.condTags.length){tagsHtml='<div class="cond-row">';for(var t=0;t<det.condTags.length;t++)tagsHtml+='<span class="cond-tag">'+det.condTags[t]+'</span>';tagsHtml+='</div>';}
+      var termBadge='blue';if(p.id==='p3'&&(G.newlywed||G.under34))termBadge='purple';
       var termInfoSection=det.termInfoHtml||'';
       var br=det.bindReason;
-      var ltvFmt=fmtW(Math.min(det.ltvLoan,999999999999));
-      var dtiFmt=fmtW(Math.min(det.dtiLoan,999999999999));
-      var capFmt=fmtW(det.capLoan);
+      var ltvFmt=fmtW(Math.min(det.ltvLoan,999999999999));var dtiFmt=fmtW(Math.min(det.dtiLoan,999999999999));var capFmt=fmtW(det.capLoan);
       var isLtv=(br&&br.label==='LTV 한도'),isDti=(br&&br.label==='DTI 한도'),isCap=(br&&(br.label==='상품 한도'||br.label===det.capLabel)),isPriceCap=(br&&br.label==='주택가격 상한');
       var cmpHtml='<div class="pol-cmp">'
         +'<div class="pol-cmp-row'+(isLtv?' active':'')+'"><span class="pol-cmp-lbl">LTV 한도 대출</span><span class="pol-cmp-val">'+ltvFmt+(isLtv?' ← 한도 결정':'')+'</span></div>'
@@ -1044,17 +986,14 @@ function runPol(){
         +'<span class="det-badge '+termBadge+'">만기: '+det.term+'</span>'
         +'<span class="det-badge green">우대금리 포함 상품</span>'
         +'</div>'
-        +tagsHtml
-        +termInfoSection
+        +tagsHtml+termInfoSection
         +'<div class="det-price-lbl">내 순자산 맞춤 최대 매수 가능 가격</div>'
         +'<div class="det-price">'+mStr+'</div>'
         +'<div class="det-desc">'
         +'해당 정책자금 활용 시, 최대 <b>'+lStr+'</b>의 대출 실행이 가능합니다. 보유 순자산 <b>'+aStr+'</b>을 합산하여 최종 <b>'+mStr+'</b> 가격대의 아파트까지 노려볼 수 있습니다.<br>'
         +'<span class="cap-note">※ 조건: '+det.capNote+'</span>'
         +'</div>'
-        +cmpHtml
-        +bindHtml
-        +vrowHtml
+        +cmpHtml+bindHtml+vrowHtml
         +'</div>';
     }
     html+='<div class="plc '+(ok?'ok':'no')+'" id="card-'+p.id+'" onclick="if('+ok+')this.classList.toggle(\'open\')">'
@@ -1067,380 +1006,11 @@ function runPol(){
   document.getElementById('plFb').style.display=allFail?'block':'none';
 }
 
-
-/* ══════════════════════════════════════════════════════
-   최적 혼합 대출 시뮬레이터
-   ══════════════════════════════════════════════════════ */
-
-/* ── 정책대출 파라미터 테이블 (관리자 수정 영역) ── */
-var MIX_PARAMS = [
-  {
-    id: 'p1', name: '신생아 특례 디딤돌',
-    baseRate: 0.021,      /* 최저 기준금리 (소득별 가변 — computeMixRate 참조) */
-    maxCap: 400000000,    /* 최대 한도 4억 */
-    term: 30,             /* 만기(년) */
-    ltv: 0.70,            /* LTV 70% */
-    dti: 0.60,            /* DTI 60% */
-    priceCap: 900000000,  /* 주택가격 상한 9억 */
-    incomeMax: 200000,    /* 소득상한 (맞벌이 2억 = 20000만, 단위: 만원 — check 함수에서 별도 검증) */
-    assetMax:  51100      /* 자산상한 5.11억 (만원) */
-  },
-  {
-    id: 'p2', name: '내집마련 디딤돌',
-    baseRate: 0.0298,
-    maxCap: 320000000,    /* 신혼/2자녀 3.2억 (일반 2억 — eligibleCap에서 결정) */
-    term: 30,
-    ltv: 0.70,
-    dti: 0.60,
-    priceCap: 600000000,
-    incomeMax: 8500,
-    assetMax:  51100
-  },
-  {
-    id: 'p3', name: '보금자리론',
-    baseRate: 0.042,
-    maxCap: 420000000,    /* 생애최초 4.2억 (일반 3.6억 — eligibleCap에서 결정) */
-    term: 30,             /* 만기 30~50년 — getBgzTerm()에서 결정 */
-    ltv: 0.60,
-    dti: 0.50,
-    priceCap: 600000000,
-    incomeMax: null,      /* 소득 제한 없음 */
-    assetMax:  null
-  },
-  {
-    id: 'p4', name: '수익공유형 모기지',
-    baseRate: 0.018,
-    maxCap: 200000000,
-    term: 20,
-    ltv: 0.70,
-    dti: 0.60,
-    priceCap: 600000000,
-    incomeMax: 7000,
-    assetMax:  51100
-  },
-  {
-    id: 'p5', name: '손익공유형 모기지',
-    baseRate: 0.013,      /* 최초 5년 1.3% (이후 2.3% — 가중평균 계산용 혼합) */
-    maxCap: 200000000,
-    term: 20,
-    ltv: 0.40,
-    dti: 0.60,
-    priceCap: 600000000,
-    incomeMax: 7000,
-    assetMax:  51100
-  }
-];
-
-/* ── 전역 지역 상태 ── */
-var G_MIX_ZONE = 'reg';
-
-function setMixZone(zone) {
-  G_MIX_ZONE = zone;
-  ['reg','metro','non'].forEach(function(z) {
-    document.getElementById('mzt-'+z).className = 'mix-ztab' + (z===zone?' on':'');
-  });
-  renderMixProdTable();
-}
-
-/* ── 파라미터 테이블 토글 ── */
-function toggleParamTable() {
-  var tbl = document.getElementById('paramTable');
-  var icon = document.getElementById('paramToggleIcon');
-  var open = tbl.classList.toggle('open');
-  icon.textContent = open ? '▼' : '▶';
-}
-
-/* ── 파라미터 테이블 렌더링 (관리자 확인용) ── */
-function renderParamTable() {
-  var tbody = document.getElementById('paramTableBody');
-  var rows = '';
-  MIX_PARAMS.forEach(function(p) {
-    rows += '<tr>'
-      + '<td><b>' + p.name + '</b></td>'
-      + '<td>' + fmtW(p.maxCap) + '</td>'
-      + '<td>' + (p.baseRate*100).toFixed(1) + '%' + (p.id==='p5'?' (5yr)':'') + '</td>'
-      + '<td>' + p.term + '</td>'
-      + '<td>' + Math.round(p.ltv*100) + '%</td>'
-      + '<td>' + Math.round(p.dti*100) + '%</td>'
-      + '<td>' + fmtW(p.priceCap) + '</td>'
-      + '<td>' + (p.incomeMax ? p.incomeMax.toLocaleString() : '제한없음') + '</td>'
-      + '<td>' + (p.assetMax ? p.assetMax.toLocaleString() : '제한없음') + '</td>'
-      + '</tr>';
-  });
-  tbody.innerHTML = rows;
-}
-
-/* ── 상품별 자격 검증 (checkFail 재사용) ── */
-function mixEligible(pid) {
-  return !checkFail(pid);
-}
-
-/* ── 상품별 실제 적용 금리 계산 ── */
-function computeMixRate(pid) {
-  var i = G.income;
-  if (pid==='p1') return i<=2000?0.021:i<=5000?0.0285:i<=8500?0.0365:0.0425;
-  if (pid==='p2') return i<=2000?0.0298:i<=4000?0.033:i<=6000?0.0365:0.0398;
-  if (pid==='p3') return 0.042;
-  if (pid==='p4') return 0.018;
-  if (pid==='p5') return 0.018; /* 가중평균: 5yr@1.3 + 15yr@2.3 ≈ 1.8% */
-  return 0.042;
-}
-
-/* ── 상품별 실제 한도 역산 ── */
-function computeMixLoanCap(pid, aW, iW, zone) {
-  var p = MIX_PARAMS.filter(function(x){return x.id===pid;})[0];
-  if (!p) return 0;
-  var ltvRate = p.ltv;
-  var termYr  = p.term;
-  if (pid==='p3') { ltvRate = (G.own==='first')?0.7:0.6; termYr = getBgzTerm(); }
-  if (pid==='p2') { ltvRate = (G.own==='first')?0.8:0.7; }
-  var dtiRate = p.dti;
-  var rate    = computeMixRate(pid);
-  /* 상품별 실제 최대 한도 */
-  var eligibleCap = p.maxCap;
-  if (pid==='p2') {
-    var nb2 = G.newlywed||G.baby;
-    eligibleCap = nb2?320000000:(G.own==='first'?240000000:200000000);
-  }
-  if (pid==='p3') {
-    eligibleCap = G.own==='first'?420000000:(G.baby?400000000:360000000);
-  }
-  var ltvL  = aW * ltvRate / (1 - ltvRate);
-  var dtiL  = dtiLoan(iW, rate, termYr, dtiRate);
-  var raw   = Math.min(eligibleCap, ltvL, dtiL);
-  /* 주택가격 상한 반영 */
-  var priceIfUsed = aW + raw;
-  if (priceIfUsed > p.priceCap) raw = Math.max(0, p.priceCap - aW);
-  return Math.max(0, raw);
-}
-
-/* ── 정책대출 할당 우선순위 (한도 극대화 → 금리 최적화) ── */
-var MIX_PRIORITY = ['p1','p2','p3','p4','p5'];
-
-/* ── 월 원리금 계산 ── */
-function monthlyPayment(principal, annualRate, termYears) {
-  if (principal <= 0) return 0;
-  var r = annualRate / 12, n = termYears * 12;
-  if (r === 0) return principal / n;
-  return principal * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
-}
-
-/* ── 상품 목록 테이블 렌더링 ── */
-function renderMixProdTable() {
-  if (!G.income || !G.own) return;
-  var aW = G.asset*10000, iW = G.income*10000;
-  var tbody = document.getElementById('mixProdBody');
-  var rows = '';
-  MIX_PARAMS.forEach(function(p) {
-    var ok = mixEligible(p.id);
-    var rate = computeMixRate(p.id);
-    var cap  = ok ? computeMixLoanCap(p.id, aW, iW, G_MIX_ZONE) : 0;
-    var failReason = checkFail(p.id);
-    rows += '<tr class="' + (ok?'eligible':'ineligible') + '">'
-      + '<td><div class="mix-prod-name">' + p.name + '</div>'
-      + (ok?'':'<div class="mix-prod-sub">탈락: ' + failReason + '</div>') + '</td>'
-      + '<td><span class="mix-rate-chip'+(ok?'':' na')+'">' + (rate*100).toFixed(2) + '%</span></td>'
-      + '<td>' + (ok ? fmtW(cap) : '—') + '</td>'
-      + '<td><span class="mix-elig-dot '+(ok?'ok':'no')+'"></span></td>'
-      + '</tr>';
-  });
-  tbody.innerHTML = rows;
-}
-
-/* ── 핵심 알고리즘: 최적 혼합 대출 계산 ── */
-function runMixSim() {
-  if (!G.income || !G.own) {
-    alert('주담대 한도 탭에서 연소득·순자산·주택보유수를 먼저 입력하고 계산해 주세요.');
-    return;
-  }
-  var aW = G.asset * 10000;
-  var iW = G.income * 10000;
-  var zone = G_MIX_ZONE;
-  var bankRateRaw = parseFloat(document.getElementById('mixBankRate').value);
-  if (isNaN(bankRateRaw) || bankRateRaw <= 0) { alert('일반 주담대 금리를 올바르게 입력해 주세요.'); return; }
-  var bankRate = bankRateRaw / 100;
-
-  /* STEP 1: 지역별 일반 주담대 총 한도 (최대 매수 가능 자산 기준) */
-  var bankResult = cz(iW, aW, G.own, zone);
-  var maxBankLoan = bankResult.loan; /* DSR/LTV/CAP 필터링된 일반 주담대 최대 */
-
-  /* STEP 2: 정책대출 우선순위별 할당 */
-  var allocated = [];      /* {pid, name, loan, rate, term} */
-  var totalPolicyLoan = 0;
-  var logSteps = [];
-
-  MIX_PRIORITY.forEach(function(pid) {
-    if (!mixEligible(pid)) {
-      logSteps.push({pid:pid, skip:true, reason: checkFail(pid)});
-      return;
-    }
-    var cap = computeMixLoanCap(pid, aW, iW, zone);
-    if (cap <= 0) { logSteps.push({pid:pid, skip:true, reason:'한도 0원 (LTV/DTI/자산 부족)'}); return; }
-    /* 이미 할당된 정책대출과 합산 → 일반 주담대 최대 한도를 넘지 않도록 */
-    var remaining = Math.max(0, maxBankLoan - totalPolicyLoan);
-    var alloc = Math.min(cap, remaining);
-    if (alloc <= 0) { logSteps.push({pid:pid, skip:true, reason:'기 할당 정책대출로 한도 소진'}); return; }
-    var rate = computeMixRate(pid);
-    var p = MIX_PARAMS.filter(function(x){return x.id===pid;})[0];
-    var term = (pid==='p3') ? getBgzTerm() : p.term;
-    allocated.push({pid:pid, name:p.name, loan:alloc, rate:rate, term:term});
-    totalPolicyLoan += alloc;
-    logSteps.push({pid:pid, skip:false, alloc:alloc, cap:cap, rate:rate, term:term});
-  });
-
-  /* STEP 3: 잔여분 일반 주담대로 충당 */
-  var remainingBank = Math.max(0, maxBankLoan - totalPolicyLoan);
-  var bankTerm = 30;
-  if (remainingBank > 0) {
-    allocated.push({pid:'bank', name:'시중은행 일반 주담대', loan:remainingBank, rate:bankRate, term:bankTerm});
-  }
-
-  var totalLoan = totalPolicyLoan + remainingBank;
-  var maxBuyPrice = aW + totalLoan;
-
-  /* STEP 4: 가중평균 금리 계산 */
-  var weightedRate = 0;
-  if (totalLoan > 0) {
-    allocated.forEach(function(seg) {
-      weightedRate += seg.rate * (seg.loan / totalLoan);
-    });
-  }
-
-  /* STEP 5: 총 월 원리금 */
-  var totalMonthly = 0;
-  allocated.forEach(function(seg) {
-    totalMonthly += monthlyPayment(seg.loan, seg.rate, seg.term);
-  });
-
-  /* ── 결과 렌더링 ── */
-  renderMixResult(aW, totalLoan, maxBuyPrice, weightedRate, totalMonthly, allocated, logSteps, bankRate, zone, bankResult);
-}
-
-var SEG_COLORS = {
-  p1:'#10B981', p2:'#2563EB', p3:'#7C3AED', p4:'#F59E0B', p5:'#EF4444', bank:'#64748B'
-};
-
-function renderMixResult(aW, totalLoan, maxBuyPrice, wRate, totalMonthly, allocated, logSteps, bankRate, zone, bankResult) {
-  document.getElementById('mixResult').style.display = 'block';
-  var zoneLabel = zone==='reg'?'규제지역':zone==='metro'?'수도권 비규제':'비수도권';
-
-  /* Hero */
-  document.getElementById('mixHero').innerHTML =
-    '<div class="mix-hero-tag">🔀 최적 혼합 대출 결과 — ' + zoneLabel + '</div>'
-    + '<div class="mix-hero-label">최대 매수 가능 아파트 가격</div>'
-    + '<div class="mix-hero-price">' + fmtW(maxBuyPrice) + '</div>'
-    + '<div class="mix-hero-stats">'
-    + '<div class="mix-hero-stat"><div class="mix-hero-stat-lbl">총 대출액</div><div class="mix-hero-stat-val">' + fmtW(totalLoan) + '</div></div>'
-    + '<div class="mix-hero-stat"><div class="mix-hero-stat-lbl">가중평균 금리</div><div class="mix-hero-stat-val">' + (wRate*100).toFixed(2) + '%</div></div>'
-    + '<div class="mix-hero-stat"><div class="mix-hero-stat-lbl">월 원리금 합계</div><div class="mix-hero-stat-val">' + Math.round(totalMonthly/10000).toLocaleString() + '만 원</div></div>'
-    + '</div>';
-
-  /* Portfolio 스택 바 */
-  var stackHtml = '<div class="mix-stack">';
-  var legendHtml = '<div class="mix-seg-legend">';
-  allocated.forEach(function(seg) {
-    var pct = totalLoan > 0 ? (seg.loan/totalLoan*100).toFixed(1) : '0';
-    var col = SEG_COLORS[seg.pid] || '#94A3B8';
-    stackHtml += '<div class="mix-stack-seg" style="width:'+pct+'%;background:'+col+'"></div>';
-    legendHtml += '<div class="mix-seg-row">'
-      + '<div style="display:flex;align-items:center;gap:6px;flex:1">'
-      + '<div class="mix-seg-dot" style="background:'+col+'"></div>'
-      + '<span class="mix-seg-name">' + seg.name + '</span>'
-      + '</div>'
-      + '<span class="mix-seg-pct">' + pct + '%</span>'
-      + '<span class="mix-seg-amt">' + fmtW(seg.loan) + '</span>'
-      + '</div>';
-  });
-  stackHtml += '</div>';
-  legendHtml += '</div>';
-  document.getElementById('mixPort').innerHTML =
-    '<div class="mix-port-hd">최적 대출 포트폴리오 구성</div>'
-    + stackHtml + legendHtml;
-
-  /* 논리 리포트 */
-  var stepsHtml = '';
-  var stepNum = 0;
-  logSteps.forEach(function(s) {
-    if (s.skip) {
-      stepsHtml += '<div class="mix-logic-step" style="opacity:.5">'
-        + '<div class="mix-step-num" style="background:#CBD5E1">' + '✕' + '</div>'
-        + '<div class="mix-step-body">'
-        + '<div class="mix-step-title">' + (MIX_PARAMS.filter(function(x){return x.id===s.pid;})[0]||{}).name + '</div>'
-        + '<div class="mix-step-desc">제외 사유: ' + s.reason + '</div>'
-        + '</div></div>';
-    } else {
-      stepNum++;
-      var ratePct = (s.rate*100).toFixed(2);
-      stepsHtml += '<div class="mix-logic-step">'
-        + '<div class="mix-step-num">' + stepNum + '</div>'
-        + '<div class="mix-step-body">'
-        + '<div class="mix-step-title">' + (MIX_PARAMS.filter(function(x){return x.id===s.pid;})[0]||{}).name + ' 배정</div>'
-        + '<div class="mix-step-desc">자격 통과 · 적용 금리 ' + ratePct + '% · 상품 한도 ' + fmtW(s.cap) + '<br>'
-        + '한도 극대화 원칙에 따라 가능 한도를 전액 선배정합니다.</div>'
-        + '<div class="mix-step-result">배정액: ' + fmtW(s.alloc) + '</div>'
-        + '</div></div>';
-    }
-  });
-  /* 일반 주담대 스텝 */
-  var bankSeg = allocated.filter(function(x){return x.pid==='bank';})[0];
-  if (bankSeg && bankSeg.loan > 0) {
-    stepNum++;
-    stepsHtml += '<div class="mix-logic-step">'
-      + '<div class="mix-step-num">' + stepNum + '</div>'
-      + '<div class="mix-step-body">'
-      + '<div class="mix-step-title">잔여분 — 시중은행 일반 주담대</div>'
-      + '<div class="mix-step-desc">정책대출 배정 후 잔여 한도 ' + fmtW(bankSeg.loan) + '을 일반 주담대로 충당합니다. (금리 ' + (bankRate*100).toFixed(2) + '%)</div>'
-      + '<div class="mix-step-result">배정액: ' + fmtW(bankSeg.loan) + '</div>'
-      + '</div></div>';
-  }
-  document.getElementById('mixLogic').innerHTML =
-    '<div class="mix-logic-hd">왜 이 조합이 최적인가? — 단계별 논리 리포트</div>'
-    + stepsHtml
-    + '<div style="margin-top:10px;padding:9px 11px;background:#EFF6FF;border-radius:8px;font-size:10px;color:#1E40AF;line-height:1.7">'
-    + '📌 <b>한도 극대화 원칙:</b> DSR/LTV 내 최대 차입 가능 금액 ' + fmtW(bankResult.loan) + ' 중 정책대출이 '
-    + fmtW(totalPolicyLoaned(allocated)) + '를 선점. 나머지 ' + fmtW(Math.max(0,bankResult.loan-totalPolicyLoaned(allocated))) + '을 일반 주담대가 보충.<br>'
-    + '📌 <b>금리 최적화:</b> 저금리 정책대출을 최대한 채우고, 잔여분에만 은행 금리(' + (bankRate*100).toFixed(2) + '%)를 적용해 전체 가중평균 ' + (wRate*100).toFixed(2) + '%를 달성.'
-    + '</div>';
-
-  /* 월 원리금 상세 */
-  var payRows = '';
-  allocated.forEach(function(seg) {
-    var mp = monthlyPayment(seg.loan, seg.rate, seg.term);
-    payRows += '<div class="mix-pay-row">'
-      + '<span class="mix-pay-lbl">' + seg.name + ' (' + (seg.rate*100).toFixed(2) + '% / ' + seg.term + '년)</span>'
-      + '<span class="mix-pay-val">' + Math.round(mp/10000).toLocaleString() + '만 원/월</span>'
-      + '</div>';
-  });
-  document.getElementById('mixPay').innerHTML =
-    '<div class="mix-pay-hd">상품별 월 원리금 상세 (원리금균등상환 기준)</div>'
-    + payRows
-    + '<div class="mix-pay-total">'
-    + '<div class="mix-pay-total-lbl">총 월 원리금 합계</div>'
-    + '<div class="mix-pay-total-val">' + Math.round(totalMonthly/10000).toLocaleString() + '만 원 / 월</div>'
-    + '</div>';
-
-  document.getElementById('mixResult').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function totalPolicyLoaned(allocated) {
-  var t = 0;
-  allocated.forEach(function(seg){ if(seg.pid!=='bank') t+=seg.loan; });
-  return t;
-}
-
-/* ── 탭2 진입 시 시뮬레이터 초기화 ── */
-function initMixSim() {
-  if (!G.income || !G.own) return;
-  renderParamTable();
-  renderMixProdTable();
-  document.getElementById('mixSim').style.display = 'block';
-}
-
 /* ══ 탭2: 맞춤 부동산 유형 ══ */
 var TYPE_SPEC={
-  'new' :{loc:30,prod:100,fut:40, label:'신축 (10년 이내)',   badge:'🔵 신축',   minYr:2015,maxYr:2025},
-  'semi':{loc:60,prod:70, fut:50, label:'준신축 (10~20년차)', badge:'🟢 준신축', minYr:2005,maxYr:2014},
-  'old' :{loc:80,prod:10, fut:85, label:'구축 (20~30년차)',   badge:'🟡 구축',   minYr:1995,maxYr:2004}
+  'new' :{loc:30,prod:100,fut:40,label:'신축 (10년 이내)',  badge:'🔵 신축',  minYr:2015,maxYr:2025},
+  'semi':{loc:60,prod:70, fut:50,label:'준신축 (10~20년차)',badge:'🟢 준신축',minYr:2005,maxYr:2014},
+  'old' :{loc:80,prod:10, fut:85,label:'구축 (20~30년차)', badge:'🟡 구축',  minYr:1995,maxYr:2004}
 };
 var AGE_BANNER={
   20:{cls:'age-20',tag:'🔥 20대 자산 전략',title:'당신은 사서 고생할 나이!',sub:'신축 라이프는 아직 잠시 보류입니다. 젊음이 최대 무기. 입지 좋은 구축에 몸을 던지는 게 자산 체급을 키울 마지노선입니다.'},
@@ -1460,14 +1030,10 @@ var RANK_BADGES=['rank1','rank2','rank3'];
 
 function getSizeRec(av,fv){
   if(av>=70){return fv<=2?'20~30평대 <small style="color:rgba(255,255,255,.8)">(노후 보정)</small>':'30평대 이상';}
-  if(fv<=2)return '10~20평대'; if(fv<=4)return '20~30평대'; return '30평대 이상';
+  if(fv<=2)return '10~20평대';if(fv<=4)return '20~30평대';return '30평대 이상';
 }
 function barGroupHtml(spec){
-  function row(l,p,cls){
-    return '<div class="bar-row"><span class="bar-lbl">'+l+'</span>'
-      +'<div class="bar-track"><div class="bar-fill '+cls+'" style="width:'+p+'%"></div></div>'
-      +'<span class="bar-pct">'+p+'%</span></div>';
-  }
+  function row(l,p,cls){return '<div class="bar-row"><span class="bar-lbl">'+l+'</span><div class="bar-track"><div class="bar-fill '+cls+'" style="width:'+p+'%"></div></div><span class="bar-pct">'+p+'%</span></div>';}
   return '<div class="bar-group">'+row('입지',spec.loc,'fill-loc')+row('상품성',spec.prod,'fill-prod')+row('미래수익',spec.fut,'fill-fut')
     +'<div class="bar-legend"><div class="leg-dot"><span style="background:#10B981"></span>입지</div><div class="leg-dot"><span style="background:#0EA5E9"></span>상품성</div><div class="leg-dot"><span style="background:#F59E0B"></span>미래수익</div></div></div>';
 }
@@ -1480,14 +1046,87 @@ function verdictCardHtml(rankCls,rankLabel,tp,desc){
     +'<div class="vc-bar-wrap">'+barGroupHtml(tp)+'</div>'
     +'</div>';
 }
+
+/* ══ 3탭 리포트: 월소득 + 정책대출 원리금 계산 ══ */
+function buildLoanReport(){
+  if(!G.income||!G.own)return '';
+  var monthlyIncome=Math.round(G.income*10000/12);
+  var reports=[];
+  /* 자격 통과한 상품 대상으로 계산 */
+  for(var i=0;i<PRODS.length;i++){
+    var p=PRODS[i];
+    if(p.check())continue;/* 탈락 상품 제외 */
+    var det=computeDetail(p.id);
+    if(det.loanUsed<=0)continue;
+    var pref=det.pref||{disc:0,labels:[]};
+    var effectiveRate=Math.max(0.01,det.finalRate-pref.disc);
+    var monthly=calcMonthly(det.loanUsed,effectiveRate,det.termYr);
+    reports.push({
+      name:p.name,
+      loan:det.loanUsed,
+      baseRate:det.finalRate,
+      discount:pref.disc,
+      effectiveRate:effectiveRate,
+      prefLabels:pref.labels,
+      monthly:monthly,
+      termYr:det.termYr
+    });
+  }
+  if(reports.length===0)return '';
+  /* 최저 월납입 찾기 */
+  var bestIdx=0;
+  for(var j=1;j<reports.length;j++){if(reports[j].effectiveRate<reports[bestIdx].effectiveRate)bestIdx=j;}
+
+  var html='<div class="report-card">'
+    +'<div class="report-card-hd">'
+    +'<div class="report-icon">📋</div>'
+    +'<div><div class="report-title">전문가 상담 리포트</div><div class="report-sub">정책대출 금리 테이블 + 우대금리 반영 기준</div></div>'
+    +'</div>'
+    +'<div class="report-income-row">'
+    +'<div class="report-income-label">💰 소득 정보</div>'
+    +'<div class="report-income-vals">'
+    +'<div class="report-income-item"><div class="report-income-item-label">연소득</div><div class="report-income-item-val">'+G.income.toLocaleString('ko-KR')+'만 원</div></div>'
+    +'<div class="report-income-item"><div class="report-income-item-label">월소득 환산</div><div class="report-income-item-val">'+Math.round(monthlyIncome/10000).toLocaleString('ko-KR')+'만 원</div></div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="font-size:10px;font-weight:800;color:#1E40AF;margin-bottom:8px;letter-spacing:.3px">📊 상품별 월 원리금 (원리금균등상환)</div>'
+    +'<div class="report-loan-grid">';
+
+  for(var k=0;k<reports.length;k++){
+    var r=reports[k];
+    var isBest=(k===bestIdx);
+    var prefHtml=r.prefLabels.length?'<div class="lrr-pref">우대: '+r.prefLabels.join(' + ')+'</div>':'';
+    html+='<div class="loan-report-row'+(isBest?' best':'')+'">'
+      +'<div class="lrr-top">'
+      +'<div class="lrr-name">'+r.name+'</div>'
+      +'<div class="lrr-rate">연 '+(r.effectiveRate*100).toFixed(2)+'%</div>'
+      +'</div>'
+      +'<div class="lrr-detail">'
+      +'<div class="lrr-item"><div class="lrr-item-label">대출금</div><div class="lrr-item-val">'+Math.round(r.loan/10000).toLocaleString('ko-KR')+'만</div></div>'
+      +'<div class="lrr-item"><div class="lrr-item-label">만기</div><div class="lrr-item-val">'+r.termYr+'년</div></div>'
+      +'<div class="lrr-item"><div class="lrr-item-label">월 납입</div><div class="lrr-item-val" style="color:'+(isBest?'#065F46':'#1E40AF')+'">'+Math.round(r.monthly/10000).toLocaleString('ko-KR')+'만</div></div>'
+      +'</div>'
+      +prefHtml
+      +'</div>';
+  }
+
+  html+='</div>'
+    +'<div class="report-note">'
+    +'※ 금리는 정책 고시 기준이며 금융기관 심사·신용도에 따라 달라질 수 있습니다.<br>'
+    +'※ 월소득 대비 월납입 비율: '
+    +reports.map(function(r){return r.name.replace(/대출/,'').replace(/모기지/,'')+'('+(r.monthly/monthlyIncome*100).toFixed(1)+'%)';}).join(' / ')
+    +'</div>'
+    +'</div>';
+  return html;
+}
+
 function renderFinalSummary(ageVal,famVal){
   var box=document.getElementById('final-summary-box');
   var hasCalc=G.income>0&&G.own;
   var sizePlain=getSizeRec(ageVal,famVal).replace(/<[^>]*>/g,'');
   var ageKey=ageVal>=70?70:ageVal>=50?50:ageVal>=30?30:20;
   var ageCls=ageKey===70?'age-70':ageKey===50?'age-50':ageKey===30?'age-30':'age-20';
-  var order=AGE_ORDER[ageKey];
-  var top1=TYPE_SPEC[order[0]];
+  var order=AGE_ORDER[ageKey];var top1=TYPE_SPEC[order[0]];
   var SUMMARY_TITLE={20:'🔥 주문 내역: 사서 고생 자원입대 세트 배달 중',30:'⚡ 주문 내역: 인생 정점! 영끌 마지노선 황금 세트',50:'☕ 주문 내역: 노후 자산 방어 및 안락함 반반 세트',70:'👴 주문 내역: 오늘이 가장 젊다! 인생 역전 프리미엄 세트'};
   var userMaxPrice=0;
   if(hasCalc){
@@ -1501,14 +1140,12 @@ function renderFinalSummary(ageVal,famVal){
     var inner=best?'<div class="fsb-zone-price">'+fmtW(best.price)+'</div><div class="fsb-zone-prod">'+best.prodName+'</div>':'<div class="fsb-zone-price fsb-no-val">먼저 계산 필요</div>';
     return '<div class="fsb-zone-cell '+zc+'"><div class="fsb-zone-badge '+bc+'">'+label+'</div>'+inner+'</div>';
   }
-  var sniperHtml='<div class="fsb-sniper-wrap">'
-    +'<div class="fsb-sniper-hd">🎯 내 자산 맞춤형 연식별 최적 저격 추천 단지</div>'
-    +'<div class="wip-box wip-apt">'
-    +'<div class="wip-icon">🚧</div>'
-    +'<div class="wip-title">빅데이터 기반 맞춤형 아파트<br>추천 시스템 준비 중</div>'
-    +'<div class="wip-desc">국토교통부 실거래 빅데이터와 AI 매칭 엔진을<br>연동한 맞춤형 단지 추천 시스템을 구축 중입니다.<br>곧 업데이트됩니다.</div>'
-    +'</div></div>';
+  var sniperHtml='<div class="fsb-sniper-wrap"><div class="fsb-sniper-hd">🎯 내 자산 맞춤형 연식별 최적 저격 추천 단지</div><div class="wip-box wip-apt"><div class="wip-icon">🚧</div><div class="wip-title">빅데이터 기반 맞춤형 아파트<br>추천 시스템 준비 중</div><div class="wip-desc">국토교통부 실거래 빅데이터와 AI 매칭 엔진을<br>연동한 맞춤형 단지 추천 시스템을 구축 중입니다.<br>곧 업데이트됩니다.</div></div></div>';
   var premiumHtml='<div class="fsb-sep"></div><div class="fsb-premium-wrap"><div class="fsb-premium-badge">💡 프리미엄 리포트 서비스 준비 중</div></div>';
+
+  /* 정책대출 리포트 */
+  var loanReportHtml=buildLoanReport();
+
   box.className=ageCls;
   box.innerHTML='<div class="fsb-title">'+SUMMARY_TITLE[ageKey]+'</div>'
     +'<div class="fsb-sep"></div>'
@@ -1519,10 +1156,12 @@ function renderFinalSummary(ageVal,famVal){
     +'<div class="fsb-rec-item"><div class="fsb-rec-lbl">🥇 연령 1순위 유형</div><div class="fsb-rec-val">'+top1.label+'</div></div>'
     +'<div class="fsb-rec-item"><div class="fsb-rec-lbl">📐 추천 평수</div><div class="fsb-rec-val">'+sizePlain+'</div></div>'
     +'</div>'
+    +loanReportHtml
     +sniperHtml
     +premiumHtml;
   box.style.display='block';
 }
+
 function calcRec(){
   var ageVal=parseInt(document.getElementById('iAge').value);
   var famVal=parseInt(document.getElementById('iFam').value);
@@ -1530,20 +1169,13 @@ function calcRec(){
   var isMulti=(G.own==='multi');
   if(isMulti){
     var el=document.getElementById('recResult');
-    el.innerHTML='<div class="wip-box wip-multi" style="margin-bottom:14px;">'
-      +'<div class="wip-icon">🚧</div>'
-      +'<div class="wip-title">맞춤 투자 준비 중</div>'
-      +'<div class="wip-desc">다주택자 포트폴리오 리밸런싱 전략 및<br>사이드 투자 최적화를 위한 시스템을 현재 구축 중입니다.<br>빠르게 업데이트하겠습니다.</div>'
-      +'</div>';
+    el.innerHTML='<div class="wip-box wip-multi" style="margin-bottom:14px;"><div class="wip-icon">🚧</div><div class="wip-title">맞춤 투자 준비 중</div><div class="wip-desc">다주택자 포트폴리오 리밸런싱 전략 및<br>사이드 투자 최적화를 위한 시스템을 현재 구축 중입니다.<br>빠르게 업데이트하겠습니다.</div></div>';
     el.style.display='block';
     renderFinalSummary(ageVal,famVal);
     el.scrollIntoView({behavior:'smooth',block:'start'});
     return;
   }
-  var banner=AGE_BANNER[ageKey];
-  var order=AGE_ORDER[ageKey];
-  var rankDesc=AGE_RANK_DESC[ageKey];
-  var size=getSizeRec(ageVal,famVal);
+  var banner=AGE_BANNER[ageKey];var order=AGE_ORDER[ageKey];var rankDesc=AGE_RANK_DESC[ageKey];var size=getSizeRec(ageVal,famVal);
   var html='<div class="age-banner '+banner.cls+'">'
     +'<div class="age-banner-tag">'+banner.tag+'</div>'
     +'<div class="age-banner-title">'+banner.title.replace(/\n/g,'<br>')+'</div>'
@@ -1552,32 +1184,15 @@ function calcRec(){
     +'</div>';
   html+='<div class="age-verdict-wrap"><div class="age-verdict-hd">연령대 맞춤 부동산 유형 순위</div>';
   if(ageKey===50){
-    var tp1=TYPE_SPEC[order[0]];
-    var tp2a=TYPE_SPEC[order[1]];
-    var tp2b=TYPE_SPEC[order[2]];
+    var tp1=TYPE_SPEC[order[0]],tp2a=TYPE_SPEC[order[1]],tp2b=TYPE_SPEC[order[2]];
     html+=verdictCardHtml('rank1','🥇 1순위',tp1,rankDesc[order[0]]);
     html+='<div class="verdict-tied-label">🥈 공동 2순위</div>'
       +'<div class="verdict-tied-grid">'
-      +'<div class="verdict-card rank2">'
-      +'<div class="vc-rank">🥈 공동 2순위</div>'
-      +'<div class="vc-title">'+tp2a.label+'</div>'
-      +'<div class="vc-subtitle">건축연도 '+tp2a.minYr+'~'+tp2a.maxYr+'년 | '+tp2a.badge+'</div>'
-      +'<div class="vc-desc">'+rankDesc[order[1]]+'</div>'
-      +'<div class="vc-bar-wrap">'+barGroupHtml(tp2a)+'</div>'
-      +'</div>'
-      +'<div class="verdict-card rank2b">'
-      +'<div class="vc-rank">🥈 공동 2순위</div>'
-      +'<div class="vc-title">'+tp2b.label+'</div>'
-      +'<div class="vc-subtitle">건축연도 '+tp2b.minYr+'~'+tp2b.maxYr+'년 | '+tp2b.badge+'</div>'
-      +'<div class="vc-desc">'+rankDesc[order[2]]+'</div>'
-      +'<div class="vc-bar-wrap">'+barGroupHtml(tp2b)+'</div>'
-      +'</div>'
+      +'<div class="verdict-card rank2"><div class="vc-rank">🥈 공동 2순위</div><div class="vc-title">'+tp2a.label+'</div><div class="vc-subtitle">건축연도 '+tp2a.minYr+'~'+tp2a.maxYr+'년 | '+tp2a.badge+'</div><div class="vc-desc">'+rankDesc[order[1]]+'</div><div class="vc-bar-wrap">'+barGroupHtml(tp2a)+'</div></div>'
+      +'<div class="verdict-card rank2b"><div class="vc-rank">🥈 공동 2순위</div><div class="vc-title">'+tp2b.label+'</div><div class="vc-subtitle">건축연도 '+tp2b.minYr+'~'+tp2b.maxYr+'년 | '+tp2b.badge+'</div><div class="vc-desc">'+rankDesc[order[2]]+'</div><div class="vc-bar-wrap">'+barGroupHtml(tp2b)+'</div></div>'
       +'</div>';
-  } else {
-    for(var ri=0;ri<order.length;ri++){
-      var tpKey=order[ri];var tp=TYPE_SPEC[tpKey];var desc=rankDesc[tpKey]||'';
-      html+=verdictCardHtml(RANK_BADGES[ri],RANK_LABELS[ri],tp,desc);
-    }
+  }else{
+    for(var ri=0;ri<order.length;ri++){var tpKey=order[ri];html+=verdictCardHtml(RANK_BADGES[ri],RANK_LABELS[ri],TYPE_SPEC[tpKey],rankDesc[tpKey]||'');}
   }
   html+='<div class="dev-notice-box"><div class="dev-notice-box-hd">🚧 재건축 / 재개발 추천 시스템</div><div class="dev-notice-box-body"><b>현재 재건축·재개발 정비사업 추천 기능은 개발 중입니다.</b><br>정비구역 지정·조합설립 인가·사업시행인가·관리처분인가 등 정비사업 추진 단계 데이터를 연동하는 알고리즘이 준비 중입니다. 곧 업데이트됩니다!</div></div></div>';
   var el=document.getElementById('recResult');

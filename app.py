@@ -1,19 +1,14 @@
 """
-app.py  ·  영끌내집  ·  Streamlit 단독 배포
+app.py  ·  영집: 영끌로 사는 똘똘한 내 집  ·  Streamlit 단독 배포
 ════════════════════════════════════════════════════════
 구조: FastAPI 없음 · Nginx 없음 · 프록시 없음
 
 OAuth 흐름:
-  1. 로그인 버튼 → 카카오/네이버 인증 페이지 (현재 탭 이동)
+  1. 로그인 버튼 → 네이버 인증 페이지 (현재 탭 이동)
   2. 인증 완료 → ?code=XXX&state=YYY 로 앱 복귀
   3. Streamlit이 직접 code 처리 → 세션 저장
 
-세션 문제 해결:
-  state를 세션에 저장하지 않고 HMAC 서명으로 검증.
-  리다이렉트 후 세션이 초기화돼도 서명만으로 통과.
-
 Render 환경변수:
-  KAKAO_REST_API_KEY
   NAVER_CLIENT_ID
   NAVER_CLIENT_SECRET
   HMAC_SECRET          ← 아무 랜덤 문자열 32자 이상
@@ -37,18 +32,15 @@ import streamlit.components.v1 as components
 # ════════════════════════════════════════════════════════
 # 환경변수
 # ════════════════════════════════════════════════════════
-KAKAO_KEY    = os.environ.get("KAKAO_REST_API_KEY", "")
 NAVER_ID     = os.environ.get("NAVER_CLIENT_ID", "")
 NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
 HMAC_SECRET  = os.environ.get("HMAC_SECRET", "dev_secret_change_in_production")
 
-# Render는 RENDER_EXTERNAL_URL 자동 주입
 BASE_URL = (
     os.environ.get("RENDER_EXTERNAL_URL")
     or os.environ.get("BASE_URL", "http://localhost:8501")
 ).rstrip("/")
 
-KAKAO_REDIRECT = f"{BASE_URL}/"
 NAVER_REDIRECT = f"{BASE_URL}/"
 
 # ════════════════════════════════════════════════════════
@@ -69,7 +61,7 @@ def verify_state(state: str, provider: str) -> bool:
         p, ts, sig = state.split("|", 2)
         if p != provider:
             return False
-        if int(time.time()) - int(ts) > 600:   # 10분 유효
+        if int(time.time()) - int(ts) > 600:
             return False
         return hmac.compare_digest(sig, _sig(f"{p}|{ts}"))
     except Exception:
@@ -78,17 +70,6 @@ def verify_state(state: str, provider: str) -> bool:
 # ════════════════════════════════════════════════════════
 # OAuth URL 생성
 # ════════════════════════════════════════════════════════
-
-def kakao_auth_url() -> str:
-    return (
-        "https://kauth.kakao.com/oauth/authorize?"
-        + urllib.parse.urlencode({
-            "response_type": "code",
-            "client_id":     KAKAO_KEY,
-            "redirect_uri":  KAKAO_REDIRECT,
-            "state":         make_state("kakao"),
-        })
-    )
 
 def naver_auth_url() -> str:
     return (
@@ -104,40 +85,6 @@ def naver_auth_url() -> str:
 # ════════════════════════════════════════════════════════
 # 토큰 + 프로필 조회
 # ════════════════════════════════════════════════════════
-
-def kakao_login(code: str) -> dict | None:
-    with httpx.Client(timeout=15) as c:
-        r = c.post(
-            "https://kauth.kakao.com/oauth/token",
-            data={
-                "grant_type":   "authorization_code",
-                "client_id":    KAKAO_KEY,
-                "redirect_uri": KAKAO_REDIRECT,
-                "code":         code,
-            },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        if r.status_code != 200:
-            st.error(f"카카오 토큰 실패: {r.text}")
-            return None
-        access_token = r.json().get("access_token")
-
-        r2 = c.get(
-            "https://kapi.kakao.com/v2/user/me",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        if r2.status_code != 200:
-            return None
-        d = r2.json()
-        acct = d.get("kakao_account", {})
-        prof = acct.get("profile", {})
-        return {
-            "provider":      "kakao",
-            "id":            str(d.get("id", "")),
-            "nickname":      prof.get("nickname", ""),
-            "profile_image": prof.get("profile_image_url", ""),
-            "email":         acct.get("email", ""),
-        }
 
 def naver_login(code: str, state: str) -> dict | None:
     with httpx.Client(timeout=15) as c:
@@ -175,7 +122,7 @@ def naver_login(code: str, state: str) -> dict | None:
         }
 
 # ════════════════════════════════════════════════════════
-# 콜백 처리 — 페이지 최상단에서 실행
+# 콜백 처리
 # ════════════════════════════════════════════════════════
 
 def handle_callback():
@@ -196,7 +143,6 @@ def handle_callback():
         st.query_params.clear()
         return
 
-    # provider 판별 (state 앞부분)
     provider = state.split("|")[0] if "|" in state else ""
 
     if not verify_state(state, provider):
@@ -205,9 +151,7 @@ def handle_callback():
         return
 
     with st.spinner("로그인 처리 중..."):
-        if provider == "kakao":
-            profile = kakao_login(code)
-        elif provider == "naver":
+        if provider == "naver":
             profile = naver_login(code, state)
         else:
             profile = None
@@ -229,7 +173,7 @@ def handle_callback():
 # 페이지 설정
 # ════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="영끌내집 — 내 집 마련 계산기",
+    page_title="영집: 영끌로 사는 똘똘한 내 집",
     page_icon="🏠",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -237,7 +181,6 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-  /* 브라우저 전체 스크롤 — 내부 스크롤 컨테이너 완전 해제 */
   html, body {
     overflow: visible !important;
     height: auto !important;
@@ -303,7 +246,6 @@ profile      = st.session_state.get("user_profile")
 is_logged_in = bool(profile)
 login_error  = st.session_state.get("login_error")
 
-# auth_url 세션 캐싱 (렌더링마다 새 URL 생성 방지)
 if "naver_url" not in st.session_state:
     st.session_state["naver_url"] = naver_auth_url()
 
@@ -321,8 +263,6 @@ if is_logged_in:
     nickname = profile.get("nickname") or "사용자"
     email    = profile.get("email", "")
     img_url  = profile.get("profile_image", "")
-    provider = profile.get("provider", "")
-    badge    = "🟡 카카오" if provider == "kakao" else "🟢 네이버"
 
     img_tag = (
         f'<img src="{img_url}" style="width:38px;height:38px;'
@@ -334,7 +274,7 @@ if is_logged_in:
       {img_tag}
       <div>
         <div class="welcome-name">환영합니다, {nickname}님 👋</div>
-        <div class="welcome-sub">{badge}&nbsp;&nbsp;{email}</div>
+        <div class="welcome-sub">🟢 네이버&nbsp;&nbsp;{email}</div>
       </div>
     </div>""", unsafe_allow_html=True)
 
@@ -343,8 +283,6 @@ if is_logged_in:
         st.rerun()
 
 else:
-    # target="_self" → 현재 탭 이동, Streamlit 메인 프레임에서 실행
-    # → sandbox 없음, iframe 없음, 100% 동작
     st.markdown(f"""
     <div class="login-wrap">
       <a href="{naver_url}" target="_self" class="naver-btn">
@@ -367,11 +305,8 @@ if not CALC.exists():
     st.stop()
 
 html = CALC.read_text(encoding="utf-8")
-# 로그인 게이트 버튼 숨김 CSS 추가 주입
-# calculator.html 내부 naverLogin 버튼을 CSS로 숨김 (로직 수정 없음)
 extra_css = """
 <style>
-  /* 2·3탭 로그인 게이트: 버튼 숨김, 자물쇠+안내문구만 표시 */
   #loginGate button { display: none !important; }
 </style>
 """
@@ -380,4 +315,4 @@ html = html.replace(
     f"<head>{extra_css}<script>var APP_LOGGED_IN={json.dumps(is_logged_in)};var APP_AUTH_URL='';</script>",
     1,
 )
-components.html(html, height=5000, scrolling=False)
+components.html(html, height=2600, scrolling=False)
