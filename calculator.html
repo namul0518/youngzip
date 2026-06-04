@@ -849,22 +849,23 @@ function dtiLoan(iW,rate,termYears,dtiRatio){
 }
 
 function bgzLoanCalc(aW,iW,own){
-  var rate=0.042,termYr=getBgzTerm();
+  var rate=getBgzBase(getBgzTerm()),termYr=getBgzTerm();
   var ltvRate=0.6,dtiRate=0.5;
+  /* 생애최초: LTV 70%, DTI 60% */
   if(own==='first'){ltvRate=0.7;dtiRate=0.6;}
+  /* 실수요자: 소득 7천 이하 & LTV 60% 기준 주택가격 6억 이하 → LTV 70% */
   else if(iW<=70000000){
-    var tentLtv=aW*0.7/0.3;
-    var tentDti=dtiLoan(iW,rate,termYr,0.6);
-    var hardCap=own==='first'?420000000:((G.baby||G.child2||G.child3)?400000000:360000000);
-    var tentLoan=Math.min(hardCap,tentLtv,tentDti);
-    var tentPrice=Math.min(aW+tentLoan,600000000);
-    if(tentPrice<=600000000){ltvRate=0.7;dtiRate=0.6;}
+    var hardCap=((G.baby||G.child2||G.child3)?400000000:360000000);
+    var chkLtv=aW*0.6/0.4;
+    var chkDti=dtiLoan(iW,rate,termYr,0.5);
+    var chkPrice=aW+Math.min(hardCap,chkLtv,chkDti);
+    if(chkPrice<=600000000){ltvRate=0.7;dtiRate=0.6;}
   }
   var ltvL=aW*ltvRate/(1-ltvRate);
   var dtiL=dtiLoan(iW,rate,termYr,dtiRate);
   var hardMax=own==='first'?420000000:((G.baby||G.child2||G.child3)?400000000:360000000);
   var loan=Math.max(0,Math.min(hardMax,ltvL,dtiL));
-  var price=Math.min(aW+loan,600000000);
+  var price=aW+loan; /* 보금자리론: 주택가격 상한 없음 */
   return{loan:Math.max(0,price-aW),price:price,ltvRate:ltvRate,dtiRate:dtiRate,term:termYr};
 }
 
@@ -980,7 +981,7 @@ function computeDetail(pid){
   if(pid==='p3'){
     var termYr3=getBgzTerm(),finalRate3=getBgzFinalRate(termYr3),discInfo3=getBgzDisc();
     var bgz=bgzLoanCalc(aW,iW,G.own),ltvPct=Math.round(bgz.ltvRate*100),dtiPct=Math.round(bgz.dtiRate*100);
-    var specNote=bgz.ltvRate===0.7?'생애최초/실수요자(소득 7천·주택 6억 이하) LTV 70% 완화':'기본 LTV 60% / DTI 50% 적용';
+    var specNote=bgz.ltvRate===0.7?'생애최초/실수요자(소득 7천·주택 6억 이하) LTV 70% · DTI 60% 완화':'기본 LTV 60% · DTI 50% 적용';
     var tl=getBgzTermLabel();
     var termInfoHtml='<div class="bgz-term-box">⏱ <b>적용 만기: '+tl.yr+'년</b> — '+tl.reason+'</div>';
     var hardMax=G.own==='first'?420000000:((G.baby||G.child2||G.child3)?400000000:360000000);
@@ -991,7 +992,7 @@ function computeDetail(pid){
     if(bgz.price<aW+bgzRaw) br3={label:'주택가격 상한',desc:'매수 가능 가격이 상품의 주택가격 상한선(6억)에 막혀 있습니다.'};
     var monthly3=calcMonthly(bgz.loan,finalRate3,termYr3);
     var bgzRateLbl='연 '+(finalRate3*100).toFixed(2)+'%'+(discInfo3.disc>0?' (기본 '+(getBgzBase(termYr3)*100).toFixed(2)+'% − 우대 '+(discInfo3.disc*100).toFixed(2)+'%)':'');
-    return{term:getTermText('p3'),rate:bgzRateLbl,discInfo:discInfo3,monthly:monthly3,maxPrice:bgz.price,loanUsed:bgz.loan,ltvLoan:bgzLtvL,dtiLoan:bgzDtiL,capLoan:hardMax,capLabel:'상품 한도 ('+fmtW(hardMax)+')',bindReason:br3,loanStr:G.own==='first'?'4.2억 원 (생애최초)':((G.baby||G.child2||G.child3)?'4억 원 (다자녀/출산)':'3.6억 원 (일반)'),capNote:'주택가격 상한선 6억 / LTV '+ltvPct+'% / DTI '+dtiPct+'% | '+specNote,condTags:['소득·자산 제한 없음','무주택~1주택 가능','만기 '+bgz.term+'년 적용'],termInfoHtml:termInfoHtml};
+    return{term:getTermText('p3'),rate:bgzRateLbl,discInfo:discInfo3,monthly:monthly3,maxPrice:bgz.price,loanUsed:bgz.loan,ltvLoan:bgzLtvL,dtiLoan:bgzDtiL,capLoan:hardMax,capLabel:'상품 한도 ('+fmtW(hardMax)+')',bindReason:br3,loanStr:G.own==='first'?'4.2억 원 (생애최초)':((G.baby||G.child2||G.child3)?'4억 원 (다자녀/출산)':'3.6억 원 (일반)'),capNote:'주택가격 상한 없음 / LTV '+ltvPct+'% / DTI '+dtiPct+'% | '+specNote,condTags:['소득·자산 제한 없음','무주택~1주택 가능','만기 '+bgz.term+'년 적용'],termInfoHtml:termInfoHtml};
   }
   if(pid==='p4'){
     var ltvL4=aW*0.7/0.3,dtiL4=dtiLoan(iW,0.018,20,0.6);
