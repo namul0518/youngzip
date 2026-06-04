@@ -17,13 +17,13 @@ body{
   overflow-y:visible !important;
 }
 .wrap{max-width:660px;margin:0 auto;padding:18px 14px 40px}
-.hd{padding:6px 0 18px}
-.hd-inner{display:flex;align-items:center;gap:14px;margin-bottom:8px}
-.hd-logo{width:52px;height:52px;object-fit:contain;flex-shrink:0}
-.hd-text{flex:1}
-.pill{display:inline-block;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:8px}
-.hd h1{font-size:19px;font-weight:900;color:#111827;line-height:1.3}
-.hd p{font-size:12px;color:#6B7280;margin-top:4px}
+.hd{padding:6px 0 18px;text-align:center}
+.hd-inner{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:6px}
+.hd-logo{width:72px;height:72px;object-fit:contain;flex-shrink:0}
+.hd-text{text-align:left}
+.pill{display:inline-block;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:10px}
+.hd h1{font-size:22px;font-weight:900;color:#111827;line-height:1.3}
+.hd p{font-size:12px;color:#6B7280;margin-top:5px;text-align:center}
 .tabs{display:flex;background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:3px;margin-bottom:16px;gap:2px}
 .tab{flex:1;padding:8px 4px;border:none;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:#64748B;transition:all .15s;white-space:nowrap}
 .tab.on{background:#2563EB;color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.25)}
@@ -881,7 +881,7 @@ function computeDetail(pid){
   if(pid==='p3'){
     var bgz=bgzLoanCalc(aW,iW,G.own);
     var termYr3=bgz.term;var rate3=BGZ_RATE[termYr3]||0.0490;
-    var pref3=getPreferential('p3');/* 보금자리론은 우대금리 미적용 */
+    var pref3=getPreferential('p3');/* 보금자리론도 동일 우대금리 적용 */
     var ltvPct=Math.round(bgz.ltvRate*100),dtiPct=Math.round(bgz.dtiRate*100);
     var tl=getBgzTermLabel();
     var termInfoHtml='<div class="bgz-term-box">⏱ <b>적용 만기: '+tl.yr+'년</b> — '+tl.reason+'</div>';
@@ -891,7 +891,7 @@ function computeDetail(pid){
     var bgzRaw=Math.min(hardMax,bgzLtvL,bgzDtiL);
     var br3=bindReason(bgzRaw,bgzLtvL,bgzDtiL,hardMax,'상품 한도 ('+fmtW(hardMax)+')');
     if(bgz.price<aW+bgzRaw)br3={label:'주택가격 상한',desc:'주택가격 상한선(6억)에 막혀 있습니다.'};
-    return{term:getTermText('p3'),rate:'연 '+(rate3*100).toFixed(2)+'%',finalRate:rate3,actualLoan:bgz.loan,termYr:termYr3,pref:{disc:0,labels:[]},maxPrice:bgz.price,loanUsed:bgz.loan,ltvLoan:bgzLtvL,dtiLoan:bgzDtiL,capLoan:hardMax,capLabel:'상품 한도 ('+fmtW(hardMax)+')',bindReason:br3,loanStr:G.own==='first'?'4.2억 원 (생애최초)':(G.baby?'4억 원 (다자녀)':'3.6억 원 (일반)'),capNote:'주택가격 상한선 6억 / LTV '+ltvPct+'% / DTI '+dtiPct+'%',condTags:['소득·자산 제한 없음','무주택~1주택 가능','만기 '+bgz.term+'년 적용'],termInfoHtml:termInfoHtml};
+    var finalRate3=Math.max(0.01,rate3-pref3.disc);return{term:getTermText('p3'),rate:'연 '+(rate3*100).toFixed(2)+'%',finalRate:finalRate3,actualLoan:bgz.loan,termYr:termYr3,pref:pref3,maxPrice:bgz.price,loanUsed:bgz.loan,ltvLoan:bgzLtvL,dtiLoan:bgzDtiL,capLoan:hardMax,capLabel:'상품 한도 ('+fmtW(hardMax)+')',bindReason:br3,loanStr:G.own==='first'?'4.2억 원 (생애최초)':(G.baby?'4억 원 (다자녀)':'3.6억 원 (일반)'),capNote:'주택가격 상한선 6억 / LTV '+ltvPct+'% / DTI '+dtiPct+'%',condTags:['소득·자산 제한 없음','무주택~1주택 가능','만기 '+bgz.term+'년 적용'],termInfoHtml:termInfoHtml};
   }
   if(pid==='p4'){
     var ltvL4=aW*0.7/0.3,dtiL4=dtiLoan(iW,0.018,20,0.6);
@@ -1047,76 +1047,126 @@ function verdictCardHtml(rankCls,rankLabel,tp,desc){
     +'</div>';
 }
 
-/* ══ 3탭 리포트: 월소득 + 정책대출 원리금 계산 ══ */
+/* ══ 3탭 리포트: 최대매수가 기준 대출정보 + 월납입 ══ */
 function buildLoanReport(){
   if(!G.income||!G.own)return '';
-  var monthlyIncome=Math.round(G.income*10000/12);
+  var aW=G.asset*10000,iW=G.income*10000;
+  var monthlyIncome=Math.round(iW/12);
+
+  /* 권역별 최대매수가 (bestForZone 활용) */
+  var zones=[
+    {key:'reg',  label:'규제지역',     zc:'fzc-reg',   bc:'fzb-reg'},
+    {key:'metro',label:'수도권 비규제', zc:'fzc-metro', bc:'fzb-metro'},
+    {key:'non',  label:'비수도권',      zc:'fzc-non',   bc:'fzb-non'}
+  ];
+
+  /* 각 권역 최대매수가와 대출금 */
+  var zoneResults=zones.map(function(z){
+    var best=bestForZone(z.key);
+    return{label:z.label,zc:z.zc,bc:z.bc,price:best.price,loan:best.loan,prodName:best.prodName};
+  });
+
+  /* 정책대출 자격 통과 상품별 금리+월납입 계산 (대출금은 computeDetail 기준) */
   var reports=[];
-  /* 자격 통과한 상품 대상으로 계산 */
   for(var i=0;i<PRODS.length;i++){
     var p=PRODS[i];
-    if(p.check())continue;/* 탈락 상품 제외 */
+    if(p.check())continue;
     var det=computeDetail(p.id);
     if(det.loanUsed<=0)continue;
     var pref=det.pref||{disc:0,labels:[]};
-    var effectiveRate=Math.max(0.01,det.finalRate-pref.disc);
+    /* finalRate에 이미 우대금리 반영된 경우 그대로 사용 */
+    var effectiveRate=det.finalRate;
     var monthly=calcMonthly(det.loanUsed,effectiveRate,det.termYr);
     reports.push({
       name:p.name,
       loan:det.loanUsed,
-      baseRate:det.finalRate,
-      discount:pref.disc,
       effectiveRate:effectiveRate,
       prefLabels:pref.labels,
+      discount:pref.disc,
       monthly:monthly,
       termYr:det.termYr
     });
   }
-  if(reports.length===0)return '';
-  /* 최저 월납입 찾기 */
+
+  /* 최저금리 상품 찾기 */
   var bestIdx=0;
   for(var j=1;j<reports.length;j++){if(reports[j].effectiveRate<reports[bestIdx].effectiveRate)bestIdx=j;}
 
-  var html='<div class="report-card">'
-    +'<div class="report-card-hd">'
+  /* ── HTML 조립 ── */
+  var html='<div class="report-card">';
+
+  /* 헤더 */
+  html+='<div class="report-card-hd">'
     +'<div class="report-icon">📋</div>'
-    +'<div><div class="report-title">전문가 상담 리포트</div><div class="report-sub">정책대출 금리 테이블 + 우대금리 반영 기준</div></div>'
-    +'</div>'
-    +'<div class="report-income-row">'
+    +'<div><div class="report-title">전문가 상담 리포트</div>'
+    +'<div class="report-sub">정책대출 금리 테이블 + 우대금리 반영 기준</div></div>'
+    +'</div>';
+
+  /* 소득 정보 */
+  html+='<div class="report-income-row">'
     +'<div class="report-income-label">💰 소득 정보</div>'
     +'<div class="report-income-vals">'
-    +'<div class="report-income-item"><div class="report-income-item-label">연소득</div><div class="report-income-item-val">'+G.income.toLocaleString('ko-KR')+'만 원</div></div>'
-    +'<div class="report-income-item"><div class="report-income-item-label">월소득 환산</div><div class="report-income-item-val">'+Math.round(monthlyIncome/10000).toLocaleString('ko-KR')+'만 원</div></div>'
-    +'</div>'
-    +'</div>'
-    +'<div style="font-size:10px;font-weight:800;color:#1E40AF;margin-bottom:8px;letter-spacing:.3px">📊 상품별 월 원리금 (원리금균등상환)</div>'
-    +'<div class="report-loan-grid">';
+    +'<div class="report-income-item">'
+    +'<div class="report-income-item-label">연소득</div>'
+    +'<div class="report-income-item-val">'+G.income.toLocaleString('ko-KR')+'만 원</div></div>'
+    +'<div class="report-income-item">'
+    +'<div class="report-income-item-label">월소득 환산</div>'
+    +'<div class="report-income-item-val">'+Math.round(monthlyIncome/10000).toLocaleString('ko-KR')+'만 원</div></div>'
+    +'</div></div>';
 
-  for(var k=0;k<reports.length;k++){
-    var r=reports[k];
-    var isBest=(k===bestIdx);
-    var prefHtml=r.prefLabels.length?'<div class="lrr-pref">우대: '+r.prefLabels.join(' + ')+'</div>':'';
-    html+='<div class="loan-report-row'+(isBest?' best':'')+'">'
-      +'<div class="lrr-top">'
-      +'<div class="lrr-name">'+r.name+'</div>'
-      +'<div class="lrr-rate">연 '+(r.effectiveRate*100).toFixed(2)+'%</div>'
-      +'</div>'
-      +'<div class="lrr-detail">'
-      +'<div class="lrr-item"><div class="lrr-item-label">대출금</div><div class="lrr-item-val">'+Math.round(r.loan/10000).toLocaleString('ko-KR')+'만</div></div>'
-      +'<div class="lrr-item"><div class="lrr-item-label">만기</div><div class="lrr-item-val">'+r.termYr+'년</div></div>'
-      +'<div class="lrr-item"><div class="lrr-item-label">월 납입</div><div class="lrr-item-val" style="color:'+(isBest?'#065F46':'#1E40AF')+'">'+Math.round(r.monthly/10000).toLocaleString('ko-KR')+'만</div></div>'
-      +'</div>'
-      +prefHtml
+  /* 권역별 최대매수가 + 대출금 테이블 */
+  html+='<div style="font-size:10px;font-weight:800;color:#1E40AF;margin:10px 0 8px;letter-spacing:.3px">🏠 권역별 최대 매수 가능가 &amp; 필요 대출금</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">';
+  for(var zi=0;zi<zoneResults.length;zi++){
+    var zr=zoneResults[zi];
+    html+='<div class="lrr-item" style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:9px;padding:10px 8px;text-align:center">'
+      +'<div style="font-size:9px;font-weight:800;color:#6B7280;margin-bottom:4px">'+zr.label+'</div>'
+      +'<div style="font-size:13px;font-weight:900;color:#111827">'+fmtW(zr.price)+'</div>'
+      +'<div style="font-size:9px;color:#9CA3AF;margin-top:2px">대출 '+fmtW(zr.loan)+'</div>'
+      +'<div style="font-size:9px;font-weight:700;color:#059669;margin-top:2px">'+zr.prodName+'</div>'
       +'</div>';
   }
+  html+='</div>';
 
-  html+='</div>'
-    +'<div class="report-note">'
+  /* 상품별 금리+월납입 */
+  if(reports.length>0){
+    html+='<div style="font-size:10px;font-weight:800;color:#1E40AF;margin-bottom:8px;letter-spacing:.3px">📊 상품별 월 원리금 (원리금균등상환)</div>';
+    html+='<div class="report-loan-grid">';
+    for(var k=0;k<reports.length;k++){
+      var r=reports[k];
+      var isBest=(k===bestIdx);
+      var prefHtml=r.prefLabels.length
+        ?'<div class="lrr-pref">우대 적용: '+r.prefLabels.join(' + ')+' (기준금리 -'+(r.discount*100).toFixed(1)+'%)</div>':'';
+      html+='<div class="loan-report-row'+(isBest?' best':'')+'">'
+        +'<div class="lrr-top">'
+        +'<div class="lrr-name">'+r.name+'</div>'
+        +'<div class="lrr-rate">연 '+(r.effectiveRate*100).toFixed(2)+'%</div>'
+        +'</div>'
+        +'<div class="lrr-detail">'
+        +'<div class="lrr-item"><div class="lrr-item-label">대출금</div>'
+        +'<div class="lrr-item-val">'+Math.round(r.loan/10000).toLocaleString('ko-KR')+'만</div></div>'
+        +'<div class="lrr-item"><div class="lrr-item-label">만기</div>'
+        +'<div class="lrr-item-val">'+r.termYr+'년</div></div>'
+        +'<div class="lrr-item"><div class="lrr-item-label">월 납입</div>'
+        +'<div class="lrr-item-val" style="color:'+(isBest?'#065F46':'#1E40AF')+'">'
+        +Math.round(r.monthly/10000).toLocaleString('ko-KR')+'만</div></div>'
+        +'</div>'
+        +prefHtml
+        +'</div>';
+    }
+    html+='</div>';
+  }
+
+  html+='<div class="report-note">'
     +'※ 금리는 정책 고시 기준이며 금융기관 심사·신용도에 따라 달라질 수 있습니다.<br>'
-    +'※ 월소득 대비 월납입 비율: '
-    +reports.map(function(r){return r.name.replace(/대출/,'').replace(/모기지/,'')+'('+(r.monthly/monthlyIncome*100).toFixed(1)+'%)';}).join(' / ')
-    +'</div>'
-    +'</div>';
+    +(reports.length>0
+      ? '※ 월소득 대비 월납입 비율: '
+        +reports.map(function(r){
+          var shortName=r.name.replace('대출','').replace('모기지','').replace('특례 디딤돌','특례').trim();
+          return shortName+'('+(r.monthly/monthlyIncome*100).toFixed(1)+'%)';
+        }).join(' / ')
+      : '※ 이용 가능한 정책대출 상품이 없습니다.')
+    +'</div></div>';
   return html;
 }
 
