@@ -242,8 +242,8 @@ def handle_callback():
                     "email":    profile.get("email", ""),
                     "last_login": datetime.now(timezone.utc).isoformat(),
                 }, on_conflict="naver_id").execute()
-        except Exception:
-            pass
+        except Exception as e:
+            st.error(f"DB 저장 오류: {e}")
     else:
         st.session_state["login_error"] = "프로필 조회 실패. 다시 시도해 주세요."
 
