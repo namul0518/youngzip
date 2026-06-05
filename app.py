@@ -33,16 +33,6 @@ from pathlib import Path
 import httpx
 import streamlit as st
 import streamlit.components.v1 as components
-from supabase import create_client
-
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
-
-@st.cache_resource
-def get_supabase():
-    if SUPABASE_URL and SUPABASE_KEY:
-        return create_client(SUPABASE_URL, SUPABASE_KEY)
-    return None
 
 # ════════════════════════════════════════════════════════
 # 환경변수
@@ -230,6 +220,19 @@ def handle_callback():
             "user_profile": profile,
         })
         st.session_state.pop("login_error", None)
+        # Supabase에 사용자 저장
+        try:
+            from datetime import datetime, timezone
+            sb = get_supabase()
+            if sb:
+                sb.table("users").upsert({
+                    "naver_id": profile.get("id", ""),
+                    "nickname": profile.get("nickname", ""),
+                    "email":    profile.get("email", ""),
+                    "last_login": datetime.now(timezone.utc).isoformat(),
+                }, on_conflict="naver_id").execute()
+        except Exception:
+            pass
     else:
         st.session_state["login_error"] = "프로필 조회 실패. 다시 시도해 주세요."
 
