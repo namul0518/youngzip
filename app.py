@@ -37,6 +37,13 @@ import streamlit as st
 import streamlit.components.v1 as components
 from supabase import create_client
 
+def get_supabase():
+    url = os.environ.get("SUPABASE_URL", "")
+    key = os.environ.get("SUPABASE_KEY", "")
+    if url and key:
+        return create_client(url, key)
+    return None
+
 # ════════════════════════════════════════════════════════
 # 환경변수
 # ════════════════════════════════════════════════════════
@@ -44,13 +51,6 @@ KAKAO_KEY    = os.environ.get("KAKAO_REST_API_KEY", "")
 NAVER_ID     = os.environ.get("NAVER_CLIENT_ID", "")
 NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
 HMAC_SECRET  = os.environ.get("HMAC_SECRET", "dev_secret_change_in_production")
-
-def get_supabase():
-    url = os.environ.get("SUPABASE_URL", "")
-    key = os.environ.get("SUPABASE_KEY", "")
-    if url and key:
-        return create_client(url, key)
-    return None
 
 # Render는 RENDER_EXTERNAL_URL 자동 주입
 BASE_URL = (
