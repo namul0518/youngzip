@@ -18,6 +18,8 @@ Render 환경변수:
   NAVER_CLIENT_SECRET
   HMAC_SECRET          ← 아무 랜덤 문자열 32자 이상
   RENDER_EXTERNAL_URL  ← Render 자동 주입
+  SUPABASE_URL
+  SUPABASE_KEY
 ════════════════════════════════════════════════════════
 """
 
@@ -33,6 +35,7 @@ from pathlib import Path
 import httpx
 import streamlit as st
 import streamlit.components.v1 as components
+from supabase import create_client
 
 # ════════════════════════════════════════════════════════
 # 환경변수
@@ -41,6 +44,15 @@ KAKAO_KEY    = os.environ.get("KAKAO_REST_API_KEY", "")
 NAVER_ID     = os.environ.get("NAVER_CLIENT_ID", "")
 NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
 HMAC_SECRET  = os.environ.get("HMAC_SECRET", "dev_secret_change_in_production")
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+@st.cache_resource
+def get_supabase():
+    if SUPABASE_URL and SUPABASE_KEY:
+        return create_client(SUPABASE_URL, SUPABASE_KEY)
+    return None
 
 # Render는 RENDER_EXTERNAL_URL 자동 주입
 BASE_URL = (
@@ -69,7 +81,7 @@ def verify_state(state: str, provider: str) -> bool:
         p, ts, sig = state.split("|", 2)
         if p != provider:
             return False
-        if int(time.time()) - int(ts) > 600:   # 10분 유효
+        if int(time.time()) - int(ts) > 600:
             return False
         return hmac.compare_digest(sig, _sig(f"{p}|{ts}"))
     except Exception:
@@ -196,7 +208,6 @@ def handle_callback():
         st.query_params.clear()
         return
 
-    # provider 판별 (state 앞부분)
     provider = state.split("|")[0] if "|" in state else ""
 
     if not verify_state(state, provider):
@@ -250,7 +261,6 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-  /* 브라우저 전체 스크롤 — 내부 스크롤 컨테이너 완전 해제 */
   html, body {
     overflow: visible !important;
     height: auto !important;
@@ -275,7 +285,6 @@ st.markdown("""
   }
   header[data-testid="stHeader"]{display:none}
   iframe{border:none !important; display:block; overflow:hidden; transition:height 0.3s ease;}
-
   .login-wrap{display:flex;gap:10px;justify-content:center;padding:6px 0 2px;flex-wrap:wrap;}
   a.naver-btn{
     display:inline-flex;align-items:center;gap:8px;
@@ -320,27 +329,16 @@ st.markdown("""
 </script>
 """, unsafe_allow_html=True)
 
-# ════════════════════════════════════════════════════════
-# 콜백 처리 (반드시 UI 렌더링 전에 실행)
-# ════════════════════════════════════════════════════════
 handle_callback()
 
-# ════════════════════════════════════════════════════════
-# 로그인 상태
-# ════════════════════════════════════════════════════════
 profile      = st.session_state.get("user_profile")
 is_logged_in = bool(profile)
 login_error  = st.session_state.get("login_error")
 
-# auth_url 세션 캐싱 (렌더링마다 새 URL 생성 방지)
 if "naver_url" not in st.session_state:
     st.session_state["naver_url"] = naver_auth_url()
 
 naver_url = st.session_state["naver_url"]
-
-# ════════════════════════════════════════════════════════
-# 상단 UI
-# ════════════════════════════════════════════════════════
 
 if login_error:
     st.markdown(f'<div class="err-bar">⚠️ {login_error}</div>',
@@ -372,8 +370,6 @@ if is_logged_in:
         st.rerun()
 
 else:
-    # target="_self" → 현재 탭 이동, Streamlit 메인 프레임에서 실행
-    # → sandbox 없음, iframe 없음, 100% 동작
     st.markdown(f"""
     <div class="login-wrap">
       <a href="{naver_url}" target="_self" class="naver-btn">
@@ -387,20 +383,14 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# ════════════════════════════════════════════════════════
-# 계산기 렌더링
-# ════════════════════════════════════════════════════════
 CALC = Path(__file__).parent / "calculator.html"
 if not CALC.exists():
     st.error("calculator.html 파일이 없습니다.")
     st.stop()
 
 html = CALC.read_text(encoding="utf-8")
-# 로그인 게이트 버튼 숨김 CSS 추가 주입
-# calculator.html 내부 naverLogin 버튼을 CSS로 숨김 (로직 수정 없음)
 extra_css = """
 <style>
-  /* 2·3탭 로그인 게이트: 버튼 숨김, 자물쇠+안내문구만 표시 */
   #loginGate button { display: none !important; }
 </style>
 """
