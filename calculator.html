@@ -434,7 +434,7 @@ body{
     <div class="r3" id="cds"></div>
     <div class="fn">
       <div class="fnr"><span>●</span><span>DSR <b>40%</b> · 만기 <b>30년</b> · 기본 금리 <b>4.5%</b> · 원리금균등상환</span></div>
-      <div class="fnr"><span>●</span><span>스트레스 금리 <b>수도권 +3.0%</b> (7.5%) · <b>비수도권 +0.75%</b> (5.25%)</span></div>
+      <div class="fnr"><span>●</span><span>스트레스 금리 <b>수도권 +3.0%</b> <span id='_dsrRegLbl'></span> · <b>비수도권 +0.75%</b> <span id='_dsrNonLbl'></span></span></div>
       <div class="fnr"><span>●</span><span>실제 대출 한도는 금융기관 심사·신용도에 따라 달라질 수 있습니다</span></div>
     </div>
     <div class="btreset" onclick="resetCalc()">↺ 다시 계산하기</div>
@@ -555,7 +555,7 @@ body{
 
 <div id="loginGate" style="display:none"></div>
 <div style="text-align:center;padding:24px 16px 16px;font-size:11px;color:#6B7280;line-height:1.8;border-top:1px solid #F1F5F9;margin-top:8px">
-  프리미엄 멤버십 가입 문의, 앱 사용 후기, 버그 제보, 개선 아이디어는<br>언제든지 아래 연락처로 보내주세요.<br><br>회원분들의 의견 하나하나가 서비스를 발전시키는 큰 힘이 됩니다.<br>남겨주신 내용은 모두 꼼꼼히 확인하겠습니다.
+  프리미엄 멤버십 가입 문의,<br>앱 사용 후기, 버그 제보, 개선 아이디어는<br>언제든지 아래 연락처로 보내주세요.<br><br>회원분들의 의견 하나하나가<br>서비스를 발전시키는 큰 힘이 됩니다.<br>남겨주신 내용은 모두 꼼꼼히 확인하겠습니다.
   <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;align-items:center">
     <a href="mailto:ihappy0304@naver.com" style="color:#2563EB;font-weight:700;text-decoration:none">📧 e-mail : ihappy0304@naver.com</a>
     <a href="https://blog.naver.com/ihappy0304" target="_blank" style="color:#03C75A;font-weight:700;text-decoration:none">📝 블로그 : blog.naver.com/ihappy0304</a>
@@ -567,6 +567,21 @@ body{
 /* 앱 로그인 상태 (주입없으면 기본값) */
 if(typeof APP_LOGGED_IN==='undefined') var APP_LOGGED_IN=false;
 if(typeof APP_AUTH_URL==='undefined')  var APP_AUTH_URL='';
+
+/* ══════════════════════════════════════════════
+   CONFIG — 금리 설정 (여기만 수정하면 전체 반영)
+   baseRate: 시중은행 실제 기본금리
+   stressReg: 규제지역 스트레스 가산금리
+   stressNon: 비규제 스트레스 가산금리
+══════════════════════════════════════════════ */
+var CONFIG={
+  baseRate:  0.045,   /* 시중은행 기본금리 (표시·원리금 계산) */
+  stressReg: 0.030,   /* 규제지역 가산 → DSR 한도 계산용 */
+  stressNon: 0.0075,  /* 비규제 가산 → DSR 한도 계산용 */
+};
+/* 자동 계산 */
+CONFIG.dsr_reg = CONFIG.baseRate + CONFIG.stressReg;   /* 규제 DSR 금리 */
+CONFIG.dsr_non = CONFIG.baseRate + CONFIG.stressNon;   /* 비규제 DSR 금리 */
 
 /* ══ 전역 상태 ══ */
 var G={income:0,asset:0,own:'',hasChild:false,baby:false,child2:false,child3:false,newlywed:false,newlywed_u39:false,newlywed_u49:false,under34:false,under39:false};
@@ -729,7 +744,7 @@ function ltvAsset(aW,ltv){return aW*ltv/(1-ltv);}
 function pcap(p){if(p<=1500000000)return 600000000;if(p<=2500000000)return 400000000;return 200000000;}
 
 function cz(iW,aW,own,zone){
-  var d75=dsrLoan(iW,0.075),d52=dsrLoan(iW,0.0525),fl,fp,ltv,bind,cap;
+  var d75=dsrLoan(iW,CONFIG.dsr_reg),d52=dsrLoan(iW,CONFIG.dsr_non),fl,fp,ltv,bind,cap;
   if(own==='multi'){
     if(zone==='reg'||zone==='metro')return{loan:0,price:aW,dsrLoan:d75,ltvLoan:0,bind:'block',isRealUser:false};
     ltv=ltvAsset(aW,0.6);fl=Math.min(d52,ltv,600000000);fp=aW+fl;
@@ -1404,7 +1419,7 @@ function renderReport(){
   // 면책
   html+='<div class="rpt-disclaimer">'
     +'<div style="margin-bottom:5px">📌 <b>계산 기준 안내</b></div>'
-    +'· 일반은행 금리는 1탭의 스트레스DSR 적용 금리를 기준으로 표기합니다.<br>'
+    +'· 일반은행 대출 한도는 스트레스DSR(규제지역 '+(CONFIG.baseRate*100).toFixed(1)+'%+3.0%='+(CONFIG.dsr_reg*100).toFixed(1)+'%, 비규제 '+(CONFIG.dsr_non*100).toFixed(2)+'%)로 계산하며, 표시 금리('+( CONFIG.baseRate*100).toFixed(1)+'%)는 실제 변동금리 기준입니다.<br>'
     +'· 정책대출(신생아특례·디딤돌·보금자리론)은 1탭·2탭에 입력한 소득·자산·가족 정보를 기반으로 자격 여부·금리·한도·만기를 자동 판별하여 최적 상품을 선정합니다.<br>'
     +'· 월 원리금은 선정된 최적 상품의 금리·대출액·만기 조건으로 원리금균등상환 방식을 적용해 자동 계산됩니다.<br>'
     +'· 실제 대출 한도는 금융기관 심사 및 신용도에 따라 달라질 수 있습니다.'
@@ -1419,8 +1434,12 @@ function bestForZoneDetail(zone){
   var candidates=[];
   // 시중은행
   var bankR=cz(iW,aW,own,zone);
-  var bankRate=zone==='reg'?'연 7.5% (스트레스DSR)':'연 5.25% (스트레스DSR)';
-  candidates.push({price:bankR.price,loan:bankR.loan,prodName:bankR.bind==='block'?'대출 불가 (다주택 제한)':'시중은행 주담대',rate:bankRate,rateBasis:'DSR 40% / 30년 기준',monthly:calcMonthly(bankR.loan,zone==='reg'?0.075:0.0525,30),discItems:[]});
+  /* 한도: 스트레스DSR / 표시·원리금: CONFIG.baseRate */
+  var bankDsrRate=zone==='reg'?CONFIG.dsr_reg:CONFIG.dsr_non;
+  var bankDsrPct=Math.round(bankDsrRate*1000)/10;
+  var bankRate='연 '+(CONFIG.baseRate*100).toFixed(1)+'%';
+  var bankRateBasis='한도: 스트레스DSR '+bankDsrPct+'% 적용 / 실제 금리는 은행별 상이';
+  candidates.push({price:bankR.price,loan:bankR.loan,prodName:bankR.bind==='block'?'대출 불가 (다주택 제한)':'시중은행 주담대',rate:bankRate,rateBasis:bankRateBasis,monthly:calcMonthly(bankR.loan,CONFIG.baseRate,30),discItems:[]});
   // p1 신생아
   if(!checkFail('p1')){
     var r1=getP1Rate(G.income);
@@ -1459,6 +1478,12 @@ function bestForZoneDetail(zone){
   return candidates[0];
 }
 
+/* CONFIG 기반 동적 텍스트 초기화 */
+(function(){
+  function _setT(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  _setT('_dsrRegLbl','('+(CONFIG.dsr_reg*100).toFixed(2)+'%)');
+  _setT('_dsrNonLbl','('+(CONFIG.dsr_non*100).toFixed(2)+'%)');
+})();
 function _notifyHeight(){
   function send(){
     var h=document.body.scrollHeight;
