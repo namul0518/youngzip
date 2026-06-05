@@ -32,6 +32,7 @@ from pathlib import Path
 
 import httpx
 import streamlit as st
+from supabase import create_client
 import streamlit.components.v1 as components
 
 # ════════════════════════════════════════════════════════
@@ -41,6 +42,15 @@ KAKAO_KEY    = os.environ.get("KAKAO_REST_API_KEY", "")
 NAVER_ID     = os.environ.get("NAVER_CLIENT_ID", "")
 NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
 HMAC_SECRET  = os.environ.get("HMAC_SECRET", "dev_secret_change_in_production")
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+@st.cache_resource
+def get_supabase():
+    if SUPABASE_URL and SUPABASE_KEY:
+        return create_client(SUPABASE_URL, SUPABASE_KEY)
+    return None
 
 # Render는 RENDER_EXTERNAL_URL 자동 주입
 BASE_URL = (
@@ -220,6 +230,18 @@ def handle_callback():
             "user_profile": profile,
         })
         st.session_state.pop("login_error", None)
+        # Supabase에 사용자 저장
+        try:
+            sb = get_supabase()
+            if sb:
+                sb.table("users").upsert({
+                    "naver_id": profile.get("id", ""),
+                    "nickname": profile.get("nickname", ""),
+                    "email":    profile.get("email", ""),
+                    "last_login": "now()",
+                }, on_conflict="naver_id").execute()
+        except Exception:
+            pass
     else:
         st.session_state["login_error"] = "프로필 조회 실패. 다시 시도해 주세요."
 
