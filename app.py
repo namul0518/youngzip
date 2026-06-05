@@ -1,26 +1,5 @@
 """
 app.py  ·  영집  ·  Streamlit 단독 배포
-════════════════════════════════════════════════════════
-구조: FastAPI 없음 · Nginx 없음 · 프록시 없음
-
-OAuth 흐름:
-  1. 로그인 버튼 → 카카오/네이버 인증 페이지 (현재 탭 이동)
-  2. 인증 완료 → ?code=XXX&state=YYY 로 앱 복귀
-  3. Streamlit이 직접 code 처리 → 세션 저장
-
-세션 문제 해결:
-  state를 세션에 저장하지 않고 HMAC 서명으로 검증.
-  리다이렉트 후 세션이 초기화돼도 서명만으로 통과.
-
-Render 환경변수:
-  KAKAO_REST_API_KEY
-  NAVER_CLIENT_ID
-  NAVER_CLIENT_SECRET
-  HMAC_SECRET          ← 아무 랜덤 문자열 32자 이상
-  RENDER_EXTERNAL_URL  ← Render 자동 주입
-  SUPABASE_URL
-  SUPABASE_KEY
-════════════════════════════════════════════════════════
 """
 
 import base64
@@ -31,6 +10,7 @@ import os
 import time
 import urllib.parse
 from pathlib import Path
+from datetime import datetime, timezone
 
 import httpx
 import streamlit as st
@@ -40,19 +20,17 @@ from supabase import create_client
 def get_supabase():
     url = os.environ.get("SUPABASE_URL", "")
     key = os.environ.get("SUPABASE_KEY", "")
+    print(f"Supabase URL: {url[:30] if url else 'EMPTY'}", flush=True)
+    print(f"Supabase KEY: {key[:20] if key else 'EMPTY'}", flush=True)
     if url and key:
         return create_client(url, key)
     return None
 
-# ════════════════════════════════════════════════════════
-# 환경변수
-# ════════════════════════════════════════════════════════
 KAKAO_KEY    = os.environ.get("KAKAO_REST_API_KEY", "")
 NAVER_ID     = os.environ.get("NAVER_CLIENT_ID", "")
 NAVER_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
 HMAC_SECRET  = os.environ.get("HMAC_SECRET", "dev_secret_change_in_production")
 
-# Render는 RENDER_EXTERNAL_URL 자동 주입
 BASE_URL = (
     os.environ.get("RENDER_EXTERNAL_URL")
     or os.environ.get("BASE_URL", "http://localhost:8501")
@@ -60,10 +38,6 @@ BASE_URL = (
 
 KAKAO_REDIRECT = f"{BASE_URL}/"
 NAVER_REDIRECT = f"{BASE_URL}/"
-
-# ════════════════════════════════════════════════════════
-# HMAC state — 세션 없이 서명으로만 검증
-# ════════════════════════════════════════════════════════
 
 def _sig(msg: str) -> str:
     return hmac.new(
@@ -84,10 +58,6 @@ def verify_state(state: str, provider: str) -> bool:
         return hmac.compare_digest(sig, _sig(f"{p}|{ts}"))
     except Exception:
         return False
-
-# ════════════════════════════════════════════════════════
-# OAuth URL 생성
-# ════════════════════════════════════════════════════════
 
 def kakao_auth_url() -> str:
     return (
@@ -111,10 +81,6 @@ def naver_auth_url() -> str:
         })
     )
 
-# ════════════════════════════════════════════════════════
-# 토큰 + 프로필 조회
-# ════════════════════════════════════════════════════════
-
 def kakao_login(code: str) -> dict | None:
     with httpx.Client(timeout=15) as c:
         r = c.post(
@@ -131,7 +97,6 @@ def kakao_login(code: str) -> dict | None:
             st.error(f"카카오 토큰 실패: {r.text}")
             return None
         access_token = r.json().get("access_token")
-
         r2 = c.get(
             "https://kapi.kakao.com/v2/user/me",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -165,7 +130,6 @@ def naver_login(code: str, state: str) -> dict | None:
             st.error(f"네이버 토큰 실패: {r.text}")
             return None
         access_token = r.json().get("access_token")
-
         r2 = c.get(
             "https://openapi.naver.com/v1/nid/me",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -183,10 +147,6 @@ def naver_login(code: str, state: str) -> dict | None:
             "profile_image": resp.get("profile_image", ""),
             "email":         resp.get("email", ""),
         }
-
-# ════════════════════════════════════════════════════════
-# 콜백 처리 — 페이지 최상단에서 실행
-# ════════════════════════════════════════════════════════
 
 def handle_callback():
     qp    = st.query_params
@@ -231,25 +191,25 @@ def handle_callback():
         st.session_state.pop("login_error", None)
         # Supabase에 사용자 저장
         try:
-            from datetime import datetime, timezone
             sb = get_supabase()
+            print(f"로그인 성공: {profile.get('nickname')}, sb={sb}", flush=True)
             if sb:
-                sb.table("users").upsert({
+                result = sb.table("users").upsert({
                     "naver_id": profile.get("id", ""),
                     "nickname": profile.get("nickname", ""),
                     "email":    profile.get("email", ""),
                     "last_login": datetime.now(timezone.utc).isoformat(),
                 }, on_conflict="naver_id").execute()
+                print(f"DB 저장 결과: {result}", flush=True)
+            else:
+                print("Supabase 연결 실패: None 반환", flush=True)
         except Exception as e:
-            st.error(f"DB오류: {e}")
+            print(f"Supabase 오류: {e}", flush=True)
     else:
         st.session_state["login_error"] = "프로필 조회 실패. 다시 시도해 주세요."
 
     st.rerun()
 
-# ════════════════════════════════════════════════════════
-# 페이지 설정
-# ════════════════════════════════════════════════════════
 st.set_page_config(
     page_title="영집 — 영끌로 사는 똘똘한 내 집",
     page_icon="🏠",
