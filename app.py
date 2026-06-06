@@ -222,7 +222,7 @@ st.markdown("""
 <head>
   <meta property="og:title" content="영집 — 영끌로 사는 똘똘한 내 집" />
   <meta property="og:description" content="내가 살 수 있는 아파트 최대 가격은? 주담대 한도 + 정책대출 자격 진단 + 맞춤 유형 추천" />
-  <meta property="og:image" content="https://www.youngzip.com/favicon.ico" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/namul0518/youngzip/main/image/logo_160px.png" />
   <meta property="og:url" content="https://www.youngzip.com" />
   <meta property="og:type" content="website" />
   <meta name="description" content="내가 살 수 있는 아파트 최대 가격은? 주담대 한도 + 정책대출 자격 진단 + 맞춤 유형 추천" />
