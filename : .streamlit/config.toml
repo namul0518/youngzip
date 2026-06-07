@@ -1,1 +1,7 @@
+[server]
+enableCORS = false
+enableXsrfProtection = false
 
+[browser]
+serverAddress = "www.youngzip.com"
+serverPort = 443
